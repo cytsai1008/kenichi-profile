@@ -44,6 +44,11 @@ export function switchLocalePath(url: URL, targetLocale: Locale): string {
   return localePath(pathname, targetLocale);
 }
 
+/** Split a translation string on \n into non-empty paragraphs. */
+export function nl(text: string): string[] {
+  return text.split("\n").filter((line) => line.trim() !== "");
+}
+
 /** Map of locales to their BCP 47 language tags for HTML lang attribute. */
 export const localeLang: Record<Locale, string> = {
   en: "en",

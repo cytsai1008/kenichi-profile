@@ -3,6 +3,7 @@ import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
 import FormattedDate from "./FormattedDate.astro";
 import { localePath, t, type Locale } from "../i18n/utils";
+import { getBlogSlug } from "../lib/blog";
 
 interface Props {
   post: CollectionEntry<"blog">;
@@ -12,7 +13,7 @@ interface Props {
 
 const { post, locale = "en", featured = false } = Astro.props;
 const tr = t(locale);
-const postHref = localePath(`/blog/${post.id}/`, locale);
+const postHref = localePath(`/blog/${getBlogSlug(post.id)}/`, locale);
 ---
 
 <article

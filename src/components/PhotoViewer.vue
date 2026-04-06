@@ -54,6 +54,18 @@ const props = defineProps<Props>();
 const galleryEl = ref<HTMLElement | null>(null);
 let lightbox: PhotoSwipeLightbox | null = null;
 
+function formatExifDate(value?: string) {
+  if (!value) return undefined;
+  const date = new Date(value);
+  if (Number.isNaN(date.valueOf())) return value;
+
+  return new Intl.DateTimeFormat(navigator.language, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
+
 onMounted(() => {
   if (!galleryEl.value) return;
 
@@ -163,6 +175,7 @@ onMounted(() => {
                 ["aperture", data!.exif!.aperture],
                 ["shutter", data!.exif!.shutter],
                 ["iso", data!.exif!.iso],
+                ["date", formatExifDate(data!.exif!.date)],
               ]
                 .filter(([, v]) => v)
                 .map(([k, v]) => {
@@ -244,19 +257,32 @@ onUnmounted(() => {
         class="absolute inset-0 flex items-end p-3"
         :class="
           props.alwaysShowText
-            ? 'bg-linear-to-t from-black/55 via-black/10 to-transparent'
+            ? ''
             : 'bg-linear-to-t from-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100'
         "
       >
         <div v-if="photo.title || photo.subtitle" class="space-y-0.5">
-          <p v-if="photo.title" class="text-sm leading-tight font-medium text-white">
+          <p
+            v-if="photo.title"
+            class="text-sm leading-tight font-medium"
+            :class="props.alwaysShowText ? 'text-fg dark:text-white' : 'text-white'"
+          >
             {{ photo.title }}
           </p>
-          <p v-if="photo.subtitle" class="text-xs leading-tight text-white/80">
+          <p
+            v-if="photo.subtitle"
+            class="text-xs leading-tight"
+            :class="props.alwaysShowText ? 'text-fg-muted dark:text-white/80' : 'text-white/80'"
+          >
             <a
               v-if="photo.subtitleUrl"
               :href="photo.subtitleUrl"
-              class="text-white/80 underline decoration-white/50 underline-offset-2"
+              class="underline underline-offset-2"
+              :class="
+                props.alwaysShowText
+                  ? 'text-fg-muted decoration-fg-muted/50 dark:text-white/80 dark:decoration-white/50'
+                  : 'text-white/80 decoration-white/50'
+              "
               target="_blank"
               rel="noopener noreferrer"
               @click.stop

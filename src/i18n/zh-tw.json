@@ -1,9 +1,9 @@
 {
   "nav": {
     "home": "首頁",
-    "blog": "部落格",
-    "gallery": "畫廊",
-    "photos": "相簿",
+    "blog": "文章",
+    "gallery": "委託",
+    "photos": "相片",
     "about": "關於我",
     "openMenu": "開啟選單",
     "closeMenu": "關閉選單"
@@ -20,34 +20,31 @@
   },
   "home": {
     "greeting": "你好，我是",
-    "tagline": "一隻生活在獸人圈的藍貓。",
-    "recentPosts": "最新文章",
-    "latestGallery": "最新畫廊",
-    "latestPhotos": "最新相片",
-    "featuredArt": "精選畫作",
+    "tagline": "一隻藍貓，會寫程式和攝影",
+    "recentPosts": "近期文章",
+    "latestGallery": "近期委託",
+    "latestPhotos": "近期相片",
     "viewAll": "查看全部"
   },
   "blog": {
-    "title": "部落格",
-    "description": "想法、故事，以及獸人圈的日常。",
+    "title": "文章",
+    "description": "想法、故事、日常",
     "readMore": "閱讀更多",
     "postedOn": "發布於",
-    "updatedOn": "更新於",
-    "minuteRead": "分鐘閱讀"
+    "updatedOn": "更新於"
   },
   "gallery": {
-    "title": "畫廊",
-    "description": "作品集、設定圖與角色插畫。",
+    "title": "委託",
+    "description": "設定圖、角色插畫和其他作品",
     "all": "全部",
     "refSheet": "設定圖",
     "creator": "創作者",
-    "fanArt": "同人作品",
     "commission": "委託作品",
     "other": "其他"
   },
   "photos": {
     "title": "相簿",
-    "description": "用鏡頭記錄下的瞬間。",
+    "description": "用鏡頭記錄下的瞬間",
     "download": "下載照片",
     "close": "關閉",
     "zoom": "縮放",
@@ -64,13 +61,22 @@
     }
   },
   "about": {
-    "title": "關於",
+    "title": "關於我",
+    "name": "健一",
     "character": "角色設定",
-    "person": "獸衣背後"
+    "person": "自我介紹",
+    "linksTitle": "社群連結",
+    "nameLabel": "名字",
+    "speciesLabel": "物種",
+    "speciesValue": "貓",
+    "pronounsLabel": "代名詞",
+    "pronounsValue": "他",
+    "hobbiesLabel": "興趣",
+    "hobbiesValue": "寫程式、攝影",
+    "intro": "我是健一，一隻喜歡寫程式和攝影的藍貓。這裡是我整理自己作品與生活片段的地方，從插畫、相片到各種小專案都有。\n喜歡做一些小東西，可以在我的 GitHub 上找到；也喜歡在看到可愛毛毛的時候按下快門。很高興認識你，希望你在這裡玩得開心。"
   },
   "footer": {},
   "a11y": {
-    "skipToContent": "跳至主要內容",
-    "externalLink": "（於新分頁開啟）"
+    "skipToContent": "跳至主要內容"
   }
 }

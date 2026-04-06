@@ -10,7 +10,9 @@ import { defineConfig } from "astro/config";
 // https://astro.build/config
 export default defineConfig({
   site: "https://kenichi.photocat.blue",
-  adapter: cloudflare({}),
+  adapter: cloudflare({
+    imageService: "compile",
+  }),
   output: "static",
 
   integrations: [
