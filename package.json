@@ -9,13 +9,37 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "eslint src ./*.mjs --fix",
+    "format": "prettier --write src ./*.mjs"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^13.1.7",
     "@astrojs/mdx": "^5.0.3",
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.2",
+    "@astrojs/vue": "^6.0.1",
+    "@iconify/vue": "^5.0.0",
+    "@lucide/astro": "^1.7.0",
+    "@tailwindcss/vite": "^4.2.2",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "animejs": "^4.3.6",
     "astro": "^6.1.1",
-    "sharp": "^0.34.3"
+    "exifreader": "^4.37.1",
+    "lucide-vue-next": "^1.0.0",
+    "photoswipe": "^5.4.4",
+    "sharp": "^0.34.3",
+    "tailwindcss": "^4.2.2",
+    "vue": "^3.5.31"
+  },
+  "devDependencies": {
+    "@typescript-eslint/parser": "^8.57.2",
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-astro": "^1.6.0",
+    "eslint-plugin-vue": "^10.8.0",
+    "prettier": "^3.8.1",
+    "prettier-plugin-astro": "0.14.1",
+    "prettier-plugin-tailwindcss": "^0.7.2"
   }
 }

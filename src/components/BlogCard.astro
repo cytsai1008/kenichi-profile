@@ -1,0 +1,61 @@
+---
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+import FormattedDate from "./FormattedDate.astro";
+import { localePath, t, type Locale } from "../i18n/utils";
+
+interface Props {
+  post: CollectionEntry<"blog">;
+  locale?: Locale;
+  featured?: boolean;
+}
+
+const { post, locale = "en", featured = false } = Astro.props;
+const tr = t(locale);
+const postHref = localePath(`/blog/${post.id}/`, locale);
+---
+
+<article
+  class:list={[
+    "group overflow-hidden rounded-2xl border border-border bg-surface-alt transition-shadow hover:shadow-lg",
+    featured ? "flex flex-col sm:flex-row" : "flex flex-col",
+  ]}
+>
+  {
+    post.data.heroImage && (
+      <a
+        href={postHref}
+        class:list={["block overflow-hidden", featured ? "sm:w-2/5 sm:shrink-0" : ""]}
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <Image
+          src={post.data.heroImage}
+          alt=""
+          width={featured ? 480 : 720}
+          height={featured ? 320 : 240}
+          class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+      </a>
+    )
+  }
+
+  <div class="flex flex-1 flex-col p-5">
+    <p class="mb-1 text-xs text-fg-muted">
+      <FormattedDate date={post.data.pubDate} />
+    </p>
+    <h3 class:list={["leading-snug font-bold text-fg", featured ? "text-xl" : "text-base"]}>
+      <a href={postHref} class="no-underline hover:underline">
+        {post.data.title}
+      </a>
+    </h3>
+    {
+      post.data.description && (
+        <p class="mt-2 line-clamp-3 flex-1 text-sm text-fg-muted">{post.data.description}</p>
+      )
+    }
+    <a href={postHref} class="mt-3 text-sm font-medium text-accent no-underline">
+      {tr.blog.readMore} →
+    </a>
+  </div>
+</article>

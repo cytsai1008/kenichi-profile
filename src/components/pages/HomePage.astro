@@ -1,0 +1,177 @@
+---
+import { Image, getImage } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import BlogCard from "../BlogCard.astro";
+import { t, localePath, type Locale } from "../../i18n/utils";
+import { SITE_TITLE } from "../../consts";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const tr = t(locale);
+
+const recentPosts = (await getCollection("blog"))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+
+const latestGallery = (await getCollection("gallery"))
+  .sort(
+    (a, b) =>
+      Number(b.data.featured) - Number(a.data.featured) ||
+      b.data.date.valueOf() - a.data.date.valueOf()
+  )
+  .slice(0, 4);
+
+const photoModules = import.meta.glob<{ default: ImageMetadata }>("/src/content/photos/*", {
+  eager: true,
+});
+
+const latestPhotos = await Promise.all(
+  (await getCollection("photos"))
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+    .slice(0, 4)
+    .map(async (entry) => {
+      const imageModule = photoModules[entry.data.imagePath]?.default;
+      const thumb = imageModule
+        ? await getImage({
+            src: imageModule,
+            width: 720,
+            quality: 85,
+          })
+        : null;
+
+      return {
+        title: entry.data.title,
+        href: localePath("/photos", locale),
+        src: thumb?.src ?? entry.data.imagePath,
+      };
+    })
+);
+---
+
+<Layout title={SITE_TITLE} description={tr.home.tagline} locale={locale}>
+  <!-- Hero -->
+  <section class="relative overflow-hidden px-4 pt-20 pb-16 text-center">
+    <div class="mx-auto max-w-3xl">
+      <p class="mb-2 text-sm font-medium tracking-widest text-accent uppercase">
+        {tr.home.greeting}
+      </p>
+      <h1 class="mb-4 text-5xl font-bold text-fg sm:text-6xl">
+        <span class="text-accent">健一</span>
+        <span class="ml-2 text-4xl text-fg-muted sm:text-5xl">Kenichi</span>
+      </h1>
+      <p class="mx-auto max-w-lg text-xl text-fg-muted">
+        {tr.home.tagline}
+      </p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <a
+          href={localePath("/about", locale)}
+          class="rounded-full border border-border px-6 py-2.5 text-sm font-semibold text-fg no-underline transition-opacity hover:opacity-80"
+        >
+          {tr.nav.about}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Blog Posts -->
+  {
+    recentPosts.length > 0 && (
+      <section class="px-4 py-12">
+        <div class="mx-auto max-w-5xl">
+          <div class="mb-8 flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-fg">{tr.home.recentPosts}</h2>
+            <a href={localePath("/blog", locale)} class="text-sm font-medium text-accent">
+              {tr.home.viewAll} →
+            </a>
+          </div>
+          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {recentPosts.map((post) => (
+              <BlogCard post={post} locale={locale} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    latestGallery.length > 0 && (
+      <section class="px-4 py-12">
+        <div class="mx-auto max-w-5xl">
+          <div class="mb-8 flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-fg">{tr.home.latestGallery}</h2>
+            <a href={localePath("/gallery", locale)} class="text-sm font-medium text-accent">
+              {tr.home.viewAll} →
+            </a>
+          </div>
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {latestGallery.map((entry) => (
+              <a
+                href={localePath("/gallery", locale)}
+                class="group overflow-hidden rounded-2xl border border-border bg-surface-alt no-underline"
+              >
+                <div class="aspect-square overflow-hidden">
+                  <Image
+                    src={entry.data.image}
+                    alt={entry.data.title}
+                    width={480}
+                    height={480}
+                    class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+                <div class="p-3">
+                  <p class="text-sm leading-tight font-semibold text-fg">{entry.data.title}</p>
+                  {entry.data.artist && (
+                    <p class="mt-0.5 text-xs text-fg-muted">
+                      {tr.gallery.creator}: {entry.data.artist}
+                    </p>
+                  )}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    latestPhotos.length > 0 && (
+      <section class="px-4 py-12">
+        <div class="mx-auto max-w-5xl">
+          <div class="mb-8 flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-fg">{tr.home.latestPhotos}</h2>
+            <a href={localePath("/photos", locale)} class="text-sm font-medium text-accent">
+              {tr.home.viewAll} →
+            </a>
+          </div>
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {latestPhotos.map((photo) => (
+              <a
+                href={photo.href}
+                class="group overflow-hidden rounded-2xl border border-border bg-surface-alt no-underline"
+              >
+                <div class="aspect-square overflow-hidden">
+                  <img
+                    src={photo.src}
+                    alt={photo.title}
+                    loading="lazy"
+                    class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+                <div class="p-3">
+                  <p class="text-sm leading-tight font-semibold text-fg">{photo.title}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+</Layout>

@@ -1,0 +1,155 @@
+---
+import { getImage } from "astro:assets";
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import { t, type Locale } from "../../i18n/utils";
+import PhotoViewer from "../PhotoViewer.vue";
+import type { PhotoItem } from "../PhotoViewer.vue";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const tr = t(locale);
+
+function localizedValue(
+  value: string | undefined,
+  i18n: { "zh-tw"?: string; "zh-cn"?: string } | undefined
+) {
+  if (locale === "zh-tw") return i18n?.["zh-tw"] ?? value;
+  if (locale === "zh-cn") return i18n?.["zh-cn"] ?? value;
+  return value;
+}
+
+const all = (await getCollection("gallery")).sort(
+  (a, b) =>
+    Number(b.data.featured) - Number(a.data.featured) ||
+    b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const categories = ["all", "ref-sheet", "commission", "other"] as const;
+
+const galleryItems: PhotoItem[] = await Promise.all(
+  all.map(async (entry) => {
+    const thumb = await getImage({
+      src: entry.data.image,
+      width: 640,
+      quality: 85,
+    });
+    const viewerImage = await getImage({
+      src: entry.data.image,
+      width: entry.data.image.width,
+      quality: 92,
+    });
+
+    return {
+      src: viewerImage.src,
+      thumb: thumb.src,
+      width: viewerImage.attributes.width,
+      height: viewerImage.attributes.height,
+      alt: localizedValue(entry.data.title, entry.data.titleI18n) ?? entry.data.title,
+      title: localizedValue(entry.data.title, entry.data.titleI18n),
+      subtitle: localizedValue(entry.data.artist, entry.data.artistI18n)
+        ? `${tr.gallery.creator}: ${localizedValue(entry.data.artist, entry.data.artistI18n)}`
+        : undefined,
+      subtitleUrl: entry.data.artistUrl,
+      creator: localizedValue(entry.data.artist, entry.data.artistI18n),
+      creatorUrl: entry.data.artistUrl,
+      category: entry.data.category,
+    } satisfies PhotoItem;
+  })
+);
+---
+
+<Layout title={tr.gallery.title} description={tr.gallery.description ?? ""} locale={locale}>
+  <div class="mx-auto max-w-5xl px-4 py-12">
+    <header class="mb-10">
+      <h1 class="text-4xl font-bold text-fg">{tr.gallery.title}</h1>
+      <p class="mt-2 text-lg text-fg-muted">{tr.gallery.description}</p>
+    </header>
+
+    <!-- Category filter tabs -->
+    <div class="mb-8 flex flex-wrap gap-2" role="tablist" aria-label="Filter by category">
+      {
+        categories.map((cat) => {
+          const label =
+            cat === "all"
+              ? tr.gallery.all
+              : cat === "ref-sheet"
+                ? tr.gallery.refSheet
+                : cat === "commission"
+                  ? tr.gallery.commission
+                  : tr.gallery.other;
+          const count =
+            cat === "all"
+              ? galleryItems.length
+              : galleryItems.filter((item) => item.category === cat).length;
+          return (
+            <button
+              role="tab"
+              data-category={cat}
+              class="gallery-filter rounded-full border border-border px-4 py-1.5 text-sm font-medium text-fg-muted transition-colors"
+              aria-selected={cat === "all" ? "true" : "false"}
+            >
+              {label}
+              <span class="ml-1 text-xs opacity-60">({count})</span>
+            </button>
+          );
+        })
+      }
+    </div>
+
+    {
+      galleryItems.length === 0 ? (
+        <p class="text-fg-muted">No artwork yet.</p>
+      ) : (
+        <PhotoViewer
+          client:load
+          photos={galleryItems}
+          closeLabel={tr.photos.close}
+          zoomLabel={tr.photos.zoom}
+          prevLabel={tr.photos.previous}
+          nextLabel={tr.photos.next}
+          creatorLabel={tr.gallery.creator}
+          showDownloadButton={false}
+          showExifPanel={false}
+          itemClass="gallery-item border border-border"
+          alwaysShowText={true}
+          disableHoverZoom={true}
+        />
+      )
+    }
+  </div>
+</Layout>
+
+<script>
+  const filters = document.querySelectorAll<HTMLButtonElement>(".gallery-filter");
+  const items = document.querySelectorAll<HTMLElement>(".gallery-item");
+
+  filters.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const cat = btn.dataset.category!;
+
+      filters.forEach((b) => {
+        b.setAttribute("aria-selected", "false");
+        b.classList.remove("bg-accent-bg", "border-accent-bg");
+        b.classList.add("text-fg-muted", "border-border");
+      });
+      btn.setAttribute("aria-selected", "true");
+      btn.classList.add("bg-accent-bg", "border-accent-bg");
+      btn.classList.remove("text-fg-muted", "border-border");
+
+      items.forEach((item) => {
+        item.style.display = cat === "all" || item.dataset.category === cat ? "" : "none";
+      });
+    });
+  });
+
+  // Set initial active style on "all"
+  const first = filters[0];
+  if (first) {
+    first.classList.add("bg-accent-bg", "border-accent-bg");
+    first.classList.remove("text-fg-muted", "border-border");
+  }
+</script>

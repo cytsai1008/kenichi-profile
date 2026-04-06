@@ -1,17 +1,28 @@
 ---
 interface Props {
-	date: Date;
+  date: Date;
 }
 
 const { date } = Astro.props;
+
+const fallback = date.toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+});
 ---
 
-<time datetime={date.toISOString()}>
-	{
-		date.toLocaleDateString('en-us', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-		})
-	}
+<time datetime={date.toISOString()} data-date={date.toISOString()}>
+  {fallback}
 </time>
+
+<script>
+  // Re-format all date elements using the browser's actual locale
+  document.querySelectorAll<HTMLTimeElement>("time[data-date]").forEach((el) => {
+    el.textContent = new Intl.DateTimeFormat(navigator.language, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).format(new Date(el.dataset.date!));
+  });
+</script>

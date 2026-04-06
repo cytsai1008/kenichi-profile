@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "home": "Home",
+    "blog": "Blog",
+    "gallery": "Gallery",
+    "photos": "Photos",
+    "about": "About Me",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "theme": {
+    "light": "Switch to light mode",
+    "dark": "Switch to dark mode"
+  },
+  "lang": {
+    "label": "Language",
+    "en": "English",
+    "zh-tw": "繁體中文",
+    "zh-cn": "简体中文"
+  },
+  "home": {
+    "greeting": "Hello, I'm",
+    "tagline": "A blue cat living in the furry world.",
+    "recentPosts": "Recent Posts",
+    "latestGallery": "Latest Gallery",
+    "latestPhotos": "Latest Photos",
+    "featuredArt": "Featured Art",
+    "viewAll": "View all"
+  },
+  "blog": {
+    "title": "Blog",
+    "description": "Thoughts, stories, and life in the furry fandom.",
+    "readMore": "Read more",
+    "postedOn": "Posted on",
+    "updatedOn": "Updated on",
+    "minuteRead": "min read"
+  },
+  "gallery": {
+    "title": "Gallery",
+    "description": "Artwork, ref sheets, and character illustrations.",
+    "all": "All",
+    "refSheet": "Ref Sheet",
+    "creator": "Creator",
+    "fanArt": "Fan Art",
+    "commission": "Commission",
+    "other": "Other"
+  },
+  "photos": {
+    "title": "Photos",
+    "description": "Moments I've captured through the lens.",
+    "download": "Download photo",
+    "close": "Close",
+    "zoom": "Zoom",
+    "previous": "Previous photo",
+    "next": "Next photo",
+    "exif": {
+      "camera": "Camera",
+      "lens": "Lens",
+      "focalLength": "Focal Length",
+      "aperture": "Aperture",
+      "shutter": "Shutter",
+      "iso": "ISO",
+      "date": "Date"
+    }
+  },
+  "about": {
+    "title": "About",
+    "character": "Character",
+    "person": "Behind the Paws"
+  },
+  "footer": {},
+  "a11y": {
+    "skipToContent": "Skip to main content",
+    "externalLink": "(opens in new tab)"
+  }
+}
