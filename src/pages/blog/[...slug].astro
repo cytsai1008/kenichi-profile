@@ -1,11 +1,12 @@
 ---
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import BlogPost from "../../layouts/BlogPost.astro";
+import { getBlogPostsForLocale, getBlogSlug } from "../../lib/blog";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog");
+  const posts = getBlogPostsForLocale(await getCollection("blog"), "en");
   return posts.map((post) => ({
-    params: { slug: post.id },
+    params: { slug: getBlogSlug(post.id) },
     props: post,
   }));
 }

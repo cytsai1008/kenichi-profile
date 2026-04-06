@@ -1,7 +1,8 @@
 ---
 import { Image } from "astro:assets";
 import Layout from "../../layouts/Layout.astro";
-import { t, type Locale } from "../../i18n/utils";
+import SocialLinks from "../SocialLinks.vue";
+import { t, nl, type Locale } from "../../i18n/utils";
 import refSheet from "../../assets/ref-sheet.png";
 
 interface Props {
@@ -10,39 +11,85 @@ interface Props {
 
 const { locale } = Astro.props;
 const tr = t(locale);
+const socialLinks = [
+  { label: "Facebook", href: "https://r.photocat.blue/facebook", icon: "simple-icons:facebook" },
+  { label: "X", href: "https://r.photocat.blue/x", icon: "simple-icons:twitter" },
+  { label: "GitHub", href: "https://r.photocat.blue/github", icon: "simple-icons:github" },
+  {
+    label: "VRChat",
+    href: "https://r.photocat.blue/vrchat",
+    icon: "simple-icons:vrchat",
+    iconWidth: 32,
+    iconHeight: 32,
+  },
+  { label: "Other Link", href: "https://link.photocat.blue/", icon: "lucide:link"
+  }
+];
 ---
 
 <Layout title={tr.about.title} description={tr.home.tagline} locale={locale}>
   <div class="mx-auto max-w-5xl px-4 py-12">
-    <h1 class="mb-2 text-4xl font-bold text-fg">{tr.about.title}</h1>
-    <p class="mb-10 text-lg text-fg-muted">{tr.home.tagline}</p>
+    <h1 class="mb-5 text-4xl font-bold text-fg">{tr.about.title}</h1>
 
-    <section class="mb-12">
-      <h2 class="mb-4 text-2xl font-bold text-accent">{tr.about.character}</h2>
-      <div class="grid gap-8 lg:items-start">
-        <figure class="overflow-hidden rounded-2xl border border-border bg-surface-alt shadow-sm">
-          <Image
-            src={refSheet}
-            alt={`${tr.about.character} ref sheet`}
-            class="h-auto w-full"
-            sizes="(min-width: 1024px) 320px, 100vw"
-          />
-          <figcaption class="border-t border-border px-4 py-3 text-sm text-fg-muted">
+    <div class="space-y-10">
+      <section>
+        <h2 class="mb-5 text-2xl font-bold text-accent">{tr.about.character}</h2>
+        <div class="grid gap-8 sm:grid-cols-3">
+        <figure>
+          <div class="overflow-hidden rounded-2xl shadow-md ring-1 ring-border">
+            <Image
+              src={refSheet}
+              alt={`${tr.about.character} ref sheet`}
+              sizes="(min-width: 640px) 50vw, 100vw"
+            />
+          </div>
+          <figcaption class="mt-2 text-center text-xs text-fg-muted">
             {tr.gallery.refSheet}
           </figcaption>
         </figure>
-      </div>
-    </section>
 
-    <section>
-      <h2 class="mb-4 text-2xl font-bold text-highlight">{tr.about.person}</h2>
-      <div class="prose max-w-2xl">
-        <p>
-          Hi! I'm the person behind 健一. I enjoy photography, writing, and building things on the
-          web. This site is my little corner of the internet — a place to share my thoughts, photos,
-          and art from life in the furry fandom.
-        </p>
-      </div>
-    </section>
+        <div class="sm:col-span-2">
+          <dl class="space-y-4">
+            <div>
+              <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
+                {tr.about.nameLabel}
+              </dt>
+              <dd class="mt-1 text-base font-medium text-fg">{tr.about.name}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
+                {tr.about.speciesLabel}
+              </dt>
+              <dd class="mt-1 text-base font-medium text-fg">{tr.about.speciesValue}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
+                {tr.about.pronounsLabel}
+              </dt>
+              <dd class="mt-1 text-base font-medium text-fg">{tr.about.pronounsValue}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
+                {tr.about.hobbiesLabel}
+              </dt>
+              <dd class="mt-1 text-base font-medium text-fg">{tr.about.hobbiesValue}</dd>
+            </div>
+          </dl>
+        </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="mb-4 text-2xl font-bold text-highlight">{tr.about.person}</h2>
+        <div class="prose max-w-none">
+          {nl(tr.about.intro).map((para) => <p>{para}</p>)}
+        </div>
+      </section>
+
+      <section>
+        <h2 class="mb-4 text-2xl font-bold text-accent">{tr.about.linksTitle}</h2>
+        <SocialLinks client:load links={socialLinks} />
+      </section>
+    </div>
   </div>
 </Layout>

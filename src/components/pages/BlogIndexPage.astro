@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import BlogCard from "../BlogCard.astro";
 import { t, type Locale } from "../../i18n/utils";
+import { getBlogPostsForLocale } from "../../lib/blog";
 
 interface Props {
   locale: Locale;
@@ -11,9 +12,11 @@ interface Props {
 const { locale } = Astro.props;
 const tr = t(locale);
 
-const posts = (await getCollection("blog")).sort(
+const allPosts = getBlogPostsForLocale(await getCollection("blog"), locale).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
+const pinned = allPosts.filter((p) => p.data.featured);
+const posts = allPosts.filter((p) => !p.data.featured);
 ---
 
 <Layout title={tr.blog.title} description={tr.blog.description} locale={locale}>
@@ -23,16 +26,24 @@ const posts = (await getCollection("blog")).sort(
       <p class="mt-2 text-lg text-fg-muted">{tr.blog.description}</p>
     </header>
 
+    {pinned.length > 0 && (
+      <div class="mb-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {pinned.map((post) => (
+          <BlogCard post={post} locale={locale} />
+        ))}
+      </div>
+    )}
+
     {
-      posts.length === 0 ? (
+      posts.length === 0 && pinned.length === 0 ? (
         <p class="text-fg-muted">No posts yet.</p>
-      ) : (
+      ) : posts.length > 0 ? (
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => (
             <BlogCard post={post} locale={locale} />
           ))}
         </div>
-      )
+      ) : null
     }
   </div>
 </Layout>

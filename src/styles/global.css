@@ -3,58 +3,49 @@
 /* ─── Enable .dark class strategy ───────────────────────── */
 @variant dark (&:where(.dark, .dark *));
 
-/* ─── Fonts ─────────────────────────────────────────────── */
-@font-face {
-  font-family: "Atkinson";
-  src: url("/fonts/atkinson-regular.woff") format("woff");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Atkinson";
-  src: url("/fonts/atkinson-bold.woff") format("woff");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* ─── Step 1: Raw switching values ──────────────────────── *
  *  These plain CSS vars switch under .dark.
  *  @theme inline below references them so Tailwind utilities
  *  output var(...) and respond to dark mode at runtime.
  * ─────────────────────────────────────────────────────────── */
 :root {
-  --surface: #fbf8f3;
-  --surface-alt: #f3ede3;
-  --fg: #3d3530;
-  --fg-muted: #7a6e68;
-  --accent: #5b8db8;
-  --accent-bg: #3d6b8f;
-  --accent-dim: #2f5470;
+  --surface: #f3f8fb;
+  --surface-alt: #e8f0f5;
+  --fg: #37424c;
+  --fg-muted: #70808d;
+  --accent: #6f93af;
+  --accent-bg: #507392;
+  --accent-dim: #405d78;
   --highlight: #d4a84b;
   --highlight-dim: #b88c35;
-  --border: #e2d9ce;
+  --border: #d5e0e8;
 }
 
 .dark {
-  --surface: #1c1917;
-  --surface-alt: #26211e;
-  --fg: #e8e0d5;
-  --fg-muted: #9a8e87;
+  --surface: #17181c;
+  --surface-alt: #1f2028;
+  --fg: #e5e1db;
+  --fg-muted: #948e89;
   --accent: #7ba4c9;
   --accent-bg: #4a7aa3;
   --accent-dim: #3d6b8f;
   --highlight: #d4a84b;
   --highlight-dim: #b88c35;
-  --border: #3a3330;
+  --border: #30323c;
 }
 
 /* ─── Step 2: Tailwind tokens via @theme inline ─────────── *
  *  "inline" = output var(...) in utilities, not static hex.
  * ─────────────────────────────────────────────────────────── */
 @theme inline {
-  --font-sans: "Atkinson", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Atkinson Hyperlegible", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans-tc: "Atkinson Hyperlegible", "Noto Sans TC", "Noto Sans", ui-sans-serif, system-ui,
+    sans-serif;
+  --font-sans-sc: "Atkinson Hyperlegible", "Noto Sans SC", "Noto Sans", ui-sans-serif, system-ui,
+    sans-serif;
+  --font-noto: "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-noto-tc: "Noto Sans TC", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-noto-sc: "Noto Sans SC", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
   --color-surface: var(--surface);
   --color-surface-alt: var(--surface-alt);
   --color-fg: var(--fg);
@@ -96,8 +87,16 @@ html {
   scrollbar-gutter: stable; /* reserves scrollbar space always — prevents layout shift */
 }
 
+html:lang(zh-TW) {
+  --font-sans: var(--font-sans-tc);
+}
+
+html:lang(zh-CN) {
+  --font-sans: var(--font-sans-sc);
+}
+
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-size: 1.125rem;
   line-height: 1.75;
   color: var(--fg);
@@ -111,6 +110,18 @@ body {
     color 0.2s ease;
 }
 
+.font-noto {
+  font-family: var(--font-noto), sans-serif;
+}
+
+.font-noto-tc {
+  font-family: var(--font-noto-tc), sans-serif;
+}
+
+.font-noto-sc {
+  font-family: var(--font-noto-sc), sans-serif;
+}
+
 /* ─── Typography ────────────────────────────────────────── */
 h1,
 h2,
@@ -118,7 +129,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), serif;
   font-weight: 700;
   line-height: 1.25;
   margin: 0 0 0.5rem 0;
@@ -166,11 +177,8 @@ img {
 }
 
 /* ─── Prose ─────────────────────────────────────────────── */
-.prose {
-  max-width: 70ch;
-}
 .prose p {
-  margin-bottom: 1.5em;
+  margin-bottom: 1em;
 }
 .prose blockquote {
   border-left: 4px solid var(--accent);

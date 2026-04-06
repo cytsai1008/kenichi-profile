@@ -1,8 +1,8 @@
 {
   "nav": {
     "home": "Home",
-    "blog": "Blog",
-    "gallery": "Gallery",
+    "blog": "Articles",
+    "gallery": "Commissions",
     "photos": "Photos",
     "about": "About Me",
     "openMenu": "Open menu",
@@ -20,28 +20,25 @@
   },
   "home": {
     "greeting": "Hello, I'm",
-    "tagline": "A blue cat living in the furry world.",
-    "recentPosts": "Recent Posts",
-    "latestGallery": "Latest Gallery",
-    "latestPhotos": "Latest Photos",
-    "featuredArt": "Featured Art",
+    "tagline": "A blue cat into coding and photography.",
+    "recentPosts": "Recent Articles",
+    "latestGallery": "Recent Commissions",
+    "latestPhotos": "Recent Photos",
     "viewAll": "View all"
   },
   "blog": {
-    "title": "Blog",
-    "description": "Thoughts, stories, and life in the furry fandom.",
+    "title": "Articles",
+    "description": "Thoughts, stories, furry life.",
     "readMore": "Read more",
     "postedOn": "Posted on",
-    "updatedOn": "Updated on",
-    "minuteRead": "min read"
+    "updatedOn": "Updated on"
   },
   "gallery": {
-    "title": "Gallery",
+    "title": "Commissions",
     "description": "Artwork, ref sheets, and character illustrations.",
     "all": "All",
-    "refSheet": "Ref Sheet",
+    "refSheet": "Reference Sheet",
     "creator": "Creator",
-    "fanArt": "Fan Art",
     "commission": "Commission",
     "other": "Other"
   },
@@ -64,13 +61,22 @@
     }
   },
   "about": {
-    "title": "About",
+    "title": "About Me",
+    "name": "Kenichi",
     "character": "Character",
-    "person": "Behind the Paws"
+    "person": "Personal Intro",
+    "linksTitle": "Links",
+    "nameLabel": "Name",
+    "speciesLabel": "Species",
+    "speciesValue": "Cat",
+    "pronounsLabel": "Pronouns",
+    "pronounsValue": "He / Him",
+    "hobbiesLabel": "Hobbies",
+    "hobbiesValue": "Coding, Photography",
+    "intro": "I'm Kenichi, a blue cat who enjoys coding and photography lives in Taiwan. \nThis site is where I collect things I make and share a bit about myself — from artwork to photos and everyday life. I enjoy building small things you can find on my GitHub, and taking photos when I spot cute furries. \nNice to meet you, hope you have a good time here."
   },
   "footer": {},
   "a11y": {
-    "skipToContent": "Skip to main content",
-    "externalLink": "(opens in new tab)"
+    "skipToContent": "Skip to main content"
   }
 }

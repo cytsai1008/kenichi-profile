@@ -1,7 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import { Icon } from "@iconify/vue";
 import { animate, spring } from "animejs";
+import {
+  ChevronDown,
+  Languages,
+  type LucideIcon,
+  Menu,
+  Monitor,
+  Moon,
+  Sun,
+  X,
+} from "@lucide/vue";
 import type { Locale } from "../i18n/utils";
 import { switchLocalePath, locales } from "../i18n/utils";
 
@@ -46,10 +55,10 @@ function setTheme(mode: ThemeMode) {
   applyTheme(mode);
 }
 
-const themeOptions: { mode: ThemeMode; icon: string; label: string }[] = [
-  { mode: "light", icon: "lucide:sun", label: "Light" },
-  { mode: "system", icon: "lucide:monitor", label: "System" },
-  { mode: "dark", icon: "lucide:moon", label: "Dark" },
+const themeOptions: { mode: ThemeMode; icon: LucideIcon; label: string }[] = [
+  { mode: "light", icon: Sun, label: "Light" },
+  { mode: "system", icon: Monitor, label: "System" },
+  { mode: "dark", icon: Moon, label: "Dark" },
 ];
 
 const activeTheme = computed(() => themeOptions.find((o) => o.mode === theme.value)!);
@@ -218,14 +227,14 @@ function isActive(href: string) {
   >
     <!-- CSS grid: logo | links | controls — links are always truly centered -->
     <nav
-      class="mx-auto grid max-w-5xl items-center px-4 py-3"
+      class="mx-auto flex max-w-5xl items-center px-4 py-3 md:grid"
       style="grid-template-columns: 1fr auto 1fr"
       aria-label="Main navigation"
     >
       <!-- Col 1: Logo (left-aligned) -->
       <a
         href="/"
-        class="flex items-center gap-2 text-lg font-bold text-fg no-underline transition-opacity"
+        class="flex flex-1 items-center gap-2 text-lg font-bold text-fg no-underline transition-opacity md:flex-none"
       >
         <span class="text-accent">健一</span>
         <span class="hidden text-fg-muted sm:inline">Kenichi</span>
@@ -253,7 +262,7 @@ function isActive(href: string) {
       <div class="flex items-center justify-end gap-1">
         <!-- Theme wrapper: compact icon always visible; full panel absolute on hover -->
         <div
-          class="relative -my-3 flex items-center py-3"
+          class="relative -my-3 hidden items-center py-3 md:flex"
           :class="themeHovered ? '-ml-28 pl-28' : '-ml-8 pl-8'"
           @mouseenter="showTheme"
           @mouseleave="hideTheme"
@@ -265,7 +274,7 @@ function isActive(href: string) {
             :aria-label="activeTheme.label"
             @click="cycleTheme"
           >
-            <Icon :icon="activeTheme.icon" width="16" />
+            <component :is="activeTheme.icon" :size="16" />
           </button>
 
           <!-- Full panel: absolute right-aligned, fades in on hover -->
@@ -289,7 +298,7 @@ function isActive(href: string) {
               :aria-pressed="theme === opt.mode"
               @click="setTheme(opt.mode)"
             >
-              <Icon :icon="opt.icon" width="16" />
+              <component :is="opt.icon" :size="16" />
             </button>
           </div>
         </div>
@@ -303,21 +312,23 @@ function isActive(href: string) {
             aria-haspopup="listbox"
             @click.stop="langOpen ? closeLangDropdown() : (langOpen = true)"
           >
-            <Icon icon="lucide:languages" width="16" />
+            <Languages :size="16" class="text-fg-muted" />
             <!-- Text hidden by default, revealed on controls hover -->
             <span
               ref="langText"
               class="hidden overflow-hidden whitespace-nowrap sm:inline"
+              :class="
+                locale === 'zh-tw'
+                  ? 'font-noto-tc'
+                  : locale === 'zh-cn'
+                    ? 'font-noto-sc'
+                    : 'font-noto'
+              "
               style="display: none; opacity: 0"
             >
               {{ localeLabels[locale] }}
             </span>
-            <Icon
-              icon="lucide:chevron-down"
-              width="14"
-              class="transition-transform"
-              :class="langOpen ? 'rotate-180' : ''"
-            />
+            <ChevronDown :size="14" class="transition-transform" :class="langOpen ? 'rotate-180' : ''" />
           </button>
 
           <!-- Invisible bridge: fills the mt-1 gap so mouseleave doesn't fire mid-travel -->
@@ -334,7 +345,10 @@ function isActive(href: string) {
                 role="option"
                 :aria-selected="loc === locale"
                 class="w-full rounded-lg px-3 py-1.5 text-left text-sm transition-colors hover:bg-surface-alt"
-                :class="loc === locale ? 'font-semibold text-accent' : 'text-fg'"
+                :class="[
+                  loc === locale ? 'font-semibold text-accent' : 'text-fg',
+                  loc === 'zh-tw' ? 'font-noto-tc' : loc === 'zh-cn' ? 'font-noto-sc' : 'font-noto',
+                ]"
                 @click="switchLang(loc)"
               >
                 {{ localeLabels[loc] }}
@@ -351,8 +365,8 @@ function isActive(href: string) {
           aria-controls="mobile-menu"
           @click.stop="menuOpen = !menuOpen"
         >
-          <Icon v-if="menuOpen" icon="lucide:x" width="20" />
-          <Icon v-else icon="lucide:menu" width="20" />
+          <X v-if="menuOpen" :size="20" />
+          <Menu v-else :size="20" />
         </button>
       </div>
     </nav>
@@ -397,7 +411,7 @@ function isActive(href: string) {
             :aria-pressed="theme === opt.mode"
             @click="setTheme(opt.mode)"
           >
-            <Icon :icon="opt.icon" width="16" />
+            <component :is="opt.icon" :size="16" />
           </button>
         </div>
       </div>

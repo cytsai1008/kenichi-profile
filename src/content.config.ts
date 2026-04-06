@@ -13,6 +13,7 @@ const blog = defineCollection({
       updatedDate: z.coerce.date().optional(),
       heroImage: z.optional(image()),
       tags: z.array(z.string()).optional(),
+      featured: z.boolean().default(false),
     }),
 });
 
@@ -36,7 +37,7 @@ const gallery = defineCollection({
         .optional(),
       image: image(),
       date: z.coerce.date(),
-      category: z.enum(["ref-sheet", "fan-art", "commission", "other"]).default("other"),
+      category: z.enum(["ref-sheet", "commission", "other"]).default("other"),
       artist: z.string().optional(),
       artistI18n: z
         .object({
