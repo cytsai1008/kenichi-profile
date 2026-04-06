@@ -1,0 +1,48 @@
+---
+import { Image } from "astro:assets";
+import Layout from "../../layouts/Layout.astro";
+import { t, type Locale } from "../../i18n/utils";
+import refSheet from "../../assets/ref-sheet.png";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const tr = t(locale);
+---
+
+<Layout title={tr.about.title} description={tr.home.tagline} locale={locale}>
+  <div class="mx-auto max-w-5xl px-4 py-12">
+    <h1 class="mb-2 text-4xl font-bold text-fg">{tr.about.title}</h1>
+    <p class="mb-10 text-lg text-fg-muted">{tr.home.tagline}</p>
+
+    <section class="mb-12">
+      <h2 class="mb-4 text-2xl font-bold text-accent">{tr.about.character}</h2>
+      <div class="grid gap-8 lg:items-start">
+        <figure class="overflow-hidden rounded-2xl border border-border bg-surface-alt shadow-sm">
+          <Image
+            src={refSheet}
+            alt={`${tr.about.character} ref sheet`}
+            class="h-auto w-full"
+            sizes="(min-width: 1024px) 320px, 100vw"
+          />
+          <figcaption class="border-t border-border px-4 py-3 text-sm text-fg-muted">
+            {tr.gallery.refSheet}
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="mb-4 text-2xl font-bold text-highlight">{tr.about.person}</h2>
+      <div class="prose max-w-2xl">
+        <p>
+          Hi! I'm the person behind 健一. I enjoy photography, writing, and building things on the
+          web. This site is my little corner of the internet — a place to share my thoughts, photos,
+          and art from life in the furry fandom.
+        </p>
+      </div>
+    </section>
+  </div>
+</Layout>

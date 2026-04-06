@@ -1,0 +1,56 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import NavBar from "../components/NavBar.vue";
+import type { ImageMetadata } from "astro";
+import { getLocaleFromUrl, localeLang, localePath, t, type Locale } from "../i18n/utils";
+import { SITE_TITLE } from "../consts";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: ImageMetadata;
+  /** Override locale detection (useful for static pages that know their locale). */
+  locale?: Locale;
+}
+
+const locale: Locale = Astro.props.locale ?? getLocaleFromUrl(Astro.url);
+const tr = t(locale);
+const lang = localeLang[locale];
+
+const { title = SITE_TITLE, description = tr.home.tagline, image } = Astro.props;
+
+const navLinks = [
+  { href: localePath("/", locale), label: tr.nav.home },
+  { href: localePath("/blog", locale), label: tr.nav.blog },
+  { href: localePath("/gallery", locale), label: tr.nav.gallery },
+  { href: localePath("/photos", locale), label: tr.nav.photos },
+  { href: localePath("/about", locale), label: tr.nav.about },
+];
+---
+
+<!doctype html>
+<html lang={lang} class="">
+  <head>
+    <BaseHead title={title} description={description} image={image} locale={locale} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">{tr.a11y.skipToContent}</a>
+
+    <NavBar
+      client:load
+      links={navLinks}
+      locale={locale}
+      currentPath={Astro.url.pathname}
+      themeDarkLabel={tr.theme.dark}
+      themeLightLabel={tr.theme.light}
+      langLabel={tr.lang.label}
+    />
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <SiteFooter locale={locale} />
+  </body>
+</html>
