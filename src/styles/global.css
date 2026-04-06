@@ -85,6 +85,11 @@
 html {
   scroll-behavior: smooth;
   scrollbar-gutter: stable; /* reserves scrollbar space always — prevents layout shift */
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 html:lang(zh-TW) {
@@ -134,6 +139,7 @@ h6 {
   line-height: 1.25;
   margin: 0 0 0.5rem 0;
   color: var(--fg);
+  scroll-margin-top: 5rem;
 }
 h1 {
   font-size: 2.5rem;
@@ -213,6 +219,24 @@ table {
   width: 100%;
 }
 
+/* ─── Scroll animations initial state ───────────────────── */
+/* Only hides elements when JS is present (class added by inline script before paint) */
+html.js [data-animate]:not([data-animate-done]) {
+  opacity: 0;
+}
+/* Reduced-motion: mark done immediately, CSS makes them visible */
+html.js [data-animate][data-animate-done] {
+  opacity: 1;
+}
+
+/* ─── Touch ─────────────────────────────────────────────── */
+button,
+a,
+[role="button"],
+[role="option"] {
+  touch-action: manipulation;
+}
+
 /* ─── Focus & a11y ──────────────────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--accent);
@@ -257,6 +281,7 @@ table {
     scroll-behavior: auto !important;
   }
 }
+
 
 @media (max-width: 640px) {
   body {
