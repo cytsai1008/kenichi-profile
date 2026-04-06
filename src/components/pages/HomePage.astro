@@ -24,7 +24,7 @@ const latestGallery = (await getCollection("gallery"))
       Number(b.data.featured) - Number(a.data.featured) ||
       b.data.date.valueOf() - a.data.date.valueOf()
   )
-  .slice(0, 4);
+  .slice(0, 6);
 
 const photoModules = import.meta.glob<{ default: ImageMetadata }>("/src/content/photos/**/*", {
   eager: true,
@@ -33,13 +33,15 @@ const photoModules = import.meta.glob<{ default: ImageMetadata }>("/src/content/
 const latestPhotos = await Promise.all(
   (await getCollection("photos"))
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-    .slice(0, 4)
+    .slice(0, 6)
     .map(async (entry) => {
       const imageModule = photoModules[entry.data.imagePath]?.default;
       const thumb = imageModule
         ? await getImage({
             src: imageModule,
-            width: 720,
+            width: 640,
+            height: 640,
+            fit: "cover",
             quality: 85,
           })
         : null;
@@ -113,7 +115,7 @@ const latestPhotos = await Promise.all(
   {
     recentPosts.length > 0 && (
       <section class="px-4 py-12">
-        <div class="mx-auto max-w-5xl">
+        <div class="mx-auto max-w-5xl px-7 sm:px-10">
           <div data-animate class="mb-8 flex items-center justify-between">
             <h2 class="text-2xl font-bold text-fg">{tr.home.recentPosts}</h2>
             <a href={localePath("/blog", locale)} class="text-sm font-medium text-accent">
@@ -133,7 +135,7 @@ const latestPhotos = await Promise.all(
   {
     latestGallery.length > 0 && (
       <section class="px-4 py-12">
-        <div class="mx-auto max-w-5xl">
+        <div class="mx-auto max-w-5xl px-7 sm:px-10">
           <div data-animate class="mb-8 flex items-center justify-between">
             <h2 class="text-2xl font-bold text-fg">{tr.home.latestGallery}</h2>
             <a href={localePath("/gallery", locale)} class="text-sm font-medium text-accent">
@@ -141,11 +143,14 @@ const latestPhotos = await Promise.all(
             </a>
           </div>
           <div data-animate-stagger class="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {latestGallery.map((entry) => (
+            {latestGallery.map((entry, i) => (
               <a
                 data-animate
                 href={localePath("/gallery", locale)}
-                class="group overflow-hidden rounded-2xl border border-border bg-surface-alt no-underline"
+                class:list={[
+                  "group overflow-hidden rounded-2xl border border-border bg-surface-alt no-underline",
+                  i >= 4 && "hidden lg:block",
+                ]}
               >
                 <div class="aspect-square overflow-hidden">
                   <Image
@@ -174,7 +179,7 @@ const latestPhotos = await Promise.all(
   {
     latestPhotos.length > 0 && (
       <section class="px-4 py-12">
-        <div class="mx-auto max-w-5xl">
+        <div class="mx-auto max-w-5xl px-7 sm:px-10">
           <div data-animate class="mb-8 flex items-center justify-between">
             <h2 class="text-2xl font-bold text-fg">{tr.home.latestPhotos}</h2>
             <a href={localePath("/photos", locale)} class="text-sm font-medium text-accent">
@@ -182,11 +187,14 @@ const latestPhotos = await Promise.all(
             </a>
           </div>
           <div data-animate-stagger class="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {latestPhotos.map((photo) => (
+            {latestPhotos.map((photo, i) => (
               <a
                 data-animate
                 href={photo.href}
-                class="group overflow-hidden rounded-2xl border border-border bg-surface-alt no-underline"
+                class:list={[
+                  "group overflow-hidden rounded-2xl border border-border bg-surface-alt no-underline",
+                  i >= 4 && "hidden lg:block",
+                ]}
               >
                 <div class="aspect-square overflow-hidden">
                   <img
