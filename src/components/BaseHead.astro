@@ -104,6 +104,52 @@ const fullTitle = `${SITE_TITLE} | ${title}`;
 <!-- Apply theme before paint to avoid flash -->
 <script is:inline>
   (function () {
+    const pathname = window.location.pathname;
+    const isPrefixedRoute = /^\/(zh-tw|zh-cn)(\/|$)/.test(pathname);
+
+    if (!isPrefixedRoute) {
+      const cookieMatch = document.cookie.match(/(?:^|;\s*)preferred-locale=([^;]+)/);
+      let locale = cookieMatch ? decodeURIComponent(cookieMatch[1]) : "";
+
+      if (!locale) {
+        const preferredLanguages =
+          Array.isArray(navigator.languages) && navigator.languages.length
+            ? navigator.languages
+            : [navigator.language];
+
+        for (const language of preferredLanguages) {
+          const normalized = language.toLowerCase();
+          if (
+            normalized === "zh-tw" ||
+            normalized.startsWith("zh-tw") ||
+            normalized.includes("hant")
+          ) {
+            locale = "zh-tw";
+            break;
+          }
+          if (
+            normalized === "zh-cn" ||
+            normalized.startsWith("zh-cn") ||
+            normalized.startsWith("zh") ||
+            normalized.includes("hans")
+          ) {
+            locale = "zh-cn";
+            break;
+          }
+          if (normalized.startsWith("en")) {
+            locale = "en";
+            break;
+          }
+        }
+      }
+
+      if (locale === "zh-tw" || locale === "zh-cn") {
+        const target = `/${locale}${pathname}${window.location.search}${window.location.hash}`;
+        window.location.replace(target);
+        return;
+      }
+    }
+
     const stored = localStorage.getItem("theme"); // 'light' | 'dark' | 'system' | null
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const isDark = stored === "dark" || (stored !== "light" && prefersDark);
