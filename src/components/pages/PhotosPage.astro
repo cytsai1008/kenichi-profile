@@ -15,24 +15,22 @@ const { locale } = Astro.props;
 const tr = t(locale);
 
 function formatAlbumName(album: string) {
-  return album
-    .replace(/[-_]+/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return album.replace(/[-_]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 const entries = (await getCollection("photos")).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
 
-const photoModules = import.meta.glob<{ default: ImageMetadata }>(
-  "/src/content/photos/**/*",
-  { eager: true }
-);
+const photoModules = import.meta.glob<{ default: ImageMetadata }>("/src/content/photos/**/*", {
+  eager: true,
+});
 
-const photoOriginalUrls = import.meta.glob<string>(
-  "/src/content/photos/**/*",
-  { query: "?url", import: "default", eager: true }
-);
+const photoOriginalUrls = import.meta.glob<string>("/src/content/photos/**/*", {
+  query: "?url",
+  import: "default",
+  eager: true,
+});
 
 async function toPhotoItem(entry: (typeof entries)[number]): Promise<PhotoItem> {
   const imageModule = photoModules[entry.data.imagePath]?.default;
@@ -110,7 +108,7 @@ for (const [album, albumEntries] of albumMap) {
         groups.map(({ album, items }) => (
           <section data-animate class="mb-16">
             {album && (
-              <h2 class="mb-6 text-2xl font-bold text-fg border-b border-border pb-2">
+              <h2 class="mb-6 border-b border-border pb-2 text-2xl font-bold text-fg">
                 {formatAlbumName(album)}
               </h2>
             )}

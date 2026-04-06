@@ -28,9 +28,7 @@ const {
 // Derive OG image path from current URL: strip leading slash, map to /og/[path].png
 const stripped = Astro.url.pathname.replace(/^\/|\/$/g, ""); // "" | "zh-tw" | "zh-tw/blog/post"
 const isHome = stripped === "" || stripped === "zh-tw" || stripped === "zh-cn";
-const pagePath = isHome
-  ? stripped ? `${stripped}_home` : "home"
-  : stripped.replace(/\//g, "_");
+const pagePath = isHome ? (stripped ? `${stripped}_home` : "home") : stripped.replace(/\//g, "_");
 const socialImage = image
   ? new URL(image.src, Astro.site)
   : new URL(`/og/${pagePath}.png`, Astro.site);
