@@ -26,13 +26,15 @@ const posts = allPosts.filter((p) => !p.data.featured);
       <p class="mt-2 text-lg text-fg-muted">{tr.blog.description}</p>
     </header>
 
-    {pinned.length > 0 && (
-      <div class="mb-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {pinned.map((post) => (
-          <BlogCard post={post} locale={locale} />
-        ))}
-      </div>
-    )}
+    {
+      pinned.length > 0 && (
+        <div class="mb-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {pinned.map((post) => (
+            <BlogCard post={post} locale={locale} />
+          ))}
+        </div>
+      )
+    }
 
     {
       posts.length === 0 && pinned.length === 0 ? (

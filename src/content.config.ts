@@ -55,6 +55,7 @@ const photos = defineCollection({
   schema: z.object({
     src: z.string(),
     slug: z.string(),
+    album: z.string().optional(),
     title: z.string(),
     description: z.string().optional(),
     date: z.coerce.date(),

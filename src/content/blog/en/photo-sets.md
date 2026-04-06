@@ -15,5 +15,5 @@ A collection of photo sets from furry events I shot. More will be added over tim
 - [FurryTeaParty](https://redir.photocat.blue/photos/2024/furryteaparty)
 - [NTUwU Graduation](https://redir.photocat.blue/photos/2024/ntuwugraduation)
 - [Furrymosa](https://redir.photocat.blue/photos/2024/furrymosa)
-- [FurMIT](https://redir.photocat.blue/photos/2024/furmit) *(in progress)*
-- [Infurnity](https://redir.photocat.blue/photos/2024/infurnity) *(in progress)*
+- [FurMIT](https://redir.photocat.blue/photos/2024/furmit) _(in progress)_
+- [Infurnity](https://redir.photocat.blue/photos/2024/infurnity) _(in progress)_

@@ -18,41 +18,55 @@ const entries = (await getCollection("photos")).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
 
-const photoModules = import.meta.glob<{ default: ImageMetadata }>("/src/content/photos/*", {
-  eager: true,
-});
-
-const photoItems: PhotoItem[] = await Promise.all(
-  entries.map(async (entry) => {
-    const imageModule = photoModules[entry.data.imagePath]?.default;
-    const optimizedThumb = imageModule
-      ? await getImage({
-          src: imageModule,
-          width: 640,
-          quality: 85,
-        })
-      : null;
-
-    return {
-      src: entry.data.imagePath,
-      thumb: optimizedThumb?.src ?? entry.data.imagePath,
-      width: entry.data.exif.width ?? imageModule?.width ?? 0,
-      height: entry.data.exif.height ?? imageModule?.height ?? 0,
-      alt: entry.data.title,
-      title: entry.data.title,
-      exif: {
-        camera: entry.data.exif.camera,
-        lens: entry.data.exif.lens,
-        focalLength: entry.data.exif.focalLength,
-        aperture: entry.data.exif.aperture,
-        shutter: entry.data.exif.shutter,
-        iso: entry.data.exif.iso,
-        date: entry.data.exif.date,
-      },
-      exifLabels: tr.photos.exif,
-    };
-  })
+const photoModules = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/content/photos/**/*",
+  { eager: true }
 );
+
+async function toPhotoItem(entry: (typeof entries)[number]): Promise<PhotoItem> {
+  const imageModule = photoModules[entry.data.imagePath]?.default;
+  const optimizedThumb = imageModule
+    ? await getImage({ src: imageModule, width: 640, quality: 85 })
+    : null;
+
+  return {
+    src: entry.data.imagePath,
+    thumb: optimizedThumb?.src ?? entry.data.imagePath,
+    width: entry.data.exif.width ?? imageModule?.width ?? 0,
+    height: entry.data.exif.height ?? imageModule?.height ?? 0,
+    alt: entry.data.title,
+    title: entry.data.title,
+    exif: {
+      camera: entry.data.exif.camera,
+      lens: entry.data.exif.lens,
+      focalLength: entry.data.exif.focalLength,
+      aperture: entry.data.exif.aperture,
+      shutter: entry.data.exif.shutter,
+      iso: entry.data.exif.iso,
+      date: entry.data.exif.date,
+    },
+    exifLabels: tr.photos.exif,
+  };
+}
+
+// Group by album; undefined album → shown first under no heading
+const albumMap = new Map<string | undefined, (typeof entries)[number][]>();
+for (const entry of entries) {
+  const album = entry.data.album;
+  if (!albumMap.has(album)) albumMap.set(album, []);
+  albumMap.get(album)!.push(entry);
+}
+
+// Sort: ungrouped first, then albums newest-first (by their latest photo)
+const groups: { album: string | undefined; items: PhotoItem[] }[] = [];
+const ungrouped = albumMap.get(undefined);
+if (ungrouped?.length) {
+  groups.push({ album: undefined, items: await Promise.all(ungrouped.map(toPhotoItem)) });
+}
+for (const [album, albumEntries] of albumMap) {
+  if (album === undefined) continue;
+  groups.push({ album, items: await Promise.all(albumEntries.map(toPhotoItem)) });
+}
 ---
 
 <Layout title={tr.photos.title} description={tr.photos.description ?? ""} locale={locale}>
@@ -63,20 +77,29 @@ const photoItems: PhotoItem[] = await Promise.all(
     </header>
 
     {
-      photoItems.length === 0 ? (
+      groups.length === 0 ? (
         <p class="text-fg-muted">No photos yet.</p>
       ) : (
-        <PhotoViewer
-          client:load
-          photos={photoItems}
-          downloadLabel={tr.photos.download}
-          closeLabel={tr.photos.close}
-          zoomLabel={tr.photos.zoom}
-          prevLabel={tr.photos.previous}
-          nextLabel={tr.photos.next}
-          showDownloadButton={true}
-          showExifPanel={true}
-        />
+        groups.map(({ album, items }) => (
+          <section class="mb-16">
+            {album && (
+              <h2 class="mb-6 text-2xl font-bold text-fg border-b border-border pb-2">
+                {album}
+              </h2>
+            )}
+            <PhotoViewer
+              client:load
+              photos={items}
+              downloadLabel={tr.photos.download}
+              closeLabel={tr.photos.close}
+              zoomLabel={tr.photos.zoom}
+              prevLabel={tr.photos.previous}
+              nextLabel={tr.photos.next}
+              showDownloadButton={true}
+              showExifPanel={true}
+            />
+          </section>
+        ))
       )
     }
   </div>

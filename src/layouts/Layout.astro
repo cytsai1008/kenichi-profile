@@ -10,15 +10,24 @@ interface Props {
   title?: string;
   description?: string;
   image?: ImageMetadata;
-  /** Override locale detection (useful for static pages that know their locale). */
   locale?: Locale;
+  type?: "website" | "article";
+  pubDate?: Date;
+  updatedDate?: Date;
 }
 
 const locale: Locale = Astro.props.locale ?? getLocaleFromUrl(Astro.url);
 const tr = t(locale);
 const lang = localeLang[locale];
 
-const { title = SITE_TITLE, description = tr.home.tagline, image } = Astro.props;
+const {
+  title = SITE_TITLE,
+  description = tr.home.tagline,
+  image,
+  type,
+  pubDate,
+  updatedDate,
+} = Astro.props;
 
 const navLinks = [
   { href: localePath("/", locale), label: tr.nav.home },
@@ -32,7 +41,15 @@ const navLinks = [
 <!doctype html>
 <html lang={lang} class="">
   <head>
-    <BaseHead title={title} description={description} image={image} locale={locale} />
+    <BaseHead
+      title={title}
+      description={description}
+      image={image}
+      locale={locale}
+      type={type}
+      pubDate={pubDate}
+      updatedDate={updatedDate}
+    />
   </head>
   <body>
     <a class="skip-link" href="#main-content">{tr.a11y.skipToContent}</a>

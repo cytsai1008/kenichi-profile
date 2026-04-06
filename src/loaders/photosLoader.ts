@@ -34,6 +34,8 @@ export interface PhotoEntry {
   src: string;
   /** File base name without extension, e.g. "golden-hour" */
   slug: string;
+  /** Album folder name, if the photo is inside a subdirectory */
+  album?: string;
   title: string;
   description?: string;
   date: Date;
@@ -137,6 +139,56 @@ async function parseExif(buffer: Buffer): Promise<PhotoExif> {
   }
 }
 
+/** Load one image file and store it. `album` is undefined for top-level files. */
+async function loadPhotoFile(
+  absPath: string,
+  absBase: string,
+  album: string | undefined,
+  store: Parameters<Loader["load"]>[0]["store"],
+  logger: Parameters<Loader["load"]>[0]["logger"]
+) {
+  const ext = path.extname(absPath);
+  const slug = path.basename(absPath, ext);
+  const id = album ? `${album}/${slug}` : slug;
+  const relPath = path.relative(path.resolve("."), absPath).replace(/\\/g, "/");
+
+  const buffer = await readFile(absPath);
+  const exif = await parseExif(buffer);
+
+  let title = slug.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  let description: string | undefined;
+  let location: string | undefined;
+  let date: Date = exif.date ? new Date(exif.date) : (await stat(absPath)).mtime;
+
+  // Sidecar .md lives next to the image
+  const sidecarPath = path.join(path.dirname(absPath), `${slug}.md`);
+  try {
+    const sidecar = await readFile(sidecarPath, "utf-8");
+    const fm = parseFrontmatter(sidecar);
+    if (fm.title) title = fm.title;
+    if (fm.description) description = fm.description;
+    if (fm.location) location = fm.location;
+    if (fm.date) date = new Date(fm.date);
+  } catch {
+    // No sidecar — use defaults
+  }
+
+  const entry: PhotoEntry = {
+    src: absPath,
+    slug,
+    album,
+    title,
+    description,
+    date,
+    location,
+    exif,
+    imagePath: `/${relPath}`,
+  };
+
+  store.set({ id, data: entry });
+  logger.info(`photos-loader: loaded ${id}`);
+}
+
 export function photosLoader(baseDir = "./src/content/photos"): Loader {
   return {
     name: "photos-loader",
@@ -145,57 +197,31 @@ export function photosLoader(baseDir = "./src/content/photos"): Loader {
       store.clear();
 
       const absBase = path.resolve(baseDir);
-      let files: string[];
+      let entries: string[];
       try {
-        files = await readdir(absBase);
+        entries = await readdir(absBase);
       } catch {
         logger.warn(`photos-loader: directory not found — ${absBase}`);
         return;
       }
 
-      const imageFiles = files.filter((f) => IMAGE_EXTS.has(path.extname(f).toLowerCase()));
+      for (const entry of entries) {
+        const absEntry = path.join(absBase, entry);
+        const s = await stat(absEntry);
 
-      for (const file of imageFiles) {
-        const ext = path.extname(file);
-        const slug = path.basename(file, ext);
-        const absPath = path.join(absBase, file);
-        // Path relative to project root for Astro's image pipeline
-        const relPath = path.relative(path.resolve("."), absPath).replace(/\\/g, "/");
-
-        const buffer = await readFile(absPath);
-        const exif = await parseExif(buffer);
-
-        // Check for sidecar .md file for title/description/location overrides
-        let title = slug.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-        let description: string | undefined;
-        let location: string | undefined;
-        let date: Date = exif.date ? new Date(exif.date) : (await stat(absPath)).mtime;
-
-        const sidecarPath = path.join(absBase, `${slug}.md`);
-        try {
-          const sidecar = await readFile(sidecarPath, "utf-8");
-          const fm = parseFrontmatter(sidecar);
-          if (fm.title) title = fm.title;
-          if (fm.description) description = fm.description;
-          if (fm.location) location = fm.location;
-          if (fm.date) date = new Date(fm.date);
-        } catch {
-          // No sidecar — use defaults
+        if (s.isDirectory()) {
+          // Album folder — load all images inside it
+          const albumFiles = await readdir(absEntry);
+          const imageFiles = albumFiles.filter((f) =>
+            IMAGE_EXTS.has(path.extname(f).toLowerCase())
+          );
+          for (const file of imageFiles) {
+            await loadPhotoFile(path.join(absEntry, file), absBase, entry, store, logger);
+          }
+        } else if (IMAGE_EXTS.has(path.extname(entry).toLowerCase())) {
+          // Top-level flat file
+          await loadPhotoFile(absEntry, absBase, undefined, store, logger);
         }
-
-        const entry: PhotoEntry = {
-          src: absPath,
-          slug,
-          title,
-          description,
-          date,
-          location,
-          exif,
-          imagePath: `/${relPath}`,
-        };
-
-        store.set({ id: slug, data: entry });
-        logger.info(`photos-loader: loaded ${file}`);
       }
     },
   };
