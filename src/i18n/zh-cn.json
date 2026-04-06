@@ -1,9 +1,9 @@
 {
   "nav": {
     "home": "首页",
-    "blog": "博客",
-    "gallery": "画廊",
-    "photos": "相册",
+    "blog": "文章",
+    "gallery": "委托",
+    "photos": "照片",
     "about": "关于我",
     "openMenu": "打开菜单",
     "closeMenu": "关闭菜单"
@@ -20,28 +20,22 @@
   },
   "home": {
     "greeting": "你好，我是",
-    "tagline": "一只生活在兽人圈的蓝猫。",
-    "heroIndex": "索引",
-    "heroPresence": "气质",
-    "heroNote": "把角色创作、设定设计与日常摄影收进同一个地方。",
-    "heroBadge": "生活在兽人圈的蓝猫",
+    "tagline": "一只蓝猫，会写程式和摄影",
     "recentPosts": "最新文章",
-    "latestGallery": "最新画廊",
+    "latestGallery": "最新委托",
     "latestPhotos": "最新相片",
-    "featuredArt": "精选画作",
     "viewAll": "查看全部"
   },
   "blog": {
-    "title": "博客",
-    "description": "想法、故事，以及兽人圈的日常。",
+    "title": "文章",
+    "description": "想法、故事、日常",
     "readMore": "阅读更多",
     "postedOn": "发布于",
-    "updatedOn": "更新于",
-    "minuteRead": "分钟阅读"
+    "updatedOn": "更新于"
   },
   "gallery": {
-    "title": "画廊",
-    "description": "作品集、设定图与角色插画。",
+    "title": "委托",
+    "description": "设定图、角色插画和其他作品",
     "all": "全部",
     "refSheet": "设定图",
     "creator": "创作者",
@@ -49,8 +43,8 @@
     "other": "其他"
   },
   "photos": {
-    "title": "相册",
-    "description": "用镜头记录下的瞬间。",
+    "title": "照片",
+    "description": "用镜头记录下的瞬间",
     "download": "下载照片",
     "close": "关闭",
     "zoom": "缩放",
@@ -83,7 +77,6 @@
   },
   "footer": {},
   "a11y": {
-    "skipToContent": "跳至主要内容",
-    "externalLink": "（在新标签页打开）"
+    "skipToContent": "跳至主要内容"
   }
 }

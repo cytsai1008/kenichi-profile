@@ -39,10 +39,10 @@
  * ─────────────────────────────────────────────────────────── */
 @theme inline {
   --font-sans: "Atkinson Hyperlegible", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-sans-tc: "Atkinson Hyperlegible", "Noto Sans TC", "Noto Sans", ui-sans-serif, system-ui,
-    sans-serif;
-  --font-sans-sc: "Atkinson Hyperlegible", "Noto Sans SC", "Noto Sans", ui-sans-serif, system-ui,
-    sans-serif;
+  --font-sans-tc:
+    "Atkinson Hyperlegible", "Noto Sans TC", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans-sc:
+    "Atkinson Hyperlegible", "Noto Sans SC", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
   --font-noto: "Noto Sans", ui-sans-serif, system-ui, sans-serif;
   --font-noto-tc: "Noto Sans TC", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
   --font-noto-sc: "Noto Sans SC", "Noto Sans", ui-sans-serif, system-ui, sans-serif;

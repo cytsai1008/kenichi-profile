@@ -6,6 +6,7 @@ import sitemap from "@astrojs/sitemap";
 import vue from "@astrojs/vue";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
+import { ogImages } from "./src/integrations/og-images";
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,6 +17,7 @@ export default defineConfig({
   output: "static",
 
   integrations: [
+    ogImages(),
     mdx(),
     sitemap({
       i18n: {
@@ -44,7 +46,6 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     define: {
-      // Cloudflare Workers runtime lacks these Node.js globals; polyfill for dev
       setImmediate: "setTimeout",
       clearImmediate: "clearTimeout",
     },

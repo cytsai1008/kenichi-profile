@@ -12,7 +12,14 @@ const locale = getLocaleFromUrl(Astro.url);
 const tr = t(locale);
 ---
 
-<Layout title={title} description={description ?? ""} locale={locale}>
+<Layout
+  title={title}
+  description={description ?? ""}
+  locale={locale}
+  type="article"
+  pubDate={pubDate}
+  updatedDate={updatedDate}
+>
   <article class="mx-auto max-w-5xl px-4 py-12">
     {
       heroImage && (

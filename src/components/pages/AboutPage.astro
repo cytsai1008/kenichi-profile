@@ -22,8 +22,7 @@ const socialLinks = [
     iconWidth: 32,
     iconHeight: 32,
   },
-  { label: "Other Link", href: "https://link.photocat.blue/", icon: "lucide:link"
-  }
+  { label: "Other Link", href: "https://link.photocat.blue/", icon: "lucide:link" },
 ];
 ---
 
@@ -35,47 +34,47 @@ const socialLinks = [
       <section>
         <h2 class="mb-5 text-2xl font-bold text-accent">{tr.about.character}</h2>
         <div class="grid gap-8 sm:grid-cols-3">
-        <figure>
-          <div class="overflow-hidden rounded-2xl shadow-md ring-1 ring-border">
-            <Image
-              src={refSheet}
-              alt={`${tr.about.character} ref sheet`}
-              sizes="(min-width: 640px) 50vw, 100vw"
-            />
-          </div>
-          <figcaption class="mt-2 text-center text-xs text-fg-muted">
-            {tr.gallery.refSheet}
-          </figcaption>
-        </figure>
+          <figure>
+            <div class="overflow-hidden rounded-2xl shadow-md ring-1 ring-border">
+              <Image
+                src={refSheet}
+                alt={`${tr.about.character} ref sheet`}
+                sizes="(min-width: 640px) 50vw, 100vw"
+              />
+            </div>
+            <figcaption class="mt-2 text-center text-xs text-fg-muted">
+              {tr.gallery.refSheet}
+            </figcaption>
+          </figure>
 
-        <div class="sm:col-span-2">
-          <dl class="space-y-4">
-            <div>
-              <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
-                {tr.about.nameLabel}
-              </dt>
-              <dd class="mt-1 text-base font-medium text-fg">{tr.about.name}</dd>
-            </div>
-            <div>
-              <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
-                {tr.about.speciesLabel}
-              </dt>
-              <dd class="mt-1 text-base font-medium text-fg">{tr.about.speciesValue}</dd>
-            </div>
-            <div>
-              <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
-                {tr.about.pronounsLabel}
-              </dt>
-              <dd class="mt-1 text-base font-medium text-fg">{tr.about.pronounsValue}</dd>
-            </div>
-            <div>
-              <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
-                {tr.about.hobbiesLabel}
-              </dt>
-              <dd class="mt-1 text-base font-medium text-fg">{tr.about.hobbiesValue}</dd>
-            </div>
-          </dl>
-        </div>
+          <div class="sm:col-span-2">
+            <dl class="space-y-4">
+              <div>
+                <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
+                  {tr.about.nameLabel}
+                </dt>
+                <dd class="mt-1 text-base font-medium text-fg">{tr.about.name}</dd>
+              </div>
+              <div>
+                <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
+                  {tr.about.speciesLabel}
+                </dt>
+                <dd class="mt-1 text-base font-medium text-fg">{tr.about.speciesValue}</dd>
+              </div>
+              <div>
+                <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
+                  {tr.about.pronounsLabel}
+                </dt>
+                <dd class="mt-1 text-base font-medium text-fg">{tr.about.pronounsValue}</dd>
+              </div>
+              <div>
+                <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
+                  {tr.about.hobbiesLabel}
+                </dt>
+                <dd class="mt-1 text-base font-medium text-fg">{tr.about.hobbiesValue}</dd>
+              </div>
+            </dl>
+          </div>
         </div>
       </section>
 

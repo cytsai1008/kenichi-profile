@@ -1,16 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { animate, spring } from "animejs";
-import {
-  ChevronDown,
-  Languages,
-  type LucideIcon,
-  Menu,
-  Monitor,
-  Moon,
-  Sun,
-  X,
-} from "@lucide/vue";
+import { ChevronDown, Languages, type LucideIcon, Menu, Monitor, Moon, Sun, X } from "@lucide/vue";
 import type { Locale } from "../i18n/utils";
 import { switchLocalePath, locales } from "../i18n/utils";
 
@@ -328,7 +319,11 @@ function isActive(href: string) {
             >
               {{ localeLabels[locale] }}
             </span>
-            <ChevronDown :size="14" class="transition-transform" :class="langOpen ? 'rotate-180' : ''" />
+            <ChevronDown
+              :size="14"
+              class="transition-transform"
+              :class="langOpen ? 'rotate-180' : ''"
+            />
           </button>
 
           <!-- Invisible bridge: fills the mt-1 gap so mouseleave doesn't fire mid-travel -->
