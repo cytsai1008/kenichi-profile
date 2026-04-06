@@ -1,0 +1,8 @@
+{
+  "routes": [
+    {
+      "pattern": "kenichi.photocat.blue",
+      "custom_domain": true
+    }
+  ]
+}

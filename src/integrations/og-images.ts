@@ -49,7 +49,11 @@ export function ogImages(): AstroIntegration {
           jobs.push(
             { path: `${prefix}home`, title: tr.nav.home, description: SITE_TITLE },
             { path: `${prefix}blog`, title: tr.blog.title, description: tr.blog.description },
-            { path: `${prefix}gallery`, title: tr.gallery.title, description: tr.gallery.description },
+            {
+              path: `${prefix}gallery`,
+              title: tr.gallery.title,
+              description: tr.gallery.description,
+            },
             { path: `${prefix}photos`, title: tr.photos.title, description: tr.photos.description },
             { path: `${prefix}about`, title: tr.about.title, description: tr.home.tagline }
           );

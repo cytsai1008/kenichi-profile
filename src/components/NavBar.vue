@@ -76,8 +76,14 @@ function showTheme() {
   themeHovered.value = true;
 
   if (reducedMotion.value) {
-    if (themeCompact.value) { themeCompact.value.style.opacity = "0"; themeCompact.value.style.pointerEvents = "none"; }
-    if (themePanel.value) { themePanel.value.style.opacity = "1"; themePanel.value.style.pointerEvents = "auto"; }
+    if (themeCompact.value) {
+      themeCompact.value.style.opacity = "0";
+      themeCompact.value.style.pointerEvents = "none";
+    }
+    if (themePanel.value) {
+      themePanel.value.style.opacity = "1";
+      themePanel.value.style.pointerEvents = "auto";
+    }
     return;
   }
   if (themeCompact.value) {
@@ -105,8 +111,14 @@ function hideTheme() {
   themeHovered.value = false;
 
   if (reducedMotion.value) {
-    if (themeCompact.value) { themeCompact.value.style.opacity = "1"; themeCompact.value.style.pointerEvents = ""; }
-    if (themePanel.value) { themePanel.value.style.opacity = "0"; themePanel.value.style.pointerEvents = "none"; }
+    if (themeCompact.value) {
+      themeCompact.value.style.opacity = "1";
+      themeCompact.value.style.pointerEvents = "";
+    }
+    if (themePanel.value) {
+      themePanel.value.style.opacity = "0";
+      themePanel.value.style.pointerEvents = "none";
+    }
     return;
   }
   if (themeCompact.value) {
@@ -142,7 +154,10 @@ function showLangText() {
 
   if (langText.value) {
     langText.value.style.display = "inline";
-    if (reducedMotion.value) { langText.value.style.opacity = "1"; return; }
+    if (reducedMotion.value) {
+      langText.value.style.opacity = "1";
+      return;
+    }
     animate(langText.value, {
       opacity: { from: 0, to: 1 },
       x: { from: -10, to: 0 },
@@ -158,7 +173,11 @@ function hideLangText() {
 
   if (langText.value) {
     const el = langText.value;
-    if (reducedMotion.value) { el.style.opacity = "0"; el.style.display = "none"; return; }
+    if (reducedMotion.value) {
+      el.style.opacity = "0";
+      el.style.display = "none";
+      return;
+    }
     animate(el, {
       opacity: { from: 1, to: 0 },
       x: { from: 0, to: -8 },
@@ -381,8 +400,8 @@ function isActive(href: string) {
           <div class="absolute inset-x-0 top-full h-2" />
 
           <ul
-            ref="langListRef"
             v-show="langOpen"
+            ref="langListRef"
             role="listbox"
             :aria-label="langLabel"
             class="absolute right-0 m-0 mt-2 w-36 list-none rounded-xl border border-border bg-surface p-1 shadow-lg"
@@ -425,7 +444,13 @@ function isActive(href: string) {
       <ul class="m-0 flex list-none flex-col gap-1 p-0 pt-3">
         <li v-for="(link, i) in links" :key="link.href">
           <a
-            :ref="i === 0 ? (el) => { firstMenuLinkRef = el as HTMLAnchorElement } : undefined"
+            :ref="
+              i === 0
+                ? (el) => {
+                    firstMenuLinkRef = el as HTMLAnchorElement;
+                  }
+                : undefined
+            "
             :href="link.href"
             :aria-current="isActive(link.href) ? 'page' : undefined"
             class="block rounded-lg px-3 py-2 text-sm font-medium no-underline transition-colors"

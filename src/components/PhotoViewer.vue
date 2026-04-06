@@ -246,21 +246,23 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="galleryEl" data-animate-stagger class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+  <div
+    ref="galleryEl"
+    data-animate-stagger
+    class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+  >
     <a
       v-for="(photo, i) in photos"
       :key="i"
       data-animate
       data-pswp
       :href="photo.src"
-      v-bind="
-        {
-          ...(!props.placeholderSrc ? {} : { 'data-pswp-msrc': photo.thumb }),
-          ...(photo.width && photo.height
-            ? { 'data-pswp-width': photo.width, 'data-pswp-height': photo.height }
-            : {}),
-        }
-      "
+      v-bind="{
+        ...(!props.placeholderSrc ? {} : { 'data-pswp-msrc': photo.thumb }),
+        ...(photo.width && photo.height
+          ? { 'data-pswp-width': photo.width, 'data-pswp-height': photo.height }
+          : {}),
+      }"
       :data-cropped="true"
       :data-category="photo.category"
       class="group relative block overflow-hidden rounded-lg bg-surface-alt"
@@ -272,7 +274,10 @@ onUnmounted(() => {
         :alt="photo.alt"
         loading="lazy"
         class="h-full w-full transition-transform duration-300"
-        :class="[props.thumbClass ?? 'object-cover', !props.disableHoverZoom && 'group-hover:scale-105']"
+        :class="[
+          props.thumbClass ?? 'object-cover',
+          !props.disableHoverZoom && 'group-hover:scale-105',
+        ]"
       />
       <div
         class="absolute inset-0 flex items-end p-3"

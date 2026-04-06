@@ -10,11 +10,11 @@ function fontFile(pkg: string, file: string) {
 }
 
 const fontRegular = fontFile("noto-sans", "noto-sans-latin-400-normal.woff");
-const fontBold    = fontFile("noto-sans", "noto-sans-latin-700-normal.woff");
+const fontBold = fontFile("noto-sans", "noto-sans-latin-700-normal.woff");
 const fontTcRegular = fontFile("noto-sans-tc", "noto-sans-tc-chinese-traditional-400-normal.woff");
-const fontTcBold    = fontFile("noto-sans-tc", "noto-sans-tc-chinese-traditional-700-normal.woff");
+const fontTcBold = fontFile("noto-sans-tc", "noto-sans-tc-chinese-traditional-700-normal.woff");
 const fontScRegular = fontFile("noto-sans-sc", "noto-sans-sc-chinese-simplified-400-normal.woff");
-const fontScBold    = fontFile("noto-sans-sc", "noto-sans-sc-chinese-simplified-700-normal.woff");
+const fontScBold = fontFile("noto-sans-sc", "noto-sans-sc-chinese-simplified-700-normal.woff");
 
 export async function generateOgImage(title: string, description: string): Promise<Buffer> {
   const svg = await satori(
@@ -162,12 +162,12 @@ export async function generateOgImage(title: string, description: string): Promi
       width: 1200,
       height: 630,
       fonts: [
-        { name: "Noto Sans",    data: fontRegular,   weight: 400, style: "normal" },
-        { name: "Noto Sans",    data: fontBold,       weight: 700, style: "normal" },
-        { name: "Noto Sans TC", data: fontTcRegular,  weight: 400, style: "normal" },
-        { name: "Noto Sans TC", data: fontTcBold,     weight: 700, style: "normal" },
-        { name: "Noto Sans SC", data: fontScRegular,  weight: 400, style: "normal" },
-        { name: "Noto Sans SC", data: fontScBold,     weight: 700, style: "normal" },
+        { name: "Noto Sans", data: fontRegular, weight: 400, style: "normal" },
+        { name: "Noto Sans", data: fontBold, weight: 700, style: "normal" },
+        { name: "Noto Sans TC", data: fontTcRegular, weight: 400, style: "normal" },
+        { name: "Noto Sans TC", data: fontTcBold, weight: 700, style: "normal" },
+        { name: "Noto Sans SC", data: fontScRegular, weight: 400, style: "normal" },
+        { name: "Noto Sans SC", data: fontScBold, weight: 700, style: "normal" },
       ],
     }
   );
