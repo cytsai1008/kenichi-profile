@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from "vue";
 import { animate, spring } from "animejs";
 import { ChevronDown, Languages, type LucideIcon, Menu, Monitor, Moon, Sun, X } from "@lucide/vue";
 import type { Locale } from "../i18n/utils";
@@ -20,6 +20,12 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+/* ─── Reduced motion ─────────────────────────────────────── */
+const reducedMotion = ref(false);
+onMounted(() => {
+  reducedMotion.value = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+});
 
 /* ─── Theme ─────────────────────────────────────────────── */
 type ThemeMode = "system" | "light" | "dark";
@@ -69,6 +75,11 @@ function showTheme() {
   if (themeHovered.value) return;
   themeHovered.value = true;
 
+  if (reducedMotion.value) {
+    if (themeCompact.value) { themeCompact.value.style.opacity = "0"; themeCompact.value.style.pointerEvents = "none"; }
+    if (themePanel.value) { themePanel.value.style.opacity = "1"; themePanel.value.style.pointerEvents = "auto"; }
+    return;
+  }
   if (themeCompact.value) {
     animate(themeCompact.value, {
       opacity: { from: 1, to: 0 },
@@ -93,6 +104,11 @@ function hideTheme() {
   if (!themeHovered.value) return;
   themeHovered.value = false;
 
+  if (reducedMotion.value) {
+    if (themeCompact.value) { themeCompact.value.style.opacity = "1"; themeCompact.value.style.pointerEvents = ""; }
+    if (themePanel.value) { themePanel.value.style.opacity = "0"; themePanel.value.style.pointerEvents = "none"; }
+    return;
+  }
   if (themeCompact.value) {
     animate(themeCompact.value, {
       opacity: { from: 0, to: 1 },
@@ -126,6 +142,7 @@ function showLangText() {
 
   if (langText.value) {
     langText.value.style.display = "inline";
+    if (reducedMotion.value) { langText.value.style.opacity = "1"; return; }
     animate(langText.value, {
       opacity: { from: 0, to: 1 },
       x: { from: -10, to: 0 },
@@ -141,6 +158,7 @@ function hideLangText() {
 
   if (langText.value) {
     const el = langText.value;
+    if (reducedMotion.value) { el.style.opacity = "0"; el.style.display = "none"; return; }
     animate(el, {
       opacity: { from: 1, to: 0 },
       x: { from: 0, to: -8 },
@@ -155,6 +173,14 @@ function hideLangText() {
 
 /* ─── Mobile menu ────────────────────────────────────────── */
 const menuOpen = ref(false);
+const hamburgerRef = ref<HTMLButtonElement | null>(null);
+const firstMenuLinkRef = ref<HTMLAnchorElement | null>(null);
+
+watch(menuOpen, async (open) => {
+  await nextTick();
+  if (open) firstMenuLinkRef.value?.focus();
+  else hamburgerRef.value?.focus();
+});
 
 function handleOutsideClick(e: MouseEvent) {
   if (!(e.target as HTMLElement).closest("[data-navbar]")) {
@@ -167,6 +193,29 @@ onUnmounted(() => document.removeEventListener("click", handleOutsideClick));
 
 /* ─── Language switcher ──────────────────────────────────── */
 const langOpen = ref(false);
+const langBtnRef = ref<HTMLButtonElement | null>(null);
+const langListRef = ref<HTMLUListElement | null>(null);
+
+function handleLangKeydown(e: KeyboardEvent) {
+  if (!langOpen.value) return;
+  const items = langListRef.value?.querySelectorAll<HTMLButtonElement>("button[role='option']");
+  if (!items?.length) return;
+  const idx = Array.from(items).indexOf(document.activeElement as HTMLButtonElement);
+
+  if (e.key === "Escape") {
+    e.preventDefault();
+    closeLangDropdown();
+    langBtnRef.value?.focus();
+  } else if (e.key === "ArrowDown") {
+    e.preventDefault();
+    items[(idx + 1) % items.length].focus();
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    items[(idx - 1 + items.length) % items.length].focus();
+  } else if (e.key === "Tab") {
+    closeLangDropdown();
+  }
+}
 
 const localeLabels: Record<string, string> = {
   en: "English",
@@ -218,14 +267,14 @@ function isActive(href: string) {
   >
     <!-- CSS grid: logo | links | controls — links are always truly centered -->
     <nav
-      class="mx-auto flex max-w-5xl items-center px-4 py-3 md:grid"
+      class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 md:grid"
       style="grid-template-columns: 1fr auto 1fr"
       aria-label="Main navigation"
     >
       <!-- Col 1: Logo (left-aligned) -->
       <a
         href="/"
-        class="flex flex-1 items-center gap-2 text-lg font-bold text-fg no-underline transition-opacity md:flex-none"
+        class="inline-flex w-fit shrink-0 items-center gap-2 text-lg font-bold text-fg no-underline transition-opacity md:justify-self-start"
       >
         <span class="text-accent">健一</span>
         <span class="hidden text-fg-muted sm:inline">Kenichi</span>
@@ -297,11 +346,13 @@ function isActive(href: string) {
         <!-- Language switcher -->
         <div class="relative" @mouseenter="showLangText" @mouseleave="hideLangText">
           <button
+            ref="langBtnRef"
             class="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-fg transition-colors hover:bg-surface-alt"
             :aria-label="langLabel"
             :aria-expanded="langOpen"
             aria-haspopup="listbox"
             @click.stop="langOpen ? closeLangDropdown() : (langOpen = true)"
+            @keydown="handleLangKeydown"
           >
             <Languages :size="16" class="text-fg-muted" />
             <!-- Text hidden by default, revealed on controls hover -->
@@ -330,10 +381,12 @@ function isActive(href: string) {
           <div class="absolute inset-x-0 top-full h-2" />
 
           <ul
+            ref="langListRef"
             v-show="langOpen"
             role="listbox"
             :aria-label="langLabel"
             class="absolute right-0 m-0 mt-2 w-36 list-none rounded-xl border border-border bg-surface p-1 shadow-lg"
+            @keydown="handleLangKeydown"
           >
             <li v-for="loc in locales" :key="loc">
               <button
@@ -354,6 +407,7 @@ function isActive(href: string) {
 
         <!-- Hamburger (mobile only) -->
         <button
+          ref="hamburgerRef"
           class="rounded-lg p-2 text-fg transition-colors hover:bg-surface-alt md:hidden"
           :aria-label="menuOpen ? 'Close menu' : 'Open menu'"
           :aria-expanded="menuOpen"
@@ -369,8 +423,9 @@ function isActive(href: string) {
     <!-- Mobile menu -->
     <div v-show="menuOpen" id="mobile-menu" class="border-t border-border px-4 pb-4 md:hidden">
       <ul class="m-0 flex list-none flex-col gap-1 p-0 pt-3">
-        <li v-for="link in links" :key="link.href">
+        <li v-for="(link, i) in links" :key="link.href">
           <a
+            :ref="i === 0 ? (el) => { firstMenuLinkRef = el as HTMLAnchorElement } : undefined"
             :href="link.href"
             :aria-current="isActive(link.href) ? 'page' : undefined"
             class="block rounded-lg px-3 py-2 text-sm font-medium no-underline transition-colors"

@@ -17,6 +17,7 @@ const postHref = localePath(`/blog/${getBlogSlug(post.id)}/`, locale);
 ---
 
 <article
+  data-animate
   class:list={[
     "group overflow-hidden rounded-2xl border border-border bg-surface-alt transition-shadow hover:shadow-lg",
     featured ? "flex flex-col sm:flex-row" : "flex flex-col",

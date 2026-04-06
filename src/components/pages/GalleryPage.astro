@@ -64,13 +64,13 @@ const galleryItems: PhotoItem[] = await Promise.all(
 
 <Layout title={tr.gallery.title} description={tr.gallery.description ?? ""} locale={locale}>
   <div class="mx-auto max-w-5xl px-4 py-12">
-    <header class="mb-10">
+    <header data-animate class="mb-10">
       <h1 class="text-4xl font-bold text-fg">{tr.gallery.title}</h1>
-      <p class="mt-2 text-lg text-fg-muted">{tr.gallery.description}</p>
+      <p class="mt-2 text-fg-muted mt-2 text-lg">{tr.gallery.description}</p>
     </header>
 
     <!-- Category filter tabs -->
-    <div class="mb-8 flex flex-wrap gap-2" role="tablist" aria-label="Filter by category">
+    <div data-animate class="mb-8 flex flex-wrap gap-2" role="tablist" aria-label="Filter by category">
       {
         categories.map((cat) => {
           const label =

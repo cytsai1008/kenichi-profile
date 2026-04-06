@@ -49,5 +49,8 @@ export default defineConfig({
       setImmediate: "setTimeout",
       clearImmediate: "clearTimeout",
     },
+    optimizeDeps: {
+      include: ["photoswipe", "photoswipe/lightbox"],
+    },
   },
 });

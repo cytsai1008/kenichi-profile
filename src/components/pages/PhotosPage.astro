@@ -14,6 +14,12 @@ interface Props {
 const { locale } = Astro.props;
 const tr = t(locale);
 
+function formatAlbumName(album: string) {
+  return album
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 const entries = (await getCollection("photos")).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
@@ -23,17 +29,38 @@ const photoModules = import.meta.glob<{ default: ImageMetadata }>(
   { eager: true }
 );
 
+const photoOriginalUrls = import.meta.glob<string>(
+  "/src/content/photos/**/*",
+  { query: "?url", import: "default", eager: true }
+);
+
 async function toPhotoItem(entry: (typeof entries)[number]): Promise<PhotoItem> {
   const imageModule = photoModules[entry.data.imagePath]?.default;
-  const optimizedThumb = imageModule
-    ? await getImage({ src: imageModule, width: 640, quality: 85 })
+  const optimizedViewer = imageModule
+    ? await getImage({
+        src: imageModule,
+        width: Math.min(imageModule.width, 2200),
+        quality: 90,
+      })
     : null;
+  const optimizedThumb = imageModule
+    ? await getImage({
+        src: imageModule,
+        width: 640,
+        height: 640,
+        fit: "cover",
+        quality: 85,
+      })
+    : null;
+  const originalUrl = photoOriginalUrls[entry.data.imagePath];
 
   return {
-    src: entry.data.imagePath,
+    src: optimizedViewer?.src ?? originalUrl ?? entry.data.imagePath,
+    downloadSrc: originalUrl ?? entry.data.imagePath,
     thumb: optimizedThumb?.src ?? entry.data.imagePath,
-    width: entry.data.exif.width ?? imageModule?.width ?? 0,
-    height: entry.data.exif.height ?? imageModule?.height ?? 0,
+    width: optimizedViewer?.attributes.width ?? entry.data.exif.width ?? imageModule?.width ?? 0,
+    height:
+      optimizedViewer?.attributes.height ?? entry.data.exif.height ?? imageModule?.height ?? 0,
     alt: entry.data.title,
     title: entry.data.title,
     exif: {
@@ -71,7 +98,7 @@ for (const [album, albumEntries] of albumMap) {
 
 <Layout title={tr.photos.title} description={tr.photos.description ?? ""} locale={locale}>
   <div class="mx-auto max-w-5xl px-4 py-12">
-    <header class="mb-10">
+    <header data-animate class="mb-10">
       <h1 class="text-4xl font-bold text-fg">{tr.photos.title}</h1>
       <p class="mt-2 text-lg text-fg-muted">{tr.photos.description}</p>
     </header>
@@ -81,10 +108,10 @@ for (const [album, albumEntries] of albumMap) {
         <p class="text-fg-muted">No photos yet.</p>
       ) : (
         groups.map(({ album, items }) => (
-          <section class="mb-16">
+          <section data-animate class="mb-16">
             {album && (
               <h2 class="mb-6 text-2xl font-bold text-fg border-b border-border pb-2">
-                {album}
+                {formatAlbumName(album)}
               </h2>
             )}
             <PhotoViewer
@@ -97,6 +124,7 @@ for (const [album, albumEntries] of albumMap) {
               nextLabel={tr.photos.next}
               showDownloadButton={true}
               showExifPanel={true}
+              thumbClass="object-cover"
             />
           </section>
         ))
