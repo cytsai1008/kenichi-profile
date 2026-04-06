@@ -110,7 +110,7 @@ onMounted(() => {
 
   // Inject EXIF panel into PhotoSwipe UI
   lightbox.on("uiRegister", () => {
-    if (props.showDownloadButton !== false) {
+    if (props.showDownloadButton) {
       lightbox!.pswp!.ui!.registerElement({
         name: "download-button",
         order: 8,
@@ -157,7 +157,7 @@ onMounted(() => {
           if (!slide) return;
           const data = props.photos[pswp.currIndex];
           const hasExif = Boolean(
-            props.showExifPanel !== false && data?.exif && Object.values(data.exif).some(Boolean)
+            props.showExifPanel && data?.exif && Object.values(data.exif).some(Boolean)
           );
           const hasCreator = Boolean(data?.creator);
 
@@ -299,16 +299,19 @@ onUnmounted(() => {
 
 <style>
 /* EXIF panel overlay in PhotoSwipe */
+/* noinspection CssUnusedSymbol */
 .pswp__info-panel[data-show] {
   display: block;
   pointer-events: none;
 }
 
+/* noinspection CssUnusedSymbol */
 .pswp__img,
 .pswp__img--placeholder {
   border-radius: 0.5rem;
 }
 
+/* noinspection CssUnusedSymbol */
 .pswp--opening .pswp__img,
 .pswp--opening .pswp__img--placeholder {
   border-radius: 0.25rem;
