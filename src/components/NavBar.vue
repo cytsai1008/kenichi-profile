@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from "vue";
-import { animate, spring } from "animejs";
+import { animate, spring, stagger } from "animejs";
 import { ChevronDown, Languages, type LucideIcon, Menu, Monitor, Moon, Sun, X } from "@lucide/vue";
 import type { Locale } from "../i18n/utils";
 import { switchLocalePath, locales } from "../i18n/utils";
@@ -150,6 +150,8 @@ const langHovered = ref(false);
 
 function showLangText() {
   if (langHovered.value) return;
+  // The text is sm:inline only — skip on mobile where it should stay hidden
+  if (window.innerWidth < 640) return;
   langHovered.value = true;
 
   if (langText.value) {
@@ -194,12 +196,89 @@ function hideLangText() {
 const menuOpen = ref(false);
 const hamburgerRef = ref<HTMLButtonElement | null>(null);
 const firstMenuLinkRef = ref<HTMLAnchorElement | null>(null);
+const mobileMenuRef = ref<HTMLElement | null>(null);
 
 watch(menuOpen, async (open) => {
+  if (open) {
+    closeLangDropdown();
+    menuOpenedAt = Date.now();
+  }
+
   await nextTick();
-  if (open) firstMenuLinkRef.value?.focus();
-  else hamburgerRef.value?.focus();
+  const el = mobileMenuRef.value;
+  if (!el) return;
+
+  if (open) {
+    firstMenuLinkRef.value?.focus();
+    el.style.display = "";
+
+    if (reducedMotion.value) return;
+
+    // Panel springs down with a scale pop
+    animate(el, {
+      opacity: [0, 1],
+      translateY: [-24, 0],
+      scale: [0.93, 1],
+      ease: spring({ stiffness: 260, damping: 18, mass: 0.85 }),
+    });
+
+    // Nav items fly in from the left, staggered
+    const rows = el.querySelectorAll<HTMLElement>("li, .mobile-menu-controls");
+    animate(rows, {
+      opacity: [0, 1],
+      translateX: [-22, 0],
+      ease: spring({ stiffness: 340, damping: 24 }),
+      delay: stagger(55, { start: 80 }),
+    });
+  } else {
+    hamburgerRef.value?.focus();
+
+    if (reducedMotion.value) {
+      el.style.display = "none";
+      return;
+    }
+
+    animate(el, {
+      opacity: [1, 0],
+      translateY: [0, -18],
+      scale: [1, 0.93],
+      duration: 200,
+      ease: "in(3)",
+      onComplete() {
+        el.style.display = "none";
+      },
+    });
+  }
 });
+
+/* ─── Hamburger icon transition hooks ───────────────────── */
+function onIconEnter(el: Element, done: () => void) {
+  if (reducedMotion.value) {
+    done();
+    return;
+  }
+  animate(el as HTMLElement, {
+    opacity: [0, 1],
+    rotate: [-30, 0],
+    duration: 200,
+    ease: "out(3)",
+    onComplete: done,
+  });
+}
+
+function onIconLeave(el: Element, done: () => void) {
+  if (reducedMotion.value) {
+    done();
+    return;
+  }
+  animate(el as HTMLElement, {
+    opacity: [1, 0],
+    rotate: [0, 30],
+    duration: 150,
+    ease: "in(3)",
+    onComplete: done,
+  });
+}
 
 function handleOutsideClick(e: MouseEvent) {
   if (!(e.target as HTMLElement).closest("[data-navbar]")) {
@@ -207,8 +286,24 @@ function handleOutsideClick(e: MouseEvent) {
     closeLangDropdown();
   }
 }
-onMounted(() => document.addEventListener("click", handleOutsideClick));
-onUnmounted(() => document.removeEventListener("click", handleOutsideClick));
+
+let menuOpenedAt = 0;
+
+function handleScroll() {
+  // Ignore the incidental scroll that mobile browsers fire during the tap that opened the menu
+  if (Date.now() - menuOpenedAt < 350) return;
+  menuOpen.value = false;
+  closeLangDropdown();
+}
+
+onMounted(() => {
+  document.addEventListener("click", handleOutsideClick);
+  window.addEventListener("scroll", handleScroll, { passive: true });
+});
+onUnmounted(() => {
+  document.removeEventListener("click", handleOutsideClick);
+  window.removeEventListener("scroll", handleScroll);
+});
 
 /* ─── Language switcher ──────────────────────────────────── */
 const langOpen = ref(false);
@@ -244,8 +339,9 @@ const localeLabels: Record<string, string> = {
 
 function closeLangDropdown() {
   langOpen.value = false;
-  // If cursor already left the wrapper, hide the text now
-  if (!langHovered.value && langText.value) {
+  // On mobile the watch(langOpen) owns text visibility — skip here to avoid double-animation.
+  // On desktop, hide the text now if the cursor has already left the wrapper.
+  if (window.innerWidth >= 640 && !langHovered.value && langText.value) {
     const el = langText.value;
     animate(el, {
       opacity: { from: 1, to: 0 },
@@ -258,6 +354,84 @@ function closeLangDropdown() {
     });
   }
 }
+
+/* ─── Lang dropdown animation ────────────────────────────── */
+watch(langOpen, async (open) => {
+  if (open) menuOpen.value = false;
+
+  // On mobile the text label is hover-hidden; tie its visibility to the dropdown state instead
+  const isMobile = window.innerWidth < 640;
+  if (isMobile && langText.value) {
+    const txt = langText.value;
+    if (open) {
+      txt.style.display = "inline";
+      if (!reducedMotion.value) {
+        animate(txt, { opacity: [0, 1], x: [-10, 0], ease: spring({ bounce: 0.4 }) });
+      } else {
+        txt.style.opacity = "1";
+      }
+    } else {
+      if (!reducedMotion.value) {
+        animate(txt, {
+          opacity: [1, 0],
+          x: [0, -8],
+          duration: 180,
+          ease: "in(3)",
+          onComplete() {
+            txt.style.display = "none";
+          },
+        });
+      } else {
+        txt.style.opacity = "0";
+        txt.style.display = "none";
+      }
+    }
+  }
+
+  await nextTick();
+  const el = langListRef.value;
+  if (!el) return;
+
+  if (open) {
+    el.style.display = "";
+    el.style.transformOrigin = "top right";
+
+    if (reducedMotion.value) return;
+
+    // Dropdown pops open from the top-right corner
+    animate(el, {
+      opacity: [0, 1],
+      scale: [0.78, 1],
+      translateY: [-8, 0],
+      ease: spring({ stiffness: 440, damping: 22, mass: 0.55 }),
+    });
+
+    // Options slide in from the right, staggered
+    const items = el.querySelectorAll<HTMLElement>("li");
+    animate(items, {
+      opacity: [0, 1],
+      translateX: [10, 0],
+      ease: spring({ stiffness: 500, damping: 30 }),
+      delay: stagger(50, { start: 55 }),
+    });
+  } else {
+    if (reducedMotion.value) {
+      el.style.display = "none";
+      return;
+    }
+
+    animate(el, {
+      opacity: [1, 0],
+      scale: [1, 0.84],
+      translateY: [0, -6],
+      duration: 160,
+      ease: "in(3)",
+      onComplete() {
+        el.style.display = "none";
+      },
+    });
+  }
+});
 
 function switchLang(targetLocale: Locale) {
   const maxAge = 60 * 60 * 24 * 365;
@@ -400,11 +574,11 @@ function isActive(href: string) {
           <div class="absolute inset-x-0 top-full h-2" />
 
           <ul
-            v-show="langOpen"
             ref="langListRef"
             role="listbox"
             :aria-label="langLabel"
-            class="absolute right-0 m-0 mt-2 w-36 list-none rounded-xl border border-border bg-surface p-1 shadow-lg"
+            class="absolute right-0 z-10 m-0 mt-2 w-36 list-none rounded-xl border border-border bg-surface p-1 shadow-lg"
+            style="display: none"
             @keydown="handleLangKeydown"
           >
             <li v-for="loc in locales" :key="loc">
@@ -433,14 +607,23 @@ function isActive(href: string) {
           aria-controls="mobile-menu"
           @click.stop="menuOpen = !menuOpen"
         >
-          <X v-if="menuOpen" :size="20" />
-          <Menu v-else :size="20" />
+          <span class="relative block h-5 w-5">
+            <Transition :css="false" @enter="onIconEnter" @leave="onIconLeave">
+              <X v-if="menuOpen" :key="'close'" :size="20" class="absolute inset-0" />
+              <Menu v-else :key="'open'" :size="20" class="absolute inset-0" />
+            </Transition>
+          </span>
         </button>
       </div>
     </nav>
 
     <!-- Mobile menu -->
-    <div v-show="menuOpen" id="mobile-menu" class="border-t border-border px-4 pb-4 md:hidden">
+    <div
+      ref="mobileMenuRef"
+      id="mobile-menu"
+      class="border-t border-border px-4 pb-4 md:hidden"
+      style="display: none"
+    >
       <ul class="m-0 flex list-none flex-col gap-1 p-0 pt-3">
         <li v-for="(link, i) in links" :key="link.href">
           <a
@@ -467,7 +650,9 @@ function isActive(href: string) {
       </ul>
 
       <!-- Theme + lang in mobile menu (always fully visible) -->
-      <div class="mt-3 flex items-center justify-between border-t border-border pt-3">
+      <div
+        class="mobile-menu-controls mt-3 flex items-center justify-between border-t border-border pt-3"
+      >
         <div
           class="flex items-center overflow-hidden rounded-lg border border-border"
           role="group"
