@@ -11,6 +11,8 @@ interface Props {
 
 const { locale } = Astro.props;
 const tr = t(locale);
+const blogFontClass =
+  locale === "zh-tw" ? "font-noto-tc" : locale === "zh-cn" ? "font-noto-sc" : "";
 
 const allPosts = getBlogPostsForLocale(await getCollection("blog"), locale).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -20,7 +22,7 @@ const posts = allPosts.filter((p) => !p.data.featured);
 ---
 
 <Layout title={tr.blog.title} description={tr.blog.description} locale={locale}>
-  <div class="mx-auto max-w-5xl px-4 py-12">
+  <div class:list={["mx-auto max-w-5xl px-4 py-12", blogFontClass]}>
     <header data-animate class="mb-10">
       <h1 class="text-4xl font-bold text-fg">{tr.blog.title}</h1>
       <p class="mt-2 text-lg text-fg-muted">{tr.blog.description}</p>

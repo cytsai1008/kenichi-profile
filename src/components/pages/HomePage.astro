@@ -31,7 +31,7 @@ const photoModules = import.meta.glob<{ default: ImageMetadata }>("/src/content/
 });
 
 const galleryImageModules = import.meta.glob<{ default: ImageMetadata }>(
-  "/src/assets/**/*.{jpg,jpeg,png,webp,avif,gif}",
+  "/src/assets/**/*.{jpg,jpeg,JPG,JPEG,png,PNG,webp,WEBP,avif,AVIF,gif,GIF}",
   { eager: true }
 );
 
@@ -82,7 +82,7 @@ const latestPhotos = await Promise.all(
                 {tr.home.greeting}
               </p>
               <h1 class="text-4xl leading-none font-bold text-fg sm:text-5xl">
-                <span class="block text-accent">健一</span>
+                <span class="block font-noto-tc text-accent">健一</span>
                 <span
                   class="mt-0.5 block text-2xl leading-none font-normal tracking-[0.2em] text-fg-muted uppercase sm:text-3xl"
                 >

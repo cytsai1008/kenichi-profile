@@ -10,6 +10,8 @@ type Props = CollectionEntry<"blog">["data"];
 const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url);
 const tr = t(locale);
+const blogFontClass =
+  locale === "zh-tw" ? "font-noto-tc" : locale === "zh-cn" ? "font-noto-sc" : "";
 ---
 
 <Layout
@@ -20,7 +22,7 @@ const tr = t(locale);
   pubDate={pubDate}
   updatedDate={updatedDate}
 >
-  <article data-animate class="mx-auto max-w-5xl px-4 py-12">
+  <article data-animate class:list={["mx-auto max-w-5xl px-4 py-12", blogFontClass]}>
     {
       heroImage && (
         <div class="mb-8 overflow-hidden rounded-2xl">

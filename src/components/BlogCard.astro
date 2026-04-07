@@ -14,12 +14,15 @@ interface Props {
 const { post, locale = "en", featured = false } = Astro.props;
 const tr = t(locale);
 const postHref = localePath(`/blog/${getBlogSlug(post.id)}/`, locale);
+const blogFontClass =
+  locale === "zh-tw" ? "font-noto-tc" : locale === "zh-cn" ? "font-noto-sc" : "";
 ---
 
 <article
   data-animate
   class:list={[
     "group overflow-hidden rounded-2xl border border-border bg-surface-alt transition-shadow hover:shadow-lg",
+    blogFontClass,
     featured ? "flex flex-col sm:flex-row" : "flex flex-col",
   ]}
 >

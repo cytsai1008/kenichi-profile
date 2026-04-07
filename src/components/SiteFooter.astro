@@ -1,11 +1,11 @@
 ---
-import {type Locale, localePath} from "../i18n/utils";
+import { type Locale, localePath } from "../i18n/utils";
 
 interface Props {
-    locale?: Locale;
+  locale?: Locale;
 }
 
-const {locale = "en"} = Astro.props;
+const { locale = "en" } = Astro.props;
 const year = new Date().getFullYear();
 ---
 
@@ -16,8 +16,10 @@ const year = new Date().getFullYear();
       <span class="mx-1.5" style="opacity: 0.4">&</span>
       <a href={localePath("/photos", locale)}>Photos</a>
       <span class="mx-1.5" style="opacity: 0.4">·</span>
-      <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer"
-      >CC BY 4.0</a
+      <a
+        href="https://creativecommons.org/licenses/by/4.0/"
+        target="_blank"
+        rel="noopener noreferrer">CC BY 4.0</a
       >
     </span>
     <span aria-hidden="true" class="text-fg-muted" style="opacity: 0.35">|</span>
@@ -25,19 +27,21 @@ const year = new Date().getFullYear();
       <a href={localePath("/gallery", locale)}>Commissions</a>
       <span class="mx-1.5" style="opacity: 0.4">·</span>
       <a
-          href="https://en.wikipedia.org/wiki/All_rights_reserved"
-          target="_blank"
-          rel="noopener noreferrer">All Rights Reserved</a
+        href="https://en.wikipedia.org/wiki/All_rights_reserved"
+        target="_blank"
+        rel="noopener noreferrer">All Rights Reserved</a
       >
     </span>
     <span aria-hidden="true" class="text-fg-muted" style="opacity: 0.35">|</span>
     <span class="text-xs" style="opacity: 0.5">
-      <a href="https://github.com/cytsai1008/kenichi-profile" target="_blank" rel="noopener noreferrer"
-      >Source Code</a
+      <a
+        href="https://github.com/cytsai1008/kenichi-profile"
+        target="_blank"
+        rel="noopener noreferrer">Source Code</a
       >
       <span class="mx-1.5" style="opacity: 0.4">·</span>
       <a href="https://choosealicense.com/licenses/mit/" target="_blank" rel="noopener noreferrer"
-      >MIT</a
+        >MIT</a
       >
     </span>
   </div>

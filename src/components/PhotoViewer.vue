@@ -325,10 +325,7 @@ onUnmounted(() => {
       :data-cropped="true"
       :data-category="photo.category"
       class="group block overflow-hidden rounded-lg bg-surface-alt transition-transform duration-150 active:scale-[0.97]"
-      :class="[
-        props.itemClass,
-        props.alwaysShowText ? 'cursor-pointer' : 'relative',
-      ]"
+      :class="[props.itemClass, props.alwaysShowText ? 'cursor-pointer' : 'relative']"
       :style="props.alwaysShowText ? undefined : 'aspect-ratio: 1 / 1'"
     >
       <!-- image container -->

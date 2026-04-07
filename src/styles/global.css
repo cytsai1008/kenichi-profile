@@ -118,14 +118,17 @@
 
   .font-noto {
     font-family: var(--font-noto), sans-serif;
+    --font-sans: var(--font-noto);
   }
 
   .font-noto-tc {
     font-family: var(--font-noto-tc), sans-serif;
+    --font-sans: var(--font-noto-tc);
   }
 
   .font-noto-sc {
     font-family: var(--font-noto-sc), sans-serif;
+    --font-sans: var(--font-noto-sc);
   }
 
   /* ─── Typography ────────────────────────────────────────── */
