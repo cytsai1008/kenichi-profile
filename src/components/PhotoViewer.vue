@@ -252,7 +252,11 @@ onUnmounted(() => {
   <div
     ref="galleryEl"
     data-animate-stagger
-    class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+    :class="
+      props.alwaysShowText
+        ? 'columns-2 gap-3 sm:columns-3 lg:columns-4'
+        : 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4'
+    "
   >
     <component
       :is="props.alwaysShowText ? 'div' : 'a'"
@@ -270,9 +274,12 @@ onUnmounted(() => {
       "
       :data-cropped="true"
       :data-category="photo.category"
-      class="group block overflow-hidden rounded-lg bg-surface-alt"
-      :class="[props.itemClass, props.alwaysShowText ? 'cursor-pointer' : 'relative']"
-      :style="props.alwaysShowText ? 'align-self: start' : 'aspect-ratio: 1 / 1'"
+      class="group block overflow-hidden rounded-lg bg-surface-alt transition-transform duration-150 active:scale-[0.97]"
+      :class="[
+        props.itemClass,
+        props.alwaysShowText ? 'mb-3 cursor-pointer break-inside-avoid' : 'relative',
+      ]"
+      :style="props.alwaysShowText ? undefined : 'aspect-ratio: 1 / 1'"
     >
       <!-- image container -->
       <div class="relative overflow-hidden">

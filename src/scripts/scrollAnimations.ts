@@ -71,7 +71,7 @@ export function initScrollAnimations(): void {
         // If group already triggered — just skip (already animating)
       }
     },
-    { threshold: 0.05, rootMargin: "0px 0px -20px 0px" }
+    { threshold: 0.05, rootMargin: "0px 0px 0px 0px" }
   );
 
   targets.forEach((el) => {
