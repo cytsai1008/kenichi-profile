@@ -27,14 +27,17 @@ function localizedValue(
 // Frontmatter paths are relative to src/content/gallery/ (e.g. "../../assets/foo.jpg").
 // We extract everything after "assets/" and look up under /src/assets/.
 const imageModules = import.meta.glob<{ default: ImageMetadata }>(
-  "/src/assets/**/*.{jpg,jpeg,png,webp,avif,gif,png}",
+  "/src/assets/**/*.{jpg,jpeg,JPG,JPEG,png,PNG,webp,WEBP,avif,AVIF,gif,GIF}",
   { eager: true }
 );
-const imageUrls = import.meta.glob<string>("/src/assets/**/*.{jpg,jpeg,png,webp,avif,gif,png}", {
-  query: "?url",
-  import: "default",
-  eager: true,
-});
+const imageUrls = import.meta.glob<string>(
+  "/src/assets/**/*.{jpg,jpeg,JPG,JPEG,png,PNG,webp,WEBP,avif,AVIF,gif,GIF}",
+  {
+    query: "?url",
+    import: "default",
+    eager: true,
+  }
+);
 
 function assetKey(relativePath: string): string {
   const m = relativePath.match(/assets\/(.+)$/);
@@ -49,8 +52,12 @@ const all = (await getCollection("gallery")).sort(
 
 const categories = ["all", "ref-sheet", "commission", "other"] as const;
 
+function isPhotoItem(item: PhotoItem | null): item is PhotoItem {
+  return item !== null;
+}
+
 const galleryItems: PhotoItem[] = await Promise.all(
-  all.map(async (entry) => {
+  all.map(async (entry): Promise<PhotoItem | null> => {
     const key = assetKey(entry.data.image);
     const imageModule = imageModules[key]?.default;
     const originalUrl = imageUrls[key];
@@ -80,7 +87,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
       category: entry.data.category,
     } satisfies PhotoItem;
   })
-).then((items) => items.filter((item): item is PhotoItem => item !== null));
+).then((items) => items.filter(isPhotoItem));
 ---
 
 <Layout title={tr.gallery.title} description={tr.gallery.description ?? ""} locale={locale}>

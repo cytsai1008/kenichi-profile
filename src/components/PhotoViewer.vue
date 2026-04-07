@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
+import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
 
@@ -56,6 +56,38 @@ interface Props {
 const props = defineProps<Props>();
 const galleryEl = ref<HTMLElement | null>(null);
 let lightbox: PhotoSwipeLightbox | null = null;
+let resizeObserver: ResizeObserver | null = null;
+
+function updateMasonryLayout() {
+  if (!props.alwaysShowText || !galleryEl.value) return;
+
+  const styles = window.getComputedStyle(galleryEl.value);
+  const autoRow = Number.parseFloat(styles.getPropertyValue("grid-auto-rows"));
+  const rowGap = Number.parseFloat(styles.getPropertyValue("row-gap"));
+  if (!autoRow) return;
+
+  Array.from(galleryEl.value.children).forEach((item) => {
+    const element = item as HTMLElement;
+    if (element.offsetParent === null) return;
+
+    element.style.gridRowEnd = "auto";
+    const height = element.getBoundingClientRect().height;
+    const span = Math.max(1, Math.ceil((height + rowGap) / (autoRow + rowGap)));
+    element.style.gridRowEnd = `span ${span}`;
+  });
+}
+
+async function syncMasonryLayout() {
+  await nextTick();
+  updateMasonryLayout();
+
+  if (!props.alwaysShowText || !galleryEl.value || !resizeObserver) return;
+
+  resizeObserver.disconnect();
+  Array.from(galleryEl.value.children).forEach((item) => {
+    resizeObserver?.observe(item);
+  });
+}
 
 function formatExifDate(value?: string) {
   if (!value) return undefined;
@@ -71,6 +103,13 @@ function formatExifDate(value?: string) {
 
 onMounted(() => {
   if (!galleryEl.value) return;
+
+  resizeObserver = new ResizeObserver(() => {
+    updateMasonryLayout();
+  });
+
+  void syncMasonryLayout();
+  window.addEventListener("resize", updateMasonryLayout);
 
   lightbox = new PhotoSwipeLightbox({
     gallery: galleryEl.value,
@@ -242,7 +281,18 @@ onMounted(() => {
   lightbox.init();
 });
 
+watch(
+  () => props.photos,
+  () => {
+    void syncMasonryLayout();
+  },
+  { deep: true, flush: "post" }
+);
+
 onUnmounted(() => {
+  window.removeEventListener("resize", updateMasonryLayout);
+  resizeObserver?.disconnect();
+  resizeObserver = null;
   lightbox?.destroy();
   lightbox = null;
 });
@@ -254,7 +304,7 @@ onUnmounted(() => {
     data-animate-stagger
     :class="
       props.alwaysShowText
-        ? 'columns-2 gap-3 sm:columns-3 lg:columns-4'
+        ? 'photo-viewer-masonry'
         : 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4'
     "
   >
@@ -277,7 +327,7 @@ onUnmounted(() => {
       class="group block overflow-hidden rounded-lg bg-surface-alt transition-transform duration-150 active:scale-[0.97]"
       :class="[
         props.itemClass,
-        props.alwaysShowText ? 'mb-3 cursor-pointer break-inside-avoid' : 'relative',
+        props.alwaysShowText ? 'cursor-pointer' : 'relative',
       ]"
       :style="props.alwaysShowText ? undefined : 'aspect-ratio: 1 / 1'"
     >
@@ -339,6 +389,31 @@ onUnmounted(() => {
 </template>
 
 <style>
+.photo-viewer-masonry {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  grid-auto-flow: row;
+  grid-auto-rows: 8px;
+  align-items: start;
+}
+
+.photo-viewer-masonry > * {
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .photo-viewer-masonry {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .photo-viewer-masonry {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 /* EXIF panel overlay in PhotoSwipe */
 /* noinspection CssUnusedSymbol */
 .pswp__info-panel[data-show] {
