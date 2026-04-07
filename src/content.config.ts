@@ -19,7 +19,7 @@ const blog = defineCollection({
 
 const gallery = defineCollection({
   loader: glob({ base: "./src/content/gallery", pattern: "**/*.{md,mdx}" }),
-  schema: ({ image }) =>
+  schema: () =>
     z.object({
       title: z.string(),
       description: z.string().optional(),
@@ -35,7 +35,7 @@ const gallery = defineCollection({
           "zh-cn": z.string().optional(),
         })
         .optional(),
-      image: image(),
+      image: z.string(),
       date: z.coerce.date(),
       category: z.enum(["ref-sheet", "commission", "other"]).default("other"),
       artist: z.string().optional(),

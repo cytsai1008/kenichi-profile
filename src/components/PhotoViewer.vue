@@ -74,7 +74,7 @@ onMounted(() => {
 
   lightbox = new PhotoSwipeLightbox({
     gallery: galleryEl.value,
-    children: "a[data-pswp]",
+    children: "[data-pswp]",
     pswpModule: () => import("photoswipe"),
     initialZoomLevel: "fit",
     secondaryZoomLevel: (zoomLevel) => Math.min(zoomLevel.fit * 1.8, 1),
@@ -208,8 +208,11 @@ onMounted(() => {
   // already-loaded thumbnail <img>. This runs before PhotoSwipe calculates zoom,
   // so it always has the correct intrinsic dimensions regardless of EXIF or timing.
   lightbox.addFilter("itemData", (itemData, index) => {
-    if (!props.placeholderSrc) {
-      itemData.msrc = undefined;
+    // Always read src from data-pswp-src — prevents PhotoSwipe from accidentally
+    // picking up a child <a> (e.g. creator link) as the image src
+    const el = galleryEl.value?.querySelectorAll<HTMLElement>("[data-pswp]")[index];
+    if (el?.dataset.pswpSrc) {
+      itemData.src = el.dataset.pswpSrc;
     }
 
     const imgs = galleryEl.value?.querySelectorAll<HTMLImageElement>("img");
@@ -251,75 +254,80 @@ onUnmounted(() => {
     data-animate-stagger
     class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
   >
-    <a
-      v-for="(photo, i) in photos"
-      :key="i"
+    <component
+      :is="props.alwaysShowText ? 'div' : 'a'"
+      v-for="photo in photos"
+      :key="photo.src"
       data-animate
       data-pswp
-      :href="photo.src"
-      v-bind="{
-        ...(!props.placeholderSrc ? {} : { 'data-pswp-msrc': photo.thumb }),
-        ...(photo.width && photo.height
+      :href="props.alwaysShowText ? undefined : photo.src"
+      :data-pswp-src="photo.src"
+      :data-pswp-msrc="photo.thumb"
+      v-bind="
+        photo.width && photo.height
           ? { 'data-pswp-width': photo.width, 'data-pswp-height': photo.height }
-          : {}),
-      }"
+          : {}
+      "
       :data-cropped="true"
       :data-category="photo.category"
-      class="group relative block overflow-hidden rounded-lg bg-surface-alt"
-      :class="props.itemClass"
-      style="aspect-ratio: 1 / 1"
+      class="group block overflow-hidden rounded-lg bg-surface-alt"
+      :class="[props.itemClass, props.alwaysShowText ? 'cursor-pointer' : 'relative']"
+      :style="props.alwaysShowText ? 'align-self: start' : 'aspect-ratio: 1 / 1'"
     >
-      <img
-        :src="photo.thumb"
-        :alt="photo.alt"
-        loading="lazy"
-        class="h-full w-full transition-transform duration-300"
-        :class="[
-          props.thumbClass ?? 'object-cover',
-          !props.disableHoverZoom && 'group-hover:scale-105',
-        ]"
-      />
-      <div
-        class="absolute inset-0 flex items-end p-3"
-        :class="
-          props.alwaysShowText
-            ? ''
-            : 'bg-linear-to-t from-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100'
-        "
-      >
-        <div v-if="photo.title || photo.subtitle" class="space-y-0.5">
-          <p
-            v-if="photo.title"
-            class="text-sm leading-tight font-medium"
-            :class="props.alwaysShowText ? 'text-fg dark:text-white' : 'text-white'"
-          >
-            {{ photo.title }}
-          </p>
-          <p
-            v-if="photo.subtitle"
-            class="text-xs leading-tight"
-            :class="props.alwaysShowText ? 'text-fg-muted dark:text-white/80' : 'text-white/80'"
-          >
-            <a
-              v-if="photo.subtitleUrl"
-              :href="photo.subtitleUrl"
-              class="underline underline-offset-2"
-              :class="
-                props.alwaysShowText
-                  ? 'text-fg-muted decoration-fg-muted/50 dark:text-white/80 dark:decoration-white/50'
-                  : 'text-white/80 decoration-white/50'
-              "
-              target="_blank"
-              rel="noopener noreferrer"
-              @click.stop
-            >
-              {{ photo.subtitle }}
-            </a>
-            <template v-else>{{ photo.subtitle }}</template>
-          </p>
+      <!-- image container -->
+      <div class="relative overflow-hidden">
+        <img
+          :src="photo.thumb"
+          :alt="photo.alt"
+          loading="lazy"
+          class="block w-full transition-transform duration-300"
+          :class="[props.thumbClass, !props.disableHoverZoom && 'group-hover:scale-105']"
+          :style="props.alwaysShowText ? 'height: auto' : 'height: 100%; object-fit: cover'"
+        />
+        <!-- hover overlay for non-alwaysShowText mode -->
+        <div
+          v-if="!props.alwaysShowText"
+          class="absolute inset-0 flex items-end bg-linear-to-t from-black/40 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100"
+        >
+          <div v-if="photo.title || photo.subtitle" class="space-y-0.5">
+            <p v-if="photo.title" class="text-sm leading-tight font-medium text-white">
+              {{ photo.title }}
+            </p>
+            <p v-if="photo.subtitle" class="text-xs leading-tight text-white/80">
+              <a
+                v-if="photo.subtitleUrl"
+                :href="photo.subtitleUrl"
+                class="underline decoration-white/50 underline-offset-2"
+                target="_blank"
+                rel="noopener noreferrer"
+                @click.stop
+                >{{ photo.subtitle }}</a
+              >
+              <template v-else>{{ photo.subtitle }}</template>
+            </p>
+          </div>
         </div>
       </div>
-    </a>
+
+      <!-- caption below image for alwaysShowText mode -->
+      <div v-if="props.alwaysShowText && (photo.title || photo.subtitle)" class="space-y-0.5 p-3">
+        <p v-if="photo.title" class="text-sm leading-tight font-medium text-fg">
+          {{ photo.title }}
+        </p>
+        <p v-if="photo.subtitle" class="text-xs leading-tight text-fg-muted">
+          <a
+            v-if="photo.subtitleUrl"
+            :href="photo.subtitleUrl"
+            class="underline decoration-fg-muted/50 underline-offset-2"
+            target="_blank"
+            rel="noopener noreferrer"
+            @click.stop
+            >{{ photo.subtitle }}</a
+          >
+          <template v-else>{{ photo.subtitle }}</template>
+        </p>
+      </div>
+    </component>
   </div>
 </template>
 
