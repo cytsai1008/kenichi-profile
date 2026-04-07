@@ -27,13 +27,14 @@ npm run dev
 
 Useful commands:
 
-| Command           | What it does                                |
-|-------------------|---------------------------------------------|
-| `npm run dev`     | Start the local dev server                  |
-| `npm run build`   | Build the site into `dist/`                 |
-| `npm run preview` | Preview the production build locally        |
-| `npm run lint`    | Run ESLint with `--fix`                     |
-| `npm run format`  | Run Prettier on `src` and root `.mjs` files |
+| Command                  | What it does                                |
+|--------------------------|---------------------------------------------|
+| `npm run dev`            | Start the local dev server                  |
+| `npm run build`          | Build the site into `dist/`                 |
+| `npm run preview`        | Preview the production build locally        |
+| `npm run new:commission` | Interactive commission post generator       |
+| `npm run lint`           | Run ESLint with `--fix`                     |
+| `npm run format`         | Run Prettier on `src` and root `.mjs` files |
 
 ## Project structure
 
@@ -89,6 +90,25 @@ Optional fields:
 ### Gallery entries
 
 Put gallery entries in `src/content/gallery/`.
+
+For new commission posts, use the interactive CLI:
+
+```sh
+npm run new:commission
+```
+
+It will prompt for the source image, titles, descriptions, optional i18n fields, and artist details, then:
+
+- ask for the image type first, such as `avatar`, `full-body`, or `other`
+- copy the image into `src/assets/commissions/`
+- create `src/content/gallery/<slug>.md`
+- infer the artist username from the filename and use it as the default artist value
+- fill title and description defaults from the selected image-type preset
+
+Optional flags:
+
+- `--preset avatar|full-body|other`
+- `--dry-run`
 
 Required frontmatter:
 

@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "new:commission": "node ./new-commission-post.mjs",
     "lint": "eslint src ./*.mjs --fix",
     "format": "prettier --write src ./*.mjs"
   },
@@ -44,6 +45,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^1.6.0",
     "eslint-plugin-vue": "^10.8.0",
+    "opencc": "^1.2.0",
     "prettier": "^3.8.1",
     "prettier-plugin-astro": "0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.2"
