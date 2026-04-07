@@ -45,7 +45,7 @@ const gallery = defineCollection({
           "zh-cn": z.string().optional(),
         })
         .optional(),
-      artistUrl: z.string().url().optional(),
+      artistUrl: z.url().optional(),
       featured: z.boolean().default(false),
     }),
 });
