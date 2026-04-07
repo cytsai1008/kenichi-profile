@@ -1,62 +1,146 @@
-# Astro Starter Kit: Blog
+# Kenichi profile
+
+This repo powers Kenichi's personal site at <https://kenichi.photocat.blue>. It is built with Astro, uses a few Vue islands for the interactive bits, and is deployed on Cloudflare.
+
+The site ships in three locales: `en`, `zh-tw`, and `zh-cn`. The repo also holds the blog, the artwork and commission gallery, the photo section that reads EXIF metadata, and the Open Graph image generation used during the build.
+
+## Stack
+
+- Astro 6
+- Vue 3 islands for interactive UI
+- Tailwind CSS v4
+- Cloudflare adapter + Wrangler
+- Markdown/MDX content collections
+- `exifreader`, `sharp`, `photoswipe`, `satori`, and `@resvg/resvg-js`
+
+## Requirements
+
+- Node.js `>=22.12.0`
+- npm
+
+## Local development
 
 ```sh
-npm create astro@latest -- --template blog
+npm install
+npm run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Useful commands:
 
-Features:
+| Command           | What it does                                |
+|-------------------|---------------------------------------------|
+| `npm run dev`     | Start the local dev server                  |
+| `npm run build`   | Build the site into `dist/`                 |
+| `npm run preview` | Preview the production build locally        |
+| `npm run lint`    | Run ESLint with `--fix`                     |
+| `npm run format`  | Run Prettier on `src` and root `.mjs` files |
 
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and Open Graph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## Project structure
 
 ```text
-├── public/
+.
+├── public/                 # Static assets, including generated OG images
 ├── src/
-│   ├── components/
-│   ├── content/
-│   ├── layouts/
-│   └── pages/
+│   ├── assets/             # Imported site assets and gallery images
+│   ├── components/         # Astro components, Vue islands, and page shells
+│   ├── content/            # Blog, gallery, and photo source content
+│   ├── i18n/               # Translation dictionaries and locale helpers
+│   ├── integrations/       # Custom Astro integrations
+│   ├── layouts/            # Base layouts
+│   ├── loaders/            # Custom content loaders
+│   ├── pages/              # Route wrappers for each locale
+│   └── styles/             # Global styles and design tokens
 ├── astro.config.mjs
-├── README.md
-├── package.json
-└── tsconfig.json
+├── wrangler.jsonc
+└── package.json
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## How localization works
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+- English is the default locale, so its routes do not use a URL prefix.
+- Traditional Chinese routes live under `/zh-tw/...`.
+- Simplified Chinese routes live under `/zh-cn/...`.
+- `src/middleware.ts` redirects `/` by checking the `preferred-locale` cookie first and `Accept-Language` after that.
+- Shared page logic lives in `src/components/pages/`; route files in `src/pages/` mainly pass the locale through.
 
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
+## Content workflows
 
-Any static assets, like images, can be placed in the `public/` directory.
+### Blog posts
 
-## 🧞 Commands
+Put blog posts in `src/content/blog/<locale>/` as `.md` or `.mdx` files.
 
-All commands are run from the root of the project, from a terminal:
+Required frontmatter:
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+```yaml
+---
+title: My post
+description: Short summary
+pubDate: 2026-04-08
+---
+```
 
-## 👀 Want to learn more?
+Optional fields:
 
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- `updatedDate`
+- `heroImage`
+- `tags`
+- `featured`
 
-## Credit
+### Gallery entries
 
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+Put gallery entries in `src/content/gallery/`.
+
+Required frontmatter:
+
+```yaml
+---
+title: Artwork title
+image: ../../assets/commissions/example.jpg
+date: 2026-04-08
+---
+```
+
+Optional fields:
+
+- `description`
+- `titleI18n`
+- `descriptionI18n`
+- `category` (`ref-sheet`, `commission`, `other`)
+- `artist`
+- `artistI18n`
+- `artistUrl`
+- `featured`
+
+### Photos
+
+Drop images into `src/content/photos/`, or into a subfolder if you want them grouped as an album.
+
+The custom loader in `src/loaders/photosLoader.ts` will:
+
+- detect supported image files
+- extract EXIF metadata automatically
+- derive a default title and date from the file metadata
+- use nested folder names as album names
+
+If you want to override or add metadata, place a sidecar `.md` file next to the image with the same basename:
+
+```yaml
+---
+title: Sunset walk
+description: Evening light near the river
+location: Taipei
+date: 2026-04-08
+---
+```
+
+## Deployment notes
+
+- The site uses the Cloudflare Astro adapter with `output: "static"`.
+- `wrangler.jsonc` is already configured for the custom domain `kenichi.photocat.blue`.
+- Open Graph images are generated during the build and written to `public/og/`.
+
+## Maintenance conventions
+
+- Use npm, not yarn.
+- Keep shared page logic in `src/components/pages/` instead of duplicating locale-specific page implementations.
+- Prefer updating `src/i18n/*.json` over hard-coding copy in page files.
