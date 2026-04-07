@@ -73,6 +73,26 @@ const fullTitle = `${SITE_TITLE} | ${title}`;
 <meta name="title" content={fullTitle} />
 <meta name="description" content={description} />
 
+<!-- Google Analytics -->
+<!-- Google tag (gtag.js) -->
+<script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-GRXHJS3F61"></script>
+<script is:inline>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-GRXHJS3F61');
+</script>
+
+<!-- Microsoft Clarity -->
+<script is:inline type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "w7t8i6b9gr");
+</script>
+
 <!-- Open Graph -->
 <meta property="og:type" content={type} />
 <meta property="og:site_name" content={SITE_TITLE} />
