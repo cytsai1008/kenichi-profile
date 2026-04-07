@@ -76,148 +76,165 @@
 }
 
 /* ─── Base styles ───────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-html {
-  scroll-behavior: smooth;
-  scrollbar-gutter: stable; /* reserves scrollbar space always — prevents layout shift */
-  color-scheme: light;
-}
+  html {
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable; /* reserves scrollbar space always — prevents layout shift */
+    color-scheme: light;
+  }
 
-html.dark {
-  color-scheme: dark;
-}
+  html.dark {
+    color-scheme: dark;
+  }
 
-html:lang(zh-TW) {
-  --font-sans: var(--font-sans-tc);
-}
+  html:lang(zh-TW) {
+    --font-sans: var(--font-sans-tc);
+  }
 
-html:lang(zh-CN) {
-  --font-sans: var(--font-sans-sc);
-}
+  html:lang(zh-CN) {
+    --font-sans: var(--font-sans-sc);
+  }
 
-body {
-  font-family: var(--font-sans), sans-serif;
-  font-size: 1.125rem;
-  line-height: 1.75;
-  color: var(--fg);
-  background-color: var(--surface);
-  margin: 0;
-  padding: 0;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
+  body {
+    font-family: var(--font-sans), sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: var(--fg);
+    background-color: var(--surface);
+    margin: 0;
+    padding: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
 
-.font-noto {
-  font-family: var(--font-noto), sans-serif;
-}
+  .font-noto {
+    font-family: var(--font-noto), sans-serif;
+  }
 
-.font-noto-tc {
-  font-family: var(--font-noto-tc), sans-serif;
-}
+  .font-noto-tc {
+    font-family: var(--font-noto-tc), sans-serif;
+  }
 
-.font-noto-sc {
-  font-family: var(--font-noto-sc), sans-serif;
-}
+  .font-noto-sc {
+    font-family: var(--font-noto-sc), sans-serif;
+  }
 
-/* ─── Typography ────────────────────────────────────────── */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-sans), serif;
-  font-weight: 700;
-  line-height: 1.25;
-  margin: 0 0 0.5rem 0;
-  color: var(--fg);
-  scroll-margin-top: 5rem;
-}
-h1 {
-  font-size: 2.5rem;
-}
-h2 {
-  font-size: 1.875rem;
-}
-h3 {
-  font-size: 1.5rem;
-}
-h4 {
-  font-size: 1.25rem;
-}
-h5 {
-  font-size: 1.125rem;
-}
+  /* ─── Typography ────────────────────────────────────────── */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-sans), serif;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0 0 0.5rem 0;
+    color: var(--fg);
+    scroll-margin-top: 5rem;
+  }
+  h1 {
+    font-size: 2.5rem;
+  }
+  h2 {
+    font-size: 1.875rem;
+  }
+  h3 {
+    font-size: 1.5rem;
+  }
+  h4 {
+    font-size: 1.25rem;
+  }
+  h5 {
+    font-size: 1.125rem;
+  }
 
-a {
-  color: var(--accent);
-  text-decoration-color: transparent;
-  transition:
-    color 0.2s ease,
-    text-decoration-color 0.2s ease;
-}
-a:hover {
-  color: var(--accent-dim);
-  text-decoration-color: currentColor;
-}
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 2px;
+    transition:
+      color 0.2s ease,
+      text-decoration-color 0.2s ease;
+  }
+  a:hover {
+    color: var(--accent-dim);
+    text-decoration-color: currentColor;
+  }
 
-p {
-  margin-bottom: 1em;
-}
-strong,
-b {
-  font-weight: 700;
-}
-img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 0.5rem;
-}
+  p {
+    margin-bottom: 1em;
+  }
+  strong,
+  b {
+    font-weight: 700;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+  }
 
-/* ─── Prose ─────────────────────────────────────────────── */
-.prose p {
-  margin-bottom: 1em;
-}
-.prose blockquote {
-  border-left: 4px solid var(--accent);
-  padding: 0.25em 0 0.25em 1.25em;
-  margin: 1.5em 0;
-  font-style: italic;
-  color: var(--fg-muted);
-}
-code {
-  padding: 0.15em 0.4em;
-  background-color: var(--surface-alt);
-  border-radius: 0.25rem;
-  font-size: 0.9em;
-}
-pre {
-  padding: 1.25em 1.5em;
-  border-radius: 0.75rem;
-  overflow-x: auto;
-  background-color: #141210;
-}
-pre > code {
-  all: unset;
-  font-size: 0.9em;
-  color: #e8e0d5;
-}
-hr {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 2em 0;
-}
-table {
-  width: 100%;
-}
+  /* ─── Prose ─────────────────────────────────────────────── */
+  .prose p {
+    margin-bottom: 1em;
+  }
+  .prose ul {
+    list-style-type: disc;
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+  }
+  .prose ol {
+    list-style-type: decimal;
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+  }
+  .prose li {
+    margin-bottom: 0.25em;
+  }
+  .prose blockquote {
+    border-left: 4px solid var(--accent);
+    padding: 0.25em 0 0.25em 1.25em;
+    margin: 1.5em 0;
+    font-style: italic;
+    color: var(--fg-muted);
+  }
+  code {
+    padding: 0.15em 0.4em;
+    background-color: var(--surface-alt);
+    border-radius: 0.25rem;
+    font-size: 0.9em;
+  }
+  pre {
+    padding: 1.25em 1.5em;
+    border-radius: 0.75rem;
+    overflow-x: auto;
+    background-color: #141210;
+  }
+  pre > code {
+    all: unset;
+    font-size: 0.9em;
+    color: #e8e0d5;
+  }
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2em 0;
+  }
+  table {
+    width: 100%;
+  }
+} /* end @layer base */
 
 /* ─── Scroll animations initial state ───────────────────── */
 /* Only hides elements when JS is present (class added by inline script before paint) */
@@ -282,14 +299,16 @@ a,
   }
 }
 
-@media (max-width: 640px) {
-  body {
-    font-size: 1rem;
-  }
-  h1 {
-    font-size: 2rem;
-  }
-  h2 {
-    font-size: 1.5rem;
+@layer base {
+  @media (max-width: 640px) {
+    body {
+      font-size: 1rem;
+    }
+    h1 {
+      font-size: 2rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+    }
   }
 }

@@ -28,11 +28,11 @@ const socialLinks = [
 
 <Layout title={tr.about.title} description={tr.home.tagline} locale={locale}>
   <div class="mx-auto max-w-5xl px-4 py-12">
-    <h1 data-animate class="mb-5 text-4xl font-bold text-fg">{tr.about.title}</h1>
+    <h1 data-animate class="mb-8 text-4xl font-bold text-fg">{tr.about.title}</h1>
 
     <div class="space-y-10">
       <section data-animate>
-        <h2 class="mb-5 text-2xl font-bold text-accent">{tr.about.character}</h2>
+        <h2 class="mb-3 text-2xl font-bold">{tr.about.character}</h2>
         <div class="grid gap-8 sm:grid-cols-3">
           <figure>
             <div class="overflow-hidden rounded-2xl shadow-md ring-1 ring-border">
@@ -79,14 +79,14 @@ const socialLinks = [
       </section>
 
       <section data-animate>
-        <h2 class="mb-4 text-2xl font-bold text-highlight">{tr.about.person}</h2>
+        <h2 class="mb-4 text-2xl font-bold">{tr.about.person}</h2>
         <div class="prose max-w-none">
           {nl(tr.about.intro).map((para) => <p>{para}</p>)}
         </div>
       </section>
 
       <section>
-        <h2 data-animate class="mb-4 text-2xl font-bold text-accent">{tr.about.linksTitle}</h2>
+        <h2 data-animate class="mb-4 text-2xl font-bold">{tr.about.linksTitle}</h2>
         <SocialLinks client:load links={socialLinks} />
       </section>
     </div>
