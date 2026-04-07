@@ -575,7 +575,7 @@ function isActive(href: string) {
               ref="langListRef"
               role="listbox"
               :aria-label="langLabel"
-              class="absolute right-0 z-[70] m-0 mt-2 w-36 list-none rounded-xl border border-border bg-surface p-1 shadow-lg"
+              class="absolute right-0 z-70 m-0 mt-2 w-36 list-none rounded-xl border border-border bg-surface p-1 shadow-lg"
               style="display: none"
               @keydown="handleLangKeydown"
             >
@@ -624,7 +624,7 @@ function isActive(href: string) {
     <div
       id="mobile-menu"
       ref="mobileMenuRef"
-      class="absolute inset-x-0 top-full z-[60] border-b border-border bg-surface/60 px-4 pb-4 shadow-lg backdrop-blur-3xl md:hidden"
+      class="absolute inset-x-0 top-full z-60 border-b border-border bg-surface/60 px-4 pb-4 shadow-lg backdrop-blur-3xl md:hidden"
       style="display: none"
     >
       <ul class="m-0 flex list-none flex-col gap-1 p-0 pt-3">
