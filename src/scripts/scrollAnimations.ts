@@ -24,58 +24,75 @@ export function initScrollAnimations(): void {
   if (!targets.length) return;
 
   if (prefersReduced) {
-    // Mark done so CSS rule `[data-animate-done]` makes them visible immediately
     targets.forEach((el) => (el.dataset.animateDone = ""));
     return;
   }
 
   const triggeredGroups = new WeakSet<Element>();
 
+  function triggerEl(el: HTMLElement, obs?: IntersectionObserver) {
+    if ("animateDone" in el.dataset) return; // already handled
+
+    obs?.unobserve(el);
+    const group = el.closest<HTMLElement>("[data-animate-stagger]");
+
+    if (group && !triggeredGroups.has(group)) {
+      triggeredGroups.add(group);
+      const groupEls = Array.from(
+        group.querySelectorAll<HTMLElement>("[data-animate]:not([data-animate-done])")
+      );
+      groupEls.forEach((e) => {
+        obs?.unobserve(e);
+        e.dataset.animateDone = "";
+        delete e.dataset.animateQueued;
+      });
+      animate(groupEls, {
+        opacity: [0, 1],
+        translateY: [22, 0],
+        duration: 520,
+        ease: "out(3)",
+        delay: stagger(65),
+      });
+    } else if (!group) {
+      el.dataset.animateDone = "";
+      animate(el, {
+        opacity: [0, 1],
+        translateY: [18, 0],
+        duration: 480,
+        ease: "out(3)",
+      });
+    }
+  }
+
   const observer = new IntersectionObserver(
     (entries, obs) => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
-        obs.unobserve(entry.target);
-
-        const el = entry.target as HTMLElement;
-        const group = el.closest<HTMLElement>("[data-animate-stagger]");
-
-        if (group && !triggeredGroups.has(group)) {
-          // Animate all not-yet-done items in the stagger group together
-          triggeredGroups.add(group);
-          const groupEls = Array.from(
-            group.querySelectorAll<HTMLElement>("[data-animate]:not([data-animate-done])")
-          );
-          groupEls.forEach((e) => {
-            obs.unobserve(e);
-            e.dataset.animateDone = "";
-            delete e.dataset.animateQueued;
-          });
-          animate(groupEls, {
-            opacity: [0, 1],
-            translateY: [22, 0],
-            duration: 520,
-            ease: "out(3)",
-            delay: stagger(65),
-          });
-        } else if (!group) {
-          // Standalone element
-          el.dataset.animateDone = "";
-          animate(el, {
-            opacity: [0, 1],
-            translateY: [18, 0],
-            duration: 480,
-            ease: "out(3)",
-          });
-        }
-        // If group already triggered — just skip (already animating)
+        triggerEl(entry.target as HTMLElement, obs);
       }
     },
     { threshold: 0.05, rootMargin: "0px 0px 0px 0px" }
   );
 
   targets.forEach((el) => {
-    el.dataset.animateQueued = ""; // prevent double-observe if called twice
+    el.dataset.animateQueued = "";
     observer.observe(el);
+  });
+
+  // Fallback for real mobile: IntersectionObserver can miss elements already in
+  // the viewport if it fires before layout is fully committed. After two frames
+  // (ensuring paint + layout are settled) we manually trigger anything that is
+  // visibly in the viewport but hasn't been animated yet.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const vh = window.innerHeight;
+      for (const el of targets) {
+        if ("animateDone" in el.dataset) continue;
+        const { top, bottom } = el.getBoundingClientRect();
+        if (top < vh && bottom > 0) {
+          triggerEl(el, observer);
+        }
+      }
+    });
   });
 }
