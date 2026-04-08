@@ -58,6 +58,7 @@ interface Props {
 const props = defineProps<Props>();
 const galleryEl = ref<HTMLElement | null>(null);
 const masonryReady = ref(false);
+const pressedPhoto = ref<string | null>(null);
 let lightbox: PhotoSwipeLightbox | null = null;
 let resizeObserver: ResizeObserver | null = null;
 
@@ -360,7 +361,14 @@ onUnmounted(() => {
       :data-category="photo.category"
       class="group block overflow-hidden rounded-lg bg-surface-alt transition-transform duration-150"
       :class="[props.itemClass, props.alwaysShowText ? 'cursor-pointer' : 'relative']"
-      :style="props.alwaysShowText ? undefined : 'aspect-ratio: 1 / 1'"
+      :style="[
+        props.alwaysShowText ? undefined : 'aspect-ratio: 1 / 1',
+        pressedPhoto === photo.src ? { scale: '0.97' } : {},
+      ]"
+      @pointerdown="pressedPhoto = photo.src"
+      @pointerup="pressedPhoto = null"
+      @pointercancel="pressedPhoto = null"
+      @pointerleave="pressedPhoto = null"
     >
       <!-- image container -->
       <div class="relative overflow-hidden">
@@ -444,13 +452,6 @@ onUnmounted(() => {
 .photo-viewer-masonry > * {
   min-width: 0;
   will-change: transform, opacity;
-}
-
-/* Active press scale — only when the click is NOT on a descendant link.
-   Uses the individual `scale` property (same as Tailwind's scale-* utilities)
-   so it composes with animejs's inline `transform` instead of being overridden. */
-.photo-viewer-root .group:active:not(:has(a:active)) {
-  scale: 0.97;
 }
 
 /* EXIF panel overlay in PhotoSwipe */
