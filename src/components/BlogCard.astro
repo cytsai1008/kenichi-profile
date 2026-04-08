@@ -54,7 +54,10 @@ const blogFontClass =
       <a href={postHref} class="inline-flex items-baseline gap-2 no-underline hover:underline">
         {
           featured && (
-            <Pin class="size-4 shrink-0 translate-y-[1.5px] text-highlight-dim" aria-hidden="true" />
+            <Pin
+              class="size-4 shrink-0 translate-y-[1.5px] text-highlight-dim"
+              aria-hidden="true"
+            />
           )
         }
         <span>{post.data.title}</span>
