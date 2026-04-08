@@ -6,14 +6,20 @@
  * per-photo overrides from a sidecar `.md` file of the same base name.
  *
  * Result: each photo entry has `exif` populated without any manual frontmatter.
+ * Parsed entries are cached in node_modules/.astro/photos-loader-cache.json,
+ * keyed by an MD5 hash of the first 64 KB of the image + sidecar content.
+ * Unchanged photos are skipped on subsequent builds, including on Cloudflare Pages
+ * (which caches node_modules/.astro between builds).
  */
 
+import { createHash } from "node:crypto";
 import type { Loader } from "astro/loaders";
 import ExifReader from "exifreader";
-import { readFile, readdir, stat } from "node:fs/promises";
+import { mkdir, open, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const IMAGE_EXTS = new Set([".jpg", ".jpeg", ".png", ".webp", ".avif", ".tiff", ".tif"]);
+const CACHE_PATH = "node_modules/.astro/photos-loader-cache.json";
 
 export interface PhotoExif {
   camera?: string;
@@ -43,6 +49,57 @@ export interface PhotoEntry {
   exif: PhotoExif;
   /** Raw image file path relative to project root (for Astro Image component) */
   imagePath: string;
+}
+
+/** Serialised form stored in the cache file (Date becomes ISO string). */
+interface CacheEntry {
+  hash: string;
+  data: Omit<PhotoEntry, "date"> & { date: string };
+}
+
+async function readPhotoCache(): Promise<Record<string, CacheEntry>> {
+  try {
+    return JSON.parse(await readFile(CACHE_PATH, "utf-8"));
+  } catch {
+    return {};
+  }
+}
+
+async function writePhotoCache(cache: Record<string, CacheEntry>): Promise<void> {
+  try {
+    await mkdir(path.dirname(CACHE_PATH), { recursive: true });
+    await writeFile(CACHE_PATH, JSON.stringify(cache));
+  } catch {
+    // non-fatal — cache miss on next build
+  }
+}
+
+/**
+ * Hash the first 64 KB of the image (covers all EXIF metadata) plus the full
+ * sidecar .md content if present. Changing either invalidates the cache entry.
+ */
+async function computeEntryHash(absPath: string): Promise<string> {
+  const SAMPLE = 64 * 1024;
+  const hash = createHash("md5");
+
+  const fh = await open(absPath, "r");
+  try {
+    const buf = Buffer.alloc(SAMPLE);
+    const { bytesRead } = await fh.read(buf, 0, SAMPLE, 0);
+    hash.update(buf.subarray(0, bytesRead));
+  } finally {
+    await fh.close();
+  }
+
+  const ext = path.extname(absPath);
+  const sidecarPath = path.join(path.dirname(absPath), `${path.basename(absPath, ext)}.md`);
+  try {
+    hash.update(await readFile(sidecarPath, "utf-8"));
+  } catch {
+    // no sidecar
+  }
+
+  return hash.digest("hex");
 }
 
 /** Read actual pixel dimensions from a JPEG SOF marker — more reliable than EXIF tags. */
@@ -139,17 +196,10 @@ async function parseExif(buffer: Buffer): Promise<PhotoExif> {
   }
 }
 
-/** Load one image file and store it. `album` is undefined for top-level files. */
-async function loadPhotoFile(
-  absPath: string,
-  absBase: string,
-  album: string | undefined,
-  store: Parameters<Loader["load"]>[0]["store"],
-  logger: Parameters<Loader["load"]>[0]["logger"]
-) {
+/** Parse the image file and return a PhotoEntry (no store interaction). */
+async function buildPhotoEntry(absPath: string, album: string | undefined): Promise<PhotoEntry> {
   const ext = path.extname(absPath);
   const slug = path.basename(absPath, ext);
-  const id = album ? `${album}/${slug}` : slug;
   const relPath = path.relative(path.resolve("."), absPath).replace(/\\/g, "/");
 
   const buffer = await readFile(absPath);
@@ -173,7 +223,7 @@ async function loadPhotoFile(
     // No sidecar — use defaults
   }
 
-  const entry: PhotoEntry = {
+  return {
     src: absPath,
     slug,
     album,
@@ -184,9 +234,6 @@ async function loadPhotoFile(
     exif,
     imagePath: `/${relPath}`,
   };
-
-  store.set({ id, data: entry });
-  logger.info(`photos-loader: loaded ${id}`);
 }
 
 export function photosLoader(baseDir = "./src/content/photos"): Loader {
@@ -194,8 +241,6 @@ export function photosLoader(baseDir = "./src/content/photos"): Loader {
     name: "photos-loader",
 
     async load({ store, logger }) {
-      store.clear();
-
       const absBase = path.resolve(baseDir);
       let entries: string[];
       try {
@@ -203,6 +248,34 @@ export function photosLoader(baseDir = "./src/content/photos"): Loader {
       } catch {
         logger.warn(`photos-loader: directory not found — ${absBase}`);
         return;
+      }
+
+      const prevCache = await readPhotoCache();
+      const newCache: Record<string, CacheEntry> = {};
+      const seenIds = new Set<string>();
+
+      async function processPhoto(absPath: string, album: string | undefined) {
+        const ext = path.extname(absPath);
+        const slug = path.basename(absPath, ext);
+        const id = album ? `${album}/${slug}` : slug;
+        seenIds.add(id);
+
+        const hash = await computeEntryHash(absPath);
+        const cached = prevCache[id];
+
+        if (cached?.hash === hash) {
+          // Restore from cache — no full file read or EXIF parse needed
+          const data = { ...cached.data, date: new Date(cached.data.date) } as PhotoEntry;
+          store.set({ id, data });
+          newCache[id] = cached;
+          logger.info(`photos-loader: cached  ${id}`);
+          return;
+        }
+
+        const data = await buildPhotoEntry(absPath, album);
+        store.set({ id, data });
+        newCache[id] = { hash, data: { ...data, date: data.date.toISOString() } };
+        logger.info(`photos-loader: loaded  ${id}`);
       }
 
       for (const entry of entries) {
@@ -216,13 +289,23 @@ export function photosLoader(baseDir = "./src/content/photos"): Loader {
             IMAGE_EXTS.has(path.extname(f).toLowerCase())
           );
           for (const file of imageFiles) {
-            await loadPhotoFile(path.join(absEntry, file), absBase, entry, store, logger);
+            await processPhoto(path.join(absEntry, file), entry);
           }
         } else if (IMAGE_EXTS.has(path.extname(entry).toLowerCase())) {
           // Top-level flat file
-          await loadPhotoFile(absEntry, absBase, undefined, store, logger);
+          await processPhoto(absEntry, undefined);
         }
       }
+
+      // Remove store entries for photos that have been deleted
+      for (const [id] of store.entries()) {
+        if (!seenIds.has(id)) {
+          store.delete(id);
+          logger.info(`photos-loader: removed ${id}`);
+        }
+      }
+
+      await writePhotoCache(newCache);
     },
   };
 }
