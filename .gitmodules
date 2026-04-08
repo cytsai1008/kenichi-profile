@@ -1,0 +1,3 @@
+[submodule "src/content/photos"]
+	path = src/content/photos
+	url = https://github.com/cytsai1008/kenichi-profile-photos
