@@ -92,6 +92,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
       creator: localizedValue(entry.data.artist, entry.data.artistI18n),
       creatorUrl: entry.data.artistUrl,
       category: entry.data.category,
+      featured: entry.data.featured,
     } satisfies PhotoItem;
   })
 ).then((items) => items.filter(isPhotoItem));
@@ -160,24 +161,24 @@ const galleryItems: PhotoItem[] = await Promise.all(
 <script>
   import { animate, stagger } from "animejs";
 
-  const filters = Array.from(document.querySelectorAll(".gallery-filter"));
-  const filterBar = document.querySelector("[role='tablist']");
-  const filterPill = document.querySelector(".gallery-filter-pill");
+  const filters = Array.from(document.querySelectorAll<HTMLButtonElement>(".gallery-filter"));
+  const filterBar = document.querySelector<HTMLElement>("[role='tablist']");
+  const filterPill = document.querySelector<HTMLElement>(".gallery-filter-pill");
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   let activeCategory = "all";
   let isTransitioning = false;
-  let activeButton = null;
+  let activeButton: HTMLButtonElement | null = null;
 
   function getItems() {
-    return Array.from(document.querySelectorAll(".gallery-item"));
+    return Array.from(document.querySelectorAll<HTMLElement>(".gallery-item"));
   }
 
-  function matchesCategory(item, category) {
+  function matchesCategory(item: HTMLElement, category: string) {
     return category === "all" || item.dataset.category === category;
   }
 
-  function setActiveFilter(activeButton) {
+  function setActiveFilter(activeButton: HTMLButtonElement) {
     filters.forEach((button) => {
       const isActive = button === activeButton;
       button.setAttribute("aria-selected", isActive ? "true" : "false");
@@ -188,7 +189,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
     });
   }
 
-  function getButtonMetrics(button) {
+  function getButtonMetrics(button: HTMLButtonElement) {
     if (!filterBar || !button) return null;
 
     const barRect = filterBar.getBoundingClientRect();
@@ -202,7 +203,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
     };
   }
 
-  function placeFilterPill(button) {
+  function placeFilterPill(button: HTMLButtonElement) {
     const metrics = getButtonMetrics(button);
     if (!filterPill || !metrics) return null;
 
@@ -214,7 +215,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
     return metrics;
   }
 
-  async function moveFilterPill(button, instant = false) {
+  async function moveFilterPill(button: HTMLButtonElement, instant = false) {
     if (!filterPill || !button) return;
 
     const next = getButtonMetrics(button);
@@ -259,7 +260,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
     });
   }
 
-  function setVisibility(category) {
+  function setVisibility(category: string) {
     const items = getItems();
     items.forEach((item) => {
       item.style.display = matchesCategory(item, category) ? "" : "none";
@@ -267,7 +268,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
     refreshMasonry();
   }
 
-  async function switchFilter(category, button) {
+  async function switchFilter(category: string, button: HTMLButtonElement) {
     if (isTransitioning || category === activeCategory) return;
 
     isTransitioning = true;

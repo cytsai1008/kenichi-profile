@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { Pin } from "@lucide/vue";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
 
@@ -13,6 +14,7 @@ export interface PhotoItem {
   title?: string;
   subtitle?: string;
   subtitleUrl?: string;
+  featured?: boolean;
   category?: string;
   creator?: string;
   creatorUrl?: string;
@@ -396,7 +398,16 @@ onUnmounted(() => {
 
       <!-- caption below image for alwaysShowText mode -->
       <div v-if="props.alwaysShowText && (photo.title || photo.subtitle)" class="space-y-0.5 p-3">
-        <p v-if="photo.title" class="text-sm leading-tight font-medium text-fg">
+        <p
+          v-if="photo.title"
+          class="flex items-start gap-1.5 text-sm leading-tight font-medium text-fg"
+        >
+          <Pin
+            v-if="photo.featured"
+            :size="14"
+            aria-hidden="true"
+            class="mt-0.5 shrink-0 text-highlight-dim"
+          />
           {{ photo.title }}
         </p>
         <p v-if="photo.subtitle" class="text-xs leading-tight text-fg-muted">

@@ -1,6 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
+import { Pin } from "@lucide/astro";
 import FormattedDate from "./FormattedDate.astro";
 import { localePath, t, type Locale } from "../i18n/utils";
 import { getBlogSlug } from "../lib/blog";
@@ -50,8 +51,13 @@ const blogFontClass =
       <FormattedDate date={post.data.pubDate} />
     </p>
     <h3 class:list={["leading-snug font-bold text-fg", featured ? "text-xl" : "text-base"]}>
-      <a href={postHref} class="no-underline hover:underline">
-        {post.data.title}
+      <a href={postHref} class="inline-flex items-baseline gap-2 no-underline hover:underline">
+        {
+          featured && (
+            <Pin class="size-4 shrink-0 translate-y-[1.5px] text-highlight-dim" aria-hidden="true" />
+          )
+        }
+        <span>{post.data.title}</span>
       </a>
     </h3>
     {
