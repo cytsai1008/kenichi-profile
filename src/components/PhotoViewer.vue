@@ -63,19 +63,43 @@ function updateMasonryLayout() {
   if (!props.alwaysShowText || !galleryEl.value) return;
 
   const styles = window.getComputedStyle(galleryEl.value);
-  const autoRow = Number.parseFloat(styles.getPropertyValue("grid-auto-rows"));
-  const rowGap = Number.parseFloat(styles.getPropertyValue("row-gap"));
-  if (!autoRow) return;
+  const rowGap = Number.parseFloat(styles.getPropertyValue("row-gap")) || 0;
+  const columnGap = Number.parseFloat(styles.getPropertyValue("column-gap")) || rowGap;
+  const columns = window.innerWidth >= 1024 ? 4 : window.innerWidth >= 640 ? 3 : 2;
+  const containerWidth = galleryEl.value.clientWidth;
+  if (!containerWidth || columns <= 0) return;
+
+  const columnWidth = (containerWidth - columnGap * (columns - 1)) / columns;
+  const columnHeights = Array(columns).fill(0);
+  const visibleItems = Array.from(galleryEl.value.children).filter(
+    (item) => (item as HTMLElement).offsetParent !== null
+  ) as HTMLElement[];
+
+  visibleItems.forEach((element, index) => {
+    const column = index % columns;
+    const x = column * (columnWidth + columnGap);
+    const y = columnHeights[column];
+
+    element.style.position = "absolute";
+    element.style.left = `${x}px`;
+    element.style.top = `${y}px`;
+    element.style.width = `${columnWidth}px`;
+    element.style.gridRowEnd = "";
+
+    const height = element.offsetHeight;
+    columnHeights[column] += height + rowGap;
+  });
 
   Array.from(galleryEl.value.children).forEach((item) => {
     const element = item as HTMLElement;
-    if (element.offsetParent === null) return;
-
-    element.style.gridRowEnd = "auto";
-    const height = element.offsetHeight;
-    const span = Math.max(1, Math.ceil((height + rowGap) / (autoRow + rowGap)));
-    element.style.gridRowEnd = `span ${span}`;
+    if (element.offsetParent !== null) return;
+    element.style.position = "";
+    element.style.left = "";
+    element.style.top = "";
+    element.style.width = "";
   });
+
+  galleryEl.value.style.height = `${Math.max(0, ...columnHeights.map((value) => value - rowGap))}px`;
 }
 
 async function syncMasonryLayout() {
@@ -394,28 +418,16 @@ onUnmounted(() => {
 
 <style>
 .photo-viewer-masonry {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-  grid-auto-flow: row;
-  grid-auto-rows: 2px;
-  align-items: start;
+  position: relative;
+  width: 100%;
+  min-height: 1px;
+  column-gap: 0.75rem;
+  row-gap: 0.75rem;
 }
 
 .photo-viewer-masonry > * {
   min-width: 0;
-}
-
-@media (min-width: 640px) {
-  .photo-viewer-masonry {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .photo-viewer-masonry {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  will-change: transform, opacity;
 }
 
 /* EXIF panel overlay in PhotoSwipe */
