@@ -2,7 +2,7 @@
   "nav": {
     "home": "Home",
     "blog": "Articles",
-    "gallery": "Commissions",
+    "gallery": "Art Collections",
     "photos": "Photos",
     "about": "About Me",
     "openMenu": "Open menu",
@@ -22,7 +22,7 @@
     "greeting": "Hello, I'm",
     "tagline": "A blue cat into coding and photography.",
     "recentPosts": "Recent Articles",
-    "latestGallery": "Recent Commissions",
+    "latestGallery": "Recent Art Collections",
     "latestPhotos": "Recent Photos",
     "viewAll": "View all"
   },
@@ -34,7 +34,7 @@
     "updatedOn": "Updated on"
   },
   "gallery": {
-    "title": "Commissions",
+    "title": "Art Collections",
     "description": "Artwork, ref sheets, and character illustrations.",
     "all": "All",
     "refSheet": "Reference Sheet",

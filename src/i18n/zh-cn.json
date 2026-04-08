@@ -2,7 +2,7 @@
   "nav": {
     "home": "首页",
     "blog": "文章",
-    "gallery": "委托",
+    "gallery": "作品收藏",
     "photos": "照片",
     "about": "关于我",
     "openMenu": "打开菜单",
@@ -22,7 +22,7 @@
     "greeting": "你好，我是",
     "tagline": "一只蓝猫，会写程式和摄影",
     "recentPosts": "最新文章",
-    "latestGallery": "最新委托",
+    "latestGallery": "最新收藏",
     "latestPhotos": "最新相片",
     "viewAll": "查看全部"
   },
@@ -34,7 +34,7 @@
     "updatedOn": "更新于"
   },
   "gallery": {
-    "title": "委托",
+    "title": "作品收藏",
     "description": "设定图、角色插画和其他作品",
     "all": "全部",
     "refSheet": "设定图",
