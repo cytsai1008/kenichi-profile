@@ -9,7 +9,7 @@ descriptionI18n:
   zh-cn: "Mofu Mofu绘制的健一头像"
 image: "../../assets/commissions/Mofu_Mofu.jpg"
 date: 2023-01-26
-category: commission
+category: gift-art
 artist: "Mofu Mofu"
 artistI18n:
   zh-tw: "阿天"

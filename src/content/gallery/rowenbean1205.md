@@ -9,7 +9,7 @@ descriptionI18n:
   zh-cn: "RowenBean1205绘制的健一头像"
 image: "../../assets/commissions/RowenBean1205.jpg"
 date: 2022-07-15
-category: commission
+category: gift-art
 artist: "RoweN"
 artistI18n:
   zh-tw: "ㄉㄉ"

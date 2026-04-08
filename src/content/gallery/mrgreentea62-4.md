@@ -9,7 +9,7 @@ descriptionI18n:
   zh-cn: "AGreen绘制的健一头像"
 image: "../../assets/commissions/MrGreentea62_4.PNG"
 date: 2024-01-30
-category: commission
+category: gift-art
 artist: "AGreen"
 artistI18n:
   zh-tw: "阿綠"

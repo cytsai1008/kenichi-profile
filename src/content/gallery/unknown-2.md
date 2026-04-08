@@ -9,7 +9,7 @@ descriptionI18n:
   zh-cn: "Unknown绘制的健一委托"
 image: "../../assets/commissions/Unknown_2.jpg"
 date: 2023-02-01
-category: commission
+category: gift-art
 artist: "Unknown"
 artistI18n:
   zh-tw: "好想睡覺"

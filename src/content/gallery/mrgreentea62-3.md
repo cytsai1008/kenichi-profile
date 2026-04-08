@@ -9,7 +9,7 @@ descriptionI18n:
   zh-cn: "MrGreentea62绘制的健一半身委托"
 image: "../../assets/commissions/MrGreentea62_3.jpg"
 date: 2023-09-28
-category: commission
+category: gift-art
 artist: "AGreen"
 artistI18n:
   zh-tw: "阿綠"

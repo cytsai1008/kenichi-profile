@@ -9,7 +9,7 @@ descriptionI18n:
   zh-cn: "Kiru绘制的健一头像"
 image: "../../assets/commissions/kiru.png"
 date: 2022-09-26
-category: commission
+category: gift-art
 artist: "Kiru"
 artistI18n:
   zh-tw: "鯊困"

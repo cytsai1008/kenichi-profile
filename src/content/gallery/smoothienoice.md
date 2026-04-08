@@ -9,7 +9,7 @@ descriptionI18n:
   zh-cn: "Flexolk绘制的健一头像"
 image: "../../assets/commissions/SmoothieNoIce.png"
 date: 2025-11-30
-category: commission
+category: gift-art
 artist: "Flexolk"
 artistI18n:
   zh-tw: "普洱"

@@ -9,7 +9,7 @@ descriptionI18n:
   zh-cn: "Baka_inuta绘制的健一半身委托"
 image: "../../assets/commissions/Baka_inuta.jpg"
 date: 2022-09-19
-category: commission
+category: gift-art
 artist: "Baka_inuta"
 artistI18n:
   zh-tw: "羽下犬太"

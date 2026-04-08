@@ -9,7 +9,7 @@ descriptionI18n:
   zh-cn: "Unknown绘制的猫咪健一"
 image: "../../assets/commissions/Unknown_1.jpg"
 date: 2022-07-09
-category: commission
+category: gift-art
 artist: "Unknown"
 artistI18n:
   zh-tw: "好想睡覺"

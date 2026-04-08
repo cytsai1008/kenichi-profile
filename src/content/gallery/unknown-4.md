@@ -9,7 +9,7 @@ descriptionI18n:
   zh-cn: "Unknown绘制的健一委托"
 image: "../../assets/commissions/Unknown_4.webp"
 date: 2022-10-08
-category: commission
+category: gift-art
 artist: "Unknown"
 artistI18n:
   zh-tw: "未知"

@@ -9,7 +9,7 @@ descriptionI18n:
   zh-cn: "Za Za绘制的健一头像"
 image: "../../assets/commissions/Zaza_artist.jpg"
 date: 2023-05-15
-category: commission
+category: gift-art
 artist: "Za Za"
 artistI18n:
   zh-tw: "喳喳"
