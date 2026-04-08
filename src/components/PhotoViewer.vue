@@ -391,7 +391,7 @@ onUnmounted(() => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
   grid-auto-flow: row;
-  grid-auto-rows: 8px;
+  grid-auto-rows: 2px;
   align-items: start;
 }
 

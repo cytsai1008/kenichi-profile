@@ -28,7 +28,7 @@ npm run dev
 Useful commands:
 
 | Command                  | What it does                                |
-|--------------------------|---------------------------------------------|
+| ------------------------ | ------------------------------------------- |
 | `npm run dev`            | Start the local dev server                  |
 | `npm run build`          | Build the site into `dist/`                 |
 | `npm run preview`        | Preview the production build locally        |
@@ -100,6 +100,7 @@ npm run new:commission
 It will prompt for the source image, titles, descriptions, optional i18n fields, and artist details, then:
 
 - ask for the image type first, such as `avatar`, `full-body`, or `other`
+- ask for the gallery category, such as `commission` or `gift-art`
 - copy the image into `src/assets/commissions/`
 - create `src/content/gallery/<slug>.md`
 - infer the artist username from the filename and use it as the default artist value
@@ -107,7 +108,8 @@ It will prompt for the source image, titles, descriptions, optional i18n fields,
 
 Optional flags:
 
-- `--preset avatar|full-body|other`
+- `--preset avatar|full-body|half-body|other`
+- `--category commission|gift-art`
 - `--dry-run`
 
 Required frontmatter:
@@ -125,7 +127,7 @@ Optional fields:
 - `description`
 - `titleI18n`
 - `descriptionI18n`
-- `category` (`ref-sheet`, `commission`, `other`)
+- `category` (`ref-sheet`, `commission`, `gift-art`, `other`)
 - `artist`
 - `artistI18n`
 - `artistUrl`

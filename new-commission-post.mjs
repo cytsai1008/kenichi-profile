@@ -18,6 +18,19 @@ const DEFAULT_NAME = "Kenichi";
 const UNKNOWN_ARTIST_EN = "Unknown";
 const UNKNOWN_ARTIST_ZH_TW = "未知";
 const twToSConverter = new OpenCC("tw2s.json");
+const GALLERY_CATEGORIES = ["commission", "gift-art"];
+const WORK_TYPE_LABELS = {
+  commission: {
+    en: "commission",
+    "zh-tw": "委託",
+    "zh-cn": "委托",
+  },
+  "gift-art": {
+    en: "gift art",
+    "zh-tw": "贈圖",
+    "zh-cn": "赠图",
+  },
+};
 
 const IMAGE_TYPE_PRESETS = {
   avatar: {
@@ -38,48 +51,49 @@ const IMAGE_TYPE_PRESETS = {
     category: "commission",
     featured: false,
     titleTemplate: "{name} Full Body",
-    descriptionTemplate: "{name} full body commission drawn by {artist}.",
+    descriptionTemplate: "{name} full body {workType} drawn by {artist}.",
     titleI18nTemplates: {
       "zh-tw": "健一全身",
       "zh-cn": "健一全身",
     },
     descriptionI18nTemplates: {
-      "zh-tw": "{artist}繪製的健一全身委託",
-      "zh-cn": "{artist}绘制的健一全身委托",
+      "zh-tw": "{artist}繪製的健一全身{workType}",
+      "zh-cn": "{artist}绘制的健一全身{workType}",
     },
   },
   "half-body": {
     category: "commission",
     featured: false,
     titleTemplate: "{name} Half Body",
-    descriptionTemplate: "{name} half body commission drawn by {artist}.",
+    descriptionTemplate: "{name} half body {workType} drawn by {artist}.",
     titleI18nTemplates: {
       "zh-tw": "健一半身",
       "zh-cn": "健一半身",
     },
     descriptionI18nTemplates: {
-      "zh-tw": "{artist}繪製的健一半身委託",
-      "zh-cn": "{artist}绘制的健一半身委托",
+      "zh-tw": "{artist}繪製的健一半身{workType}",
+      "zh-cn": "{artist}绘制的健一半身{workType}",
     },
   },
   other: {
     category: "commission",
     featured: false,
     titleTemplate: "{name}",
-    descriptionTemplate: "{name} commission drawn by {artist}.",
+    descriptionTemplate: "{name} {workType} drawn by {artist}.",
     titleI18nTemplates: {
       "zh-tw": "{name}",
       "zh-cn": "{name}",
     },
     descriptionI18nTemplates: {
-      "zh-tw": "{artist}繪製的健一委託",
-      "zh-cn": "{artist}绘制的健一委托",
+      "zh-tw": "{artist}繪製的健一{workType}",
+      "zh-cn": "{artist}绘制的健一{workType}",
     },
   },
 };
 
 const { values } = parseArgs({
   options: {
+    category: { type: "string" },
     "dry-run": { type: "boolean" },
     help: { type: "boolean", short: "h" },
     preset: { type: "string" },
@@ -108,6 +122,12 @@ async function main() {
       values.preset ?? "avatar"
     );
     const preset = IMAGE_TYPE_PRESETS[imageType];
+    const category = await promptChoice(
+      rl,
+      "Gallery category",
+      GALLERY_CATEGORIES,
+      values.category ?? preset.category
+    );
 
     const sourceInput = await promptText(rl, "Source image path", "", true);
     const sourcePath = path.resolve(ROOT, sourceInput);
@@ -137,7 +157,11 @@ async function main() {
     const description = await promptText(
       rl,
       "Description",
-      applyTemplate(preset.descriptionTemplate, { name: DEFAULT_NAME, artist }),
+      applyTemplate(preset.descriptionTemplate, {
+        name: DEFAULT_NAME,
+        artist,
+        workType: getWorkTypeLabel(category, "en"),
+      }),
       false
     );
     const date = await promptText(rl, "Date", isoToday(), true);
@@ -159,14 +183,22 @@ async function main() {
     const descriptionZhTw = await promptText(
       rl,
       "Description (zh-tw)",
-      applyTemplate(preset.descriptionI18nTemplates["zh-tw"], { name: DEFAULT_NAME, artist }),
+      applyTemplate(preset.descriptionI18nTemplates["zh-tw"], {
+        name: DEFAULT_NAME,
+        artist,
+        workType: getWorkTypeLabel(category, "zh-tw"),
+      }),
       false
     );
     const descriptionZhCn = await promptText(
       rl,
       "Description (zh-cn)",
       (await toSimplifiedChinese(descriptionZhTw)) ||
-        applyTemplate(preset.descriptionI18nTemplates["zh-cn"], { name: DEFAULT_NAME, artist }),
+        applyTemplate(preset.descriptionI18nTemplates["zh-cn"], {
+          name: DEFAULT_NAME,
+          artist,
+          workType: getWorkTypeLabel(category, "zh-cn"),
+        }),
       false
     );
 
@@ -209,7 +241,7 @@ async function main() {
       },
       image: frontmatterImagePath,
       date,
-      category: preset.category,
+      category,
       artist,
       artistI18n: {
         "zh-tw": artistZhTw,
@@ -224,6 +256,7 @@ async function main() {
     console.log(`- image: ${path.relative(ROOT, imageTarget)}`);
     console.log(`- post:  ${path.relative(ROOT, postTarget)}`);
     console.log(`- image type: ${imageType}`);
+    console.log(`- category: ${category}`);
     console.log(`- artist: ${artist || "(empty)"}`);
 
     const shouldWrite = values["dry-run"] ? false : await promptBoolean(rl, "Write files", true);
@@ -259,6 +292,7 @@ Interactive commission post generator.
 
 Options:
   --preset <name>         Preselect an image type preset
+  --category <name>       Preselect a gallery category (${GALLERY_CATEGORIES.join("|")})
   --dry-run               Print the generated frontmatter instead of writing files
   -h, --help              Show this help
 `);
@@ -394,7 +428,12 @@ function isoToday() {
 function applyTemplate(template, values) {
   return template
     .replaceAll("{name}", values.name)
-    .replaceAll("{artist}", values.artist || "the artist");
+    .replaceAll("{artist}", values.artist || "the artist")
+    .replaceAll("{workType}", values.workType || "artwork");
+}
+
+function getWorkTypeLabel(category, locale) {
+  return WORK_TYPE_LABELS[category]?.[locale] ?? WORK_TYPE_LABELS.commission[locale];
 }
 
 function inferUsernameFromFilename(fileName) {

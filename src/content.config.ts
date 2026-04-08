@@ -37,7 +37,7 @@ const gallery = defineCollection({
         .optional(),
       image: z.string(),
       date: z.coerce.date(),
-      category: z.enum(["ref-sheet", "commission", "other"]).default("other"),
+      category: z.enum(["ref-sheet", "commission", "gift-art", "other"]).default("other"),
       artist: z.string().optional(),
       artistI18n: z
         .object({

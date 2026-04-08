@@ -28,12 +28,14 @@ Run Prettier and ESLint on any changed `.astro`, `.vue`, or `.ts` files before c
 ### Color system — Tailwind v4 with `@theme inline`
 
 Defined in `src/styles/global.css`:
+
 1. Raw CSS variables in `:root` / `.dark` (e.g. `--surface`, `--fg`, `--accent-bg`)
 2. Mapped into Tailwind tokens via `@theme inline` so utilities output `var(…)` and respond to `.dark` at runtime — **not** static hex values.
 
 Dark mode is toggled by adding/removing the `.dark` class on `<html>`. The inline script in `BaseHead.astro` applies it before first paint to prevent flash.
 
 Key token distinction:
+
 - `text-accent` / `border-accent` — the medium blue, for text/borders on light backgrounds
 - `bg-accent-bg` / `bg-accent-dim` — the darker blue, for filled backgrounds where white text must be legible (WCAG AA ≥ 4.5:1)
 - Filled backgrounds (`.bg-accent-bg`, `.bg-highlight`, etc.) auto-get `color: #fff` via a global CSS rule — no need to add `text-white`.
@@ -44,11 +46,11 @@ All page content wrappers use `max-w-5xl` to match the nav, preventing layout sh
 
 Defined in `src/content.config.ts`:
 
-| Collection | Source | Notes |
-|---|---|---|
-| `blog` | `src/content/blog/*.{md,mdx}` | Standard Astro glob loader |
-| `gallery` | `src/content/gallery/*.{md,mdx}` | Artwork; frontmatter includes `image`, `category`, `artist` |
-| `photos` | `src/content/photos/` images | **Custom loader** (`src/loaders/photosLoader.ts`) — drop image files here and EXIF is read automatically at build time via `exifreader`. Optional sidecar `.md` of the same base name overrides `title`, `description`, `location`, `date`. |
+| Collection | Source                           | Notes                                                                                                                                                                                                                                       |
+| ---------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `blog`     | `src/content/blog/*.{md,mdx}`    | Standard Astro glob loader                                                                                                                                                                                                                  |
+| `gallery`  | `src/content/gallery/*.{md,mdx}` | Artwork; frontmatter includes `image`, `category`, `artist`                                                                                                                                                                                 |
+| `photos`   | `src/content/photos/` images     | **Custom loader** (`src/loaders/photosLoader.ts`) — drop image files here and EXIF is read automatically at build time via `exifreader`. Optional sidecar `.md` of the same base name overrides `title`, `description`, `location`, `date`. |
 
 ### Components
 
@@ -65,6 +67,6 @@ Defined in `src/content.config.ts`:
 
 **Blog post** — create `src/content/blog/my-post.md` with frontmatter: `title`, `description`, `pubDate`, optional `heroImage`, `tags`.
 
-**Gallery artwork** — create `src/content/gallery/my-art.md` with frontmatter: `title`, `image`, `date`, `category` (`ref-sheet` | `fan-art` | `commission` | `other`), optional `artist`, `artistUrl`.
+**Gallery artwork** — create `src/content/gallery/my-art.md` with frontmatter: `title`, `image`, `date`, `category` (`ref-sheet` | `commission` | `gift-art` | `other`), optional `artist`, `artistUrl`.
 
 **Photo** — drop `photo.jpg` into `src/content/photos/`. EXIF is extracted automatically. Optionally create `photo.md` to add `title`, `location`, `description`.

@@ -50,7 +50,14 @@ const all = (await getCollection("gallery")).sort(
     b.data.date.valueOf() - a.data.date.valueOf()
 );
 
-const categories = ["all", "ref-sheet", "commission", "other"] as const;
+const categories = ["all", "ref-sheet", "commission", "gift-art", "other"] as const;
+const categoryLabels: Record<(typeof categories)[number], string> = {
+  all: tr.gallery.all,
+  "ref-sheet": tr.gallery.refSheet,
+  commission: tr.gallery.commission,
+  "gift-art": tr.gallery.giftArt,
+  other: tr.gallery.other,
+};
 
 function isPhotoItem(item: PhotoItem | null): item is PhotoItem {
   return item !== null;
@@ -106,14 +113,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
     >
       {
         categories.map((cat) => {
-          const label =
-            cat === "all"
-              ? tr.gallery.all
-              : cat === "ref-sheet"
-                ? tr.gallery.refSheet
-                : cat === "commission"
-                  ? tr.gallery.commission
-                  : tr.gallery.other;
+          const label = categoryLabels[cat];
           const count =
             cat === "all"
               ? galleryItems.length
