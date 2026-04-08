@@ -1,8 +1,10 @@
 ---
 import "../styles/global.css";
 import type { ImageMetadata } from "astro";
+import { Seo } from "astro-seo-meta";
+import { Schema } from "astro-seo-schema";
 import { locales, localeLang, localePath, type Locale } from "../i18n/utils";
-import { SITE_TITLE } from "../consts";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 
 interface Props {
   title: string;
@@ -68,10 +70,17 @@ const fullTitle = `${SITE_TITLE} | ${title}`;
 }
 <link rel="alternate" hreflang="x-default" href={new URL(Astro.url.pathname, Astro.site)} />
 
-<!-- Primary Meta Tags -->
-<title>{fullTitle}</title>
-<meta name="title" content={fullTitle} />
-<meta name="description" content={description} />
+<!-- Primary Meta, Open Graph, Twitter -->
+<Seo
+  title={fullTitle}
+  description={description}
+  facebook={{
+    url: canonicalURL.href,
+    type: type === "article" ? "article" : "website",
+    image: socialImage.href,
+  }}
+  twitter={{ card: "summary_large_image", image: socialImage.href }}
+/>
 
 <!-- Google Analytics -->
 <!-- Google tag (gtag.js) -->
@@ -102,13 +111,8 @@ const fullTitle = `${SITE_TITLE} | ${title}`;
   })(window, document, "clarity", "script", "w7t8i6b9gr");
 </script>
 
-<!-- Open Graph -->
-<meta property="og:type" content={type} />
+<!-- Open Graph extras (not covered by astro-seo-meta) -->
 <meta property="og:site_name" content={SITE_TITLE} />
-<meta property="og:url" content={canonicalURL} />
-<meta property="og:title" content={fullTitle} />
-<meta property="og:description" content={description} />
-<meta property="og:image" content={socialImage} />
 <meta property="og:image:alt" content={fullTitle} />
 <meta property="og:locale" content={localeLang[locale]} />
 {
@@ -123,12 +127,34 @@ const fullTitle = `${SITE_TITLE} | ${title}`;
 }
 {type === "article" && <meta property="article:author" content={SITE_TITLE} />}
 
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:url" content={canonicalURL} />
-<meta name="twitter:title" content={fullTitle} />
-<meta name="twitter:description" content={description} />
-<meta name="twitter:image" content={socialImage} />
+<!-- JSON-LD -->
+<Schema
+  item={{
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${Astro.site}#website`,
+        name: SITE_TITLE,
+        url: Astro.site?.href ?? "/",
+        description: SITE_DESCRIPTION,
+        inLanguage: localeLang[locale],
+        author: { "@id": new URL("/about", Astro.site).href },
+      },
+      {
+        "@type": "Person",
+        "@id": new URL("/about", Astro.site).href,
+        name: SITE_TITLE,
+        url: Astro.site?.href ?? "/",
+        sameAs: [
+          "https://r.photocat.blue/facebook",
+          "https://r.photocat.blue/x",
+          "https://r.photocat.blue/github",
+        ],
+      },
+    ],
+  }}
+/>
 
 <!-- Apply theme before paint to avoid flash -->
 <script is:inline>

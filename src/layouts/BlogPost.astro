@@ -1,14 +1,17 @@
 ---
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
+import { Schema } from "astro-seo-schema";
 import Layout from "./Layout.astro";
 import FormattedDate from "../components/FormattedDate.astro";
-import { getLocaleFromUrl, localePath, t } from "../i18n/utils";
+import { getLocaleFromUrl, localeLang, localePath, t } from "../i18n/utils";
+import { SITE_TITLE } from "../consts";
 
 type Props = CollectionEntry<"blog">["data"];
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, tags } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url);
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const tr = t(locale);
 const blogFontClass =
   locale === "zh-tw" ? "font-noto-tc" : locale === "zh-cn" ? "font-noto-sc" : "";
@@ -22,6 +25,23 @@ const blogFontClass =
   pubDate={pubDate}
   updatedDate={updatedDate}
 >
+  <Schema
+    item={{
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: title,
+      description: description ?? "",
+      datePublished: pubDate.toISOString(),
+      dateModified: (updatedDate ?? pubDate).toISOString(),
+      url: canonicalURL.href,
+      mainEntityOfPage: { "@type": "WebPage", "@id": canonicalURL.href },
+      inLanguage: localeLang[locale],
+      ...(heroImage && { image: new URL(heroImage.src, Astro.site).href }),
+      ...(tags?.length && { keywords: tags.join(", ") }),
+      author: { "@type": "Person", "@id": new URL("/about", Astro.site).href, name: SITE_TITLE },
+      publisher: { "@type": "Person", "@id": new URL("/about", Astro.site).href, name: SITE_TITLE },
+    }}
+  />
   <article data-animate class:list={["mx-auto max-w-5xl px-4 py-12", blogFontClass]}>
     {
       heroImage && (

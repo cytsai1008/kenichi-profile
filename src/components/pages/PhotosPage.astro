@@ -2,10 +2,12 @@
 import { getImage } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import { getCollection } from "astro:content";
+import { Schema } from "astro-seo-schema";
 import Layout from "../../layouts/Layout.astro";
 import PhotoViewer from "../PhotoViewer.vue";
 import { t, type Locale } from "../../i18n/utils";
 import type { PhotoItem } from "../PhotoViewer.vue";
+import { SITE_TITLE } from "../../consts";
 
 interface Props {
   locale: Locale;
@@ -78,6 +80,36 @@ async function toPhotoItem(entry: (typeof entries)[number]): Promise<PhotoItem> 
   };
 }
 
+const aboutUrl = new URL("/about", Astro.site).href;
+const imageSchemaItems = entries
+  .map((entry) => {
+    const originalUrl = photoOriginalUrls[entry.data.imagePath];
+    if (!originalUrl) return null;
+    const contentUrl = new URL(originalUrl, Astro.site).href;
+    const imageModule = photoModules[entry.data.imagePath]?.default;
+    return {
+      "@type": "ImageObject" as const,
+      contentUrl,
+      name: entry.data.title,
+      ...(entry.data.description && { description: entry.data.description }),
+      datePublished: entry.data.date.toISOString(),
+      creator: { "@type": "Person" as const, "@id": aboutUrl, name: SITE_TITLE },
+      creditText: SITE_TITLE,
+      copyrightNotice: `© ${entry.data.date.getFullYear()} ${SITE_TITLE}`,
+      keywords: "furry, fursuit, furry convention",
+      license: "https://creativecommons.org/licenses/by/4.0/",
+      acquireLicensePage: "https://github.com/cytsai1008/kenichi-profile-photos/blob/main/LICENSE",
+      ...(entry.data.location && {
+        locationCreated: { "@type": "Place" as const, name: entry.data.location },
+      }),
+      ...(imageModule && {
+        width: String(imageModule.width),
+        height: String(imageModule.height),
+      }),
+    };
+  })
+  .filter((item) => item !== null);
+
 // Group by album; undefined album → shown first under no heading
 const albumMap = new Map<string | undefined, (typeof entries)[number][]>();
 for (const entry of entries) {
@@ -99,6 +131,16 @@ for (const [album, albumEntries] of albumMap) {
 ---
 
 <Layout title={tr.photos.title} description={tr.photos.description ?? ""} locale={locale}>
+  {
+    imageSchemaItems.length > 0 && (
+      <Schema
+        item={{
+          "@context": "https://schema.org",
+          "@graph": imageSchemaItems,
+        }}
+      />
+    )
+  }
   <div class="mx-auto max-w-5xl px-4 py-12">
     <header data-animate class="mb-10">
       <h1 class="text-4xl font-bold text-fg">{tr.photos.title}</h1>
