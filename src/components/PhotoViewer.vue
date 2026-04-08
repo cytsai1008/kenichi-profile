@@ -55,6 +55,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const galleryEl = ref<HTMLElement | null>(null);
+const masonryReady = ref(false);
 let lightbox: PhotoSwipeLightbox | null = null;
 let resizeObserver: ResizeObserver | null = null;
 
@@ -71,7 +72,7 @@ function updateMasonryLayout() {
     if (element.offsetParent === null) return;
 
     element.style.gridRowEnd = "auto";
-    const height = element.getBoundingClientRect().height;
+    const height = element.offsetHeight;
     const span = Math.max(1, Math.ceil((height + rowGap) / (autoRow + rowGap)));
     element.style.gridRowEnd = `span ${span}`;
   });
@@ -79,6 +80,12 @@ function updateMasonryLayout() {
 
 async function syncMasonryLayout() {
   await nextTick();
+
+  if (props.alwaysShowText && !masonryReady.value) {
+    masonryReady.value = true;
+    await nextTick();
+  }
+
   updateMasonryLayout();
 
   if (!props.alwaysShowText || !galleryEl.value || !resizeObserver) return;
@@ -303,9 +310,9 @@ onUnmounted(() => {
     ref="galleryEl"
     data-animate-stagger
     :class="
-      props.alwaysShowText
+      props.alwaysShowText && masonryReady
         ? 'photo-viewer-masonry'
-        : 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4'
+        : 'grid grid-cols-2 items-start gap-3 sm:grid-cols-3 lg:grid-cols-4'
     "
   >
     <component

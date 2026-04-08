@@ -107,10 +107,11 @@ const galleryItems: PhotoItem[] = await Promise.all(
     <!-- Category filter tabs -->
     <div
       data-animate
-      class="mb-10 flex flex-wrap gap-2 border-b border-border pb-6"
+      class="relative mb-10 flex flex-wrap gap-2 border-b border-border pb-6"
       role="tablist"
       aria-label="Filter by category"
     >
+      <div aria-hidden="true" class="gallery-filter-pill"></div>
       {
         categories.map((cat) => {
           const label = categoryLabels[cat];
@@ -122,7 +123,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
             <button
               role="tab"
               data-category={cat}
-              class="gallery-filter rounded-full border border-border px-4 py-1.5 text-sm font-medium text-fg-muted transition-colors"
+              class="gallery-filter relative z-10 rounded-full border border-border px-4 py-1.5 text-sm font-medium text-fg-muted transition-colors"
               aria-selected={cat === "all" ? "true" : "false"}
             >
               {label}
@@ -157,32 +158,231 @@ const galleryItems: PhotoItem[] = await Promise.all(
 </Layout>
 
 <script>
-  const filters = document.querySelectorAll<HTMLButtonElement>(".gallery-filter");
-  const items = document.querySelectorAll<HTMLElement>(".gallery-item");
+  import { animate, stagger } from "animejs";
 
-  filters.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const cat = btn.dataset.category!;
+  const filters = Array.from(document.querySelectorAll(".gallery-filter"));
+  const filterBar = document.querySelector("[role='tablist']");
+  const filterPill = document.querySelector(".gallery-filter-pill");
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-      filters.forEach((b) => {
-        b.setAttribute("aria-selected", "false");
-        b.classList.remove("bg-accent-bg", "border-accent-bg");
-        b.classList.add("text-fg-muted", "border-border");
+  let activeCategory = "all";
+  let isTransitioning = false;
+  let activeButton = null;
+
+  function getItems() {
+    return Array.from(document.querySelectorAll(".gallery-item"));
+  }
+
+  function matchesCategory(item, category) {
+    return category === "all" || item.dataset.category === category;
+  }
+
+  function setActiveFilter(activeButton) {
+    filters.forEach((button) => {
+      const isActive = button === activeButton;
+      button.setAttribute("aria-selected", isActive ? "true" : "false");
+      button.classList.toggle("text-white", isActive);
+      button.classList.toggle("border-transparent", isActive);
+      button.classList.toggle("text-fg-muted", !isActive);
+      button.classList.toggle("border-border", !isActive);
+    });
+  }
+
+  function getButtonMetrics(button) {
+    if (!filterBar || !button) return null;
+
+    const barRect = filterBar.getBoundingClientRect();
+    const buttonRect = button.getBoundingClientRect();
+
+    return {
+      left: buttonRect.left - barRect.left,
+      top: buttonRect.top - barRect.top,
+      width: buttonRect.width,
+      height: buttonRect.height,
+    };
+  }
+
+  function placeFilterPill(button) {
+    const metrics = getButtonMetrics(button);
+    if (!filterPill || !metrics) return null;
+
+    filterPill.style.left = `${metrics.left}px`;
+    filterPill.style.top = `${metrics.top}px`;
+    filterPill.style.width = `${metrics.width}px`;
+    filterPill.style.height = `${metrics.height}px`;
+    filterPill.dataset.ready = "true";
+    return metrics;
+  }
+
+  async function moveFilterPill(button, instant = false) {
+    if (!filterPill || !button) return;
+
+    const next = getButtonMetrics(button);
+    if (!next) return;
+
+    if (!activeButton || instant || prefersReducedMotion.matches) {
+      placeFilterPill(button);
+      activeButton = button;
+      return;
+    }
+
+    const prev = getButtonMetrics(activeButton) ?? next;
+    placeFilterPill(button);
+
+    const deltaX = prev.left - next.left;
+    const deltaY = prev.top - next.top;
+    const scaleX = prev.width / next.width;
+    const scaleY = prev.height / next.height;
+
+    const travel = Math.max(Math.abs(deltaX), Math.abs(deltaY));
+    const drift = Math.max(-5, Math.min(5, deltaX * 0.04));
+
+    const pillAnimation = animate(filterPill, {
+      translateX: [deltaX, 0],
+      translateY: [deltaY, 0],
+      scaleX: [Math.max(scaleX, 0.82) * 1.12, 1],
+      scaleY: [Math.max(scaleY, 0.88) * 0.92, 1],
+      rotate: [drift, 0],
+      duration: travel > 64 ? 560 : 440,
+      ease: "out(5)",
+    });
+
+    activeButton = button;
+    await pillAnimation.then();
+  }
+
+  function refreshMasonry() {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event("resize"));
       });
-      btn.setAttribute("aria-selected", "true");
-      btn.classList.add("bg-accent-bg", "border-accent-bg");
-      btn.classList.remove("text-fg-muted", "border-border");
+    });
+  }
 
-      items.forEach((item) => {
-        item.style.display = cat === "all" || item.dataset.category === cat ? "" : "none";
+  function setVisibility(category) {
+    const items = getItems();
+    items.forEach((item) => {
+      item.style.display = matchesCategory(item, category) ? "" : "none";
+    });
+    refreshMasonry();
+  }
+
+  async function switchFilter(category, button) {
+    if (isTransitioning || category === activeCategory) return;
+
+    isTransitioning = true;
+    filters.forEach((filter) => {
+      filter.disabled = true;
+    });
+
+    try {
+      setActiveFilter(button);
+      await moveFilterPill(button);
+
+      if (prefersReducedMotion.matches) {
+        setVisibility(category);
+        activeCategory = category;
+        return;
+      }
+
+      const items = getItems();
+      if (!items.length) {
+        activeCategory = category;
+        return;
+      }
+
+      const visibleItems = items.filter((item) => item.style.display !== "none");
+      const incoming = items.filter((item) => matchesCategory(item, category));
+
+      if (visibleItems.length) {
+        await animate(visibleItems, {
+          opacity: [1, 0],
+          scale: [1, 0.92],
+          translateY: [0, 24],
+          duration: 260,
+          delay: stagger(24, { from: "center" }),
+          ease: "in(3)",
+        }).then();
+      }
+
+      visibleItems.forEach((item) => {
+        item.style.display = "none";
       });
+
+      incoming.forEach((item) => {
+        item.style.display = "";
+      });
+
+      refreshMasonry();
+
+      if (incoming.length) {
+        await animate(incoming, {
+          opacity: [0, 1],
+          scale: [0.92, 1],
+          translateY: [22, 0],
+          duration: 420,
+          delay: stagger(48),
+          ease: "out(5)",
+        }).then();
+      }
+
+      refreshMasonry();
+      activeCategory = category;
+    } finally {
+      isTransitioning = false;
+      filters.forEach((filter) => {
+        filter.disabled = false;
+      });
+    }
+  }
+
+  filters.forEach((button) => {
+    button.addEventListener("click", () => {
+      void switchFilter(button.dataset.category || "all", button);
     });
   });
 
-  // Set initial active style on "all"
-  const first = filters[0];
-  if (first) {
-    first.classList.add("bg-accent-bg", "border-accent-bg");
-    first.classList.remove("text-fg-muted", "border-border");
+  function initFilters() {
+    const first = filters[0];
+    if (first) {
+      setActiveFilter(first);
+      void moveFilterPill(first, true);
+    }
+  }
+
+  window.addEventListener("resize", () => {
+    if (activeButton) {
+      void moveFilterPill(activeButton, true);
+    }
+  });
+
+  if (document.querySelector(".gallery-item")) {
+    initFilters();
+  } else {
+    requestAnimationFrame(() => {
+      initFilters();
+    });
   }
 </script>
+
+<style>
+  .gallery-filter-pill {
+    position: absolute;
+    z-index: 0;
+    border-radius: 999px;
+    background: var(--accent-bg);
+    opacity: 0;
+    transform-origin: center center;
+    will-change: transform;
+  }
+
+  .gallery-filter-pill[data-ready="true"] {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-filter-pill {
+      transition: none;
+    }
+  }
+</style>
