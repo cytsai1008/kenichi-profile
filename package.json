@@ -12,7 +12,7 @@
     "astro": "astro",
     "new:commission": "node ./new-commission-post.mjs",
     "lint": "eslint src ./*.mjs --fix",
-    "format": "prettier --write src ./*.mjs"
+    "format": "prettier --write src ./*.mjs ./*.md"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^13.1.7",

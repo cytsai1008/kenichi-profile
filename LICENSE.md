@@ -53,9 +53,9 @@ commissioned works — please respect the rights of the original artists.
 
 ## Summary
 
-| Content | License |
-|---|---|
-| Source code | MIT |
-| Blog posts | CC BY 4.0 |
-| Photography | CC BY 4.0 |
+| Content         | License             |
+| --------------- | ------------------- |
+| Source code     | MIT                 |
+| Blog posts      | CC BY 4.0           |
+| Photography     | CC BY 4.0           |
 | Gallery artwork | All Rights Reserved |
