@@ -335,6 +335,7 @@ onUnmounted(() => {
   <div
     ref="galleryEl"
     data-animate-stagger
+    class="photo-viewer-root"
     :class="
       props.alwaysShowText && masonryReady
         ? 'photo-viewer-masonry'
@@ -357,7 +358,7 @@ onUnmounted(() => {
       "
       :data-cropped="true"
       :data-category="photo.category"
-      class="group block overflow-hidden rounded-lg bg-surface-alt transition-transform duration-150 active:scale-[0.97]"
+      class="group block overflow-hidden rounded-lg bg-surface-alt transition-transform duration-150"
       :class="[props.itemClass, props.alwaysShowText ? 'cursor-pointer' : 'relative']"
       :style="props.alwaysShowText ? undefined : 'aspect-ratio: 1 / 1'"
     >
@@ -388,6 +389,8 @@ onUnmounted(() => {
                 target="_blank"
                 rel="noopener noreferrer"
                 @click.stop
+                @mousedown.stop
+                @pointerdown.stop
                 >{{ photo.subtitle }}</a
               >
               <template v-else>{{ photo.subtitle }}</template>
@@ -414,10 +417,12 @@ onUnmounted(() => {
           <a
             v-if="photo.subtitleUrl"
             :href="photo.subtitleUrl"
-            class="underline decoration-fg-muted/50 underline-offset-2"
+            class="-my-1.5 -mr-2 inline-block py-1.5 pr-2 underline underline-offset-2"
             target="_blank"
             rel="noopener noreferrer"
             @click.stop
+            @mousedown.stop
+            @pointerdown.stop
             >{{ photo.subtitle }}</a
           >
           <template v-else>{{ photo.subtitle }}</template>
@@ -439,6 +444,13 @@ onUnmounted(() => {
 .photo-viewer-masonry > * {
   min-width: 0;
   will-change: transform, opacity;
+}
+
+/* Active press scale — only when the click is NOT on a descendant link.
+   Uses the individual `scale` property (same as Tailwind's scale-* utilities)
+   so it composes with animejs's inline `transform` instead of being overridden. */
+.photo-viewer-root .group:active:not(:has(a:active)) {
+  scale: 0.97;
 }
 
 /* EXIF panel overlay in PhotoSwipe */
