@@ -16,10 +16,11 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center gap-4">
+  <div data-animate-stagger class="flex flex-wrap items-center gap-4">
     <a
       v-for="link in links"
       :key="link.href"
+      data-animate
       :href="link.href"
       target="_blank"
       rel="noopener noreferrer"
