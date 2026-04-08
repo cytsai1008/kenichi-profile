@@ -22,15 +22,19 @@ const entries = (await getCollection("photos")).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
 
-const photoModules = import.meta.glob<{ default: ImageMetadata }>("/src/content/photos/**/*", {
-  eager: true,
-});
+const photoModules = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/content/photos/**/*.{jpg,JPG,jpeg,JPEG,png,PNG,webp,WEBP,avif,AVIF,tiff,TIFF,tif,TIF,heic,HEIC,heif,HEIF}",
+  { eager: true }
+);
 
-const photoOriginalUrls = import.meta.glob<string>("/src/content/photos/**/*", {
-  query: "?url",
-  import: "default",
-  eager: true,
-});
+const photoOriginalUrls = import.meta.glob<string>(
+  "/src/content/photos/**/*.{jpg,JPG,jpeg,JPEG,png,PNG,webp,WEBP,avif,AVIF,tiff,TIFF,tif,TIF,heic,HEIC,heif,HEIF}",
+  {
+    query: "?url",
+    import: "default",
+    eager: true,
+  }
+);
 
 async function toPhotoItem(entry: (typeof entries)[number]): Promise<PhotoItem> {
   const imageModule = photoModules[entry.data.imagePath]?.default;

@@ -26,9 +26,10 @@ const latestGallery = (await getCollection("gallery"))
   )
   .slice(0, 6);
 
-const photoModules = import.meta.glob<{ default: ImageMetadata }>("/src/content/photos/**/*", {
-  eager: true,
-});
+const photoModules = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/content/photos/**/*.{jpg,JPG,jpeg,JPEG,png,PNG,webp,WEBP,avif,AVIF,tiff,TIFF,tif,TIF,heic,HEIC,heif,HEIF}",
+  { eager: true }
+);
 
 const galleryImageModules = import.meta.glob<{ default: ImageMetadata }>(
   "/src/assets/**/*.{jpg,jpeg,JPG,JPEG,png,PNG,webp,WEBP,avif,AVIF,gif,GIF}",
