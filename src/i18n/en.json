@@ -76,6 +76,13 @@
     "hobbiesValue": "Coding, Photography",
     "intro": "I'm Kenichi, a blue cat who enjoys coding and photography lives in Taiwan. \nThis site is where I collect things I make and share a bit about myself — from artwork to photos and everyday life. I enjoy building small things you can find on my GitHub, and taking photos when I spot cute furries. \nNice to meet you, hope you have a good time here."
   },
+  "notFound": {
+    "title": "Page Not Found",
+    "heading": "404",
+    "message": "The page you're looking for doesn't exist or has been moved.",
+    "goBack": "Go back",
+    "backHome": "Go back home"
+  },
   "footer": {},
   "a11y": {
     "skipToContent": "Skip to main content"

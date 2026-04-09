@@ -46,6 +46,7 @@
   --font-noto: "Noto Sans", ui-sans-serif, system-ui, sans-serif;
   --font-noto-tc: "Noto Sans TC", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
   --font-noto-sc: "Noto Sans SC", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-chiron: "Chiron GoRound TC", ui-sans-serif, system-ui, sans-serif;
   --color-surface: var(--surface);
   --color-surface-alt: var(--surface-alt);
   --color-fg: var(--fg);
@@ -129,6 +130,11 @@
   .font-noto-sc {
     font-family: var(--font-noto-sc), sans-serif;
     --font-sans: var(--font-noto-sc);
+  }
+
+  .font-chiron {
+    font-family: var(--font-chiron), sans-serif;
+    --font-sans: var(--font-chiron);
   }
 
   /* ─── Typography ────────────────────────────────────────── */

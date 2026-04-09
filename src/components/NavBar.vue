@@ -3,7 +3,7 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted } from "vue";
 import { animate, spring, stagger } from "animejs";
 import { ChevronDown, Languages, type LucideIcon, Menu, Monitor, Moon, Sun, X } from "@lucide/vue";
 import type { Locale } from "../i18n/utils";
-import { switchLocalePath, locales } from "../i18n/utils";
+import { switchLocalePath, locales, t } from "../i18n/utils";
 
 interface NavLink {
   href: string;
@@ -468,9 +468,7 @@ function isActive(href: string) {
           class="inline-flex w-fit shrink-0 items-center gap-2 text-lg font-bold text-fg no-underline transition-opacity md:justify-self-start"
         >
           <!-- Mobile: single span whose text changes with locale -->
-          <span class="sm:hidden text-accent">{{
-            locale === "en" ? "Kenichi" : "健一"
-          }}</span>
+          <span class="text-accent sm:hidden">{{ t(locale).about.name }}</span>
           <!-- Desktop: always show both, unchanged -->
           <span class="hidden text-accent sm:inline">健一</span>
           <span class="hidden text-fg-muted sm:inline">Kenichi</span>

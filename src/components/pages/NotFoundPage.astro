@@ -1,0 +1,48 @@
+---
+import { ArrowLeft, House } from "@lucide/astro";
+import Layout from "../../layouts/Layout.astro";
+import { t, localePath, type Locale } from "../../i18n/utils";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const tr = t(locale);
+---
+
+<Layout title={tr.notFound.title} locale={locale}>
+  <div
+    class="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-12 text-center min-h-dvh"
+  >
+    <p data-animate class="mb-0 text-8xl leading-none font-bold text-accent">
+      {tr.notFound.heading}
+    </p>
+    <h1 data-animate class="mt-2 text-3xl font-bold text-fg">{tr.notFound.title}</h1>
+    <p data-animate class="mt-2 max-w-md text-fg-muted">{tr.notFound.message}</p>
+
+    <div data-animate class="mt-4 flex flex-wrap items-center justify-center gap-3">
+      <button
+        id="go-back-btn"
+        class="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-accent-bg px-6 py-3 text-sm font-semibold text-fg transition-colors hover:bg-accent-dim"
+      >
+        <ArrowLeft size={14} />
+        {tr.notFound.goBack}
+      </button>
+
+      <a
+        href={localePath("/", locale)}
+        class="inline-flex items-center gap-2 rounded-full bg-surface-alt/55 px-6 py-3 text-sm font-semibold text-fg no-underline transition-colors hover:border-accent/40 hover:bg-surface-alt"
+      >
+        <House size={14} />
+        {tr.notFound.backHome}
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  document.getElementById("go-back-btn")?.addEventListener("click", () => {
+    history.back();
+  });
+</script>

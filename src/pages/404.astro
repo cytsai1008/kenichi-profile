@@ -1,0 +1,27 @@
+---
+import NotFoundPage from "../components/pages/NotFoundPage.astro";
+---
+
+<NotFoundPage locale="en" />
+
+<script>
+  // Cloudflare Pages always serves /404.html for every 404, but the browser
+  // retains the original URL. Detect locale from the URL path first, then
+  // fall back to the preferred-locale cookie, and redirect to the locale-
+  // specific 404 page so the user sees translated content.
+  const path = window.location.pathname;
+
+  if (path.startsWith("/zh-tw/")) {
+    window.location.replace("/zh-tw/404/");
+  } else if (path.startsWith("/zh-cn/")) {
+    window.location.replace("/zh-cn/404/");
+  } else {
+    const cookie = document.cookie.split(";").find((c) => c.trim().startsWith("preferred-locale="));
+    const locale = cookie ? cookie.split("=")[1].trim() : null;
+    if (locale === "zh-tw") {
+      window.location.replace("/zh-tw/404/");
+    } else if (locale === "zh-cn") {
+      window.location.replace("/zh-cn/404/");
+    }
+  }
+</script>
