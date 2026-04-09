@@ -164,8 +164,9 @@ async function main() {
       }),
       false
     );
-    const date = await promptText(rl, "Date", isoToday(), true);
-    assertIsoDate(date);
+    const date = await promptText(rl, "Date", isoToday(), true, (v) =>
+      /^\d{4}-\d{2}-\d{2}$/.test(v) ? null : "Date must use YYYY-MM-DD format."
+    );
 
     const titleZhTw = await promptText(
       rl,
@@ -298,43 +299,46 @@ Options:
 `);
 }
 
-async function promptText(rl, label, fallback, required) {
+async function promptText(rl, label, fallback, required, validate) {
   const suffix = fallback ? ` [${fallback}]` : "";
-  const answer = (await rl.question(`${label}${suffix}: `)).trim();
-  if (answer) {
-    return answer;
+  while (true) {
+    const answer = (await rl.question(`${label}${suffix}: `)).trim();
+    const value = answer || fallback || "";
+    if (!value && required) {
+      console.error(`  ${label} is required.`);
+      continue;
+    }
+    if (value && validate) {
+      const err = validate(value);
+      if (err) {
+        console.error(`  ${err}`);
+        continue;
+      }
+    }
+    return value;
   }
-  if (fallback) {
-    return fallback;
-  }
-  if (required) {
-    throw new Error(`${label} is required.`);
-  }
-  return "";
 }
 
 async function promptChoice(rl, label, choices, fallback) {
   const prompt = `${label} (${choices.join("/")}) [${fallback}]: `;
-  const answer = (await rl.question(prompt)).trim() || fallback;
-  if (!choices.includes(answer)) {
-    throw new Error(`${label} must be one of: ${choices.join(", ")}`);
+  while (true) {
+    const answer = (await rl.question(prompt)).trim() || fallback;
+    if (choices.includes(answer)) {
+      return answer;
+    }
+    console.error(`  Must be one of: ${choices.join(", ")}`);
   }
-  return answer;
 }
 
 async function promptBoolean(rl, label, fallback) {
   const marker = fallback ? "Y/n" : "y/N";
-  const answer = (await rl.question(`${label} [${marker}]: `)).trim().toLowerCase();
-  if (!answer) {
-    return fallback;
+  while (true) {
+    const answer = (await rl.question(`${label} [${marker}]: `)).trim().toLowerCase();
+    if (!answer) return fallback;
+    if (["y", "yes"].includes(answer)) return true;
+    if (["n", "no"].includes(answer)) return false;
+    console.error("  Please answer y or n.");
   }
-  if (["y", "yes"].includes(answer)) {
-    return true;
-  }
-  if (["n", "no"].includes(answer)) {
-    return false;
-  }
-  throw new Error(`${label} must be answered with y or n.`);
 }
 
 async function assertExists(filePath, label) {
@@ -412,12 +416,6 @@ function pushI18n(lines, key, values) {
   lines.push(`${key}:`);
   for (const [locale, value] of entries) {
     lines.push(`  ${locale}: ${JSON.stringify(value.trim())}`);
-  }
-}
-
-function assertIsoDate(value) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    throw new Error(`Date must use YYYY-MM-DD. Received: ${value}`);
   }
 }
 
