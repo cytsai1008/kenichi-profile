@@ -68,7 +68,11 @@ const fullTitle = `${SITE_TITLE} | ${title}`;
     return <link rel="alternate" hreflang={localeLang[loc]} href={new URL(path, Astro.site)} />;
   })
 }
-<link rel="alternate" hreflang="x-default" href={new URL(Astro.url.pathname.replace(/^\/(zh-tw|zh-cn)/, "") || "/", Astro.site)} />
+<link
+  rel="alternate"
+  hreflang="x-default"
+  href={new URL(Astro.url.pathname.replace(/^\/(zh-tw|zh-cn)/, "") || "/", Astro.site)}
+/>
 
 <!-- Primary Meta, Open Graph, Twitter -->
 <Seo

@@ -254,6 +254,13 @@ html.js [data-animate]:not([data-animate-done]) {
 html.js [data-animate][data-animate-done] {
   opacity: 1;
 }
+/* Final opacity for sub-1 elements (used by reduced-motion path, which skips animation) */
+[data-animate][data-animate-done][data-opacity="0.5"] {
+  opacity: 0.5;
+}
+[data-animate][data-animate-done][data-opacity="0.35"] {
+  opacity: 0.35;
+}
 
 /* ─── Text selection ────────────────────────────────────── */
 ::selection {

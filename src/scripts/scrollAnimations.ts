@@ -46,17 +46,20 @@ export function initScrollAnimations(): void {
         e.dataset.animateDone = "";
         delete e.dataset.animateQueued;
       });
-      animate(groupEls, {
-        opacity: [0, 1],
-        translateY: [22, 0],
-        duration: 520,
-        ease: "out(3)",
-        delay: stagger(65),
+      groupEls.forEach((e, i) => {
+        const targetOpacity = parseFloat(e.dataset.opacity ?? "1");
+        animate(e, {
+          opacity: [0, targetOpacity],
+          translateY: [22, 0],
+          duration: 520,
+          ease: "out(3)",
+          delay: i * 65,
+        });
       });
     } else if (!group) {
       el.dataset.animateDone = "";
       animate(el, {
-        opacity: [0, 1],
+        opacity: [0, parseFloat(el.dataset.opacity ?? "1")],
         translateY: [18, 0],
         duration: 480,
         ease: "out(3)",
