@@ -467,7 +467,12 @@ function isActive(href: string) {
           href="/"
           class="inline-flex w-fit shrink-0 items-center gap-2 text-lg font-bold text-fg no-underline transition-opacity md:justify-self-start"
         >
-          <span class="text-accent">健一</span>
+          <!-- Mobile: single span whose text changes with locale -->
+          <span class="sm:hidden" :class="locale === 'en' ? 'text-fg-muted' : 'text-accent'">{{
+            locale === "en" ? "Kenichi" : "健一"
+          }}</span>
+          <!-- Desktop: always show both, unchanged -->
+          <span class="hidden text-accent sm:inline">健一</span>
           <span class="hidden text-fg-muted sm:inline">Kenichi</span>
         </a>
 
