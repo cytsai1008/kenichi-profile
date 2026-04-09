@@ -1,4 +1,4 @@
-import { animate, stagger } from "animejs";
+import { animate } from "animejs";
 
 /**
  * Scroll-triggered entrance animations.
