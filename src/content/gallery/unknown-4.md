@@ -11,5 +11,8 @@ image: "../../assets/commissions/Unknown_4.webp"
 date: 2022-10-08
 category: gift-art
 artist: "Asahi"
+artistI18n:
+  zh-tw: "朝日名"
+  zh-cn: "朝日名"
 artistUrl: "https://www.facebook.com/xiao.ming.169347"
 ---
