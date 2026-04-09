@@ -467,8 +467,10 @@ function isActive(href: string) {
           href="/"
           class="inline-flex w-fit shrink-0 items-center gap-2 text-lg font-bold text-fg no-underline transition-opacity md:justify-self-start"
         >
-          <span class="text-accent">健一</span>
-          <span class="hidden text-fg-muted sm:inline">Kenichi</span>
+          <span class="text-accent" :class="locale === 'en' ? 'hidden sm:inline' : ''">健一</span>
+          <span class="text-fg-muted" :class="locale === 'en' ? '' : 'hidden sm:inline'"
+            >Kenichi</span
+          >
         </a>
 
         <!-- Col 2: Desktop links (centered) -->
