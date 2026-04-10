@@ -263,7 +263,14 @@ const galleryItems: PhotoItem[] = await Promise.all(
   function setVisibility(category: string) {
     const items = getItems();
     items.forEach((item) => {
-      item.style.display = matchesCategory(item, category) ? "" : "none";
+      const isMatch = matchesCategory(item, category);
+      item.style.display = isMatch ? "" : "none";
+
+      if (isMatch) {
+        item.setAttribute("data-pswp", "");
+      } else {
+        item.removeAttribute("data-pswp");
+      }
     });
     refreshMasonry();
   }
@@ -308,10 +315,12 @@ const galleryItems: PhotoItem[] = await Promise.all(
 
       visibleItems.forEach((item) => {
         item.style.display = "none";
+        item.removeAttribute("data-pswp");
       });
 
       incoming.forEach((item) => {
         item.style.display = "";
+        item.setAttribute("data-pswp", "");
       });
 
       refreshMasonry();

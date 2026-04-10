@@ -62,6 +62,23 @@ const pressedPhoto = ref<string | null>(null);
 let lightbox: PhotoSwipeLightbox | null = null;
 let resizeObserver: ResizeObserver | null = null;
 
+function getLightboxElements() {
+  return Array.from(galleryEl.value?.querySelectorAll<HTMLElement>("[data-pswp]") ?? []);
+}
+
+function getPhotoByElement(element: HTMLElement | null | undefined) {
+  const src = element?.dataset.pswpSrc;
+  return src ? props.photos.find((photo) => photo.src === src) : undefined;
+}
+
+function getLightboxPhotos() {
+  const photos = getLightboxElements()
+    .map((element) => getPhotoByElement(element))
+    .filter((photo): photo is PhotoItem => Boolean(photo));
+
+  return photos.length ? photos : props.photos;
+}
+
 function updateMasonryLayout() {
   if (!props.alwaysShowText || !galleryEl.value) return;
 
@@ -203,7 +220,7 @@ onMounted(() => {
         },
         onInit: (el, pswp) => {
           const updateDownloadLink = () => {
-            const data = props.photos[pswp.currIndex];
+            const data = getLightboxPhotos()[pswp.currIndex];
             const downloadUrl = data?.downloadSrc ?? data?.src;
             if (!downloadUrl) {
               el.removeAttribute("href");
@@ -233,7 +250,7 @@ onMounted(() => {
         const updateInfoPanel = () => {
           const slide = pswp.currSlide;
           if (!slide) return;
-          const data = props.photos[pswp.currIndex];
+          const data = getLightboxPhotos()[pswp.currIndex];
           const hasExif = Boolean(
             props.showExifPanel && data?.exif && Object.values(data.exif).some(Boolean)
           );
@@ -283,13 +300,18 @@ onMounted(() => {
   lightbox.addFilter("itemData", (itemData, index) => {
     // Always read src from data-pswp-src — prevents PhotoSwipe from accidentally
     // picking up a child <a> (e.g. creator link) as the image src
-    const el = galleryEl.value?.querySelectorAll<HTMLElement>("[data-pswp]")[index];
+    const el = getLightboxElements()[index];
     if (el?.dataset.pswpSrc) {
       itemData.src = el.dataset.pswpSrc;
     }
 
-    const imgs = galleryEl.value?.querySelectorAll<HTMLImageElement>("img");
-    const img = imgs?.[index];
+    const activePhoto = getPhotoByElement(el);
+    if (activePhoto) {
+      itemData.w = activePhoto.width;
+      itemData.h = activePhoto.height;
+    }
+
+    const img = el?.querySelector<HTMLImageElement>("img");
     if (
       img?.naturalWidth &&
       img.naturalHeight &&
