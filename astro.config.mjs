@@ -7,6 +7,7 @@ import vue from "@astrojs/vue";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 import { ogImages } from "./src/integrations/og-images";
+import rehypeTaskListLucide from "./src/plugins/rehypeTaskListLucide.mjs";
 
 // https://astro.build/config
 export default defineConfig({
@@ -41,6 +42,10 @@ export default defineConfig({
     fallback: {
       "zh-cn": "zh-tw",
     },
+  },
+
+  markdown: {
+    rehypePlugins: [rehypeTaskListLucide],
   },
 
   vite: {

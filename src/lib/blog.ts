@@ -11,3 +11,17 @@ export function getBlogPostsForLocale(
 ): CollectionEntry<"blog">[] {
   return posts.filter((post) => post.id.startsWith(`${locale}/`));
 }
+
+export function compareBlogPostsByDate(
+  a: CollectionEntry<"blog">,
+  b: CollectionEntry<"blog">
+): number {
+  return b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
+}
+
+export function compareFeaturedBlogPosts(
+  a: CollectionEntry<"blog">,
+  b: CollectionEntry<"blog">
+): number {
+  return b.data.featured_priority - a.data.featured_priority || compareBlogPostsByDate(a, b);
+}

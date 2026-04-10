@@ -3,7 +3,11 @@ import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import BlogCard from "../BlogCard.astro";
 import { t, type Locale } from "../../i18n/utils";
-import { getBlogPostsForLocale } from "../../lib/blog";
+import {
+  compareBlogPostsByDate,
+  compareFeaturedBlogPosts,
+  getBlogPostsForLocale,
+} from "../../lib/blog";
 
 interface Props {
   locale: Locale;
@@ -14,11 +18,9 @@ const tr = t(locale);
 const blogFontClass =
   locale === "zh-tw" ? "font-noto-tc" : locale === "zh-cn" ? "font-noto-sc" : "";
 
-const allPosts = getBlogPostsForLocale(await getCollection("blog"), locale).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
-const pinned = allPosts.filter((p) => p.data.featured);
-const posts = allPosts.filter((p) => !p.data.featured);
+const allPosts = getBlogPostsForLocale(await getCollection("blog"), locale);
+const pinned = allPosts.filter((p) => p.data.featured).sort(compareFeaturedBlogPosts);
+const posts = allPosts.filter((p) => !p.data.featured).sort(compareBlogPostsByDate);
 ---
 
 <Layout title={tr.blog.title} description={tr.blog.description} locale={locale}>

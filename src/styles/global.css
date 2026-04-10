@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@chinese-fonts/maple-mono-cn/dist/MapleMono-CN-Regular/result.css";
+@import "@chinese-fonts/maple-mono-cn/dist/MapleMono-CN-Bold/result.css";
 
 /* ─── Enable .dark class strategy ───────────────────────── */
 @variant dark (&:where(.dark, .dark *));
@@ -46,6 +48,7 @@
   --font-noto: "Noto Sans", ui-sans-serif, system-ui, sans-serif;
   --font-noto-tc: "Noto Sans TC", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
   --font-noto-sc: "Noto Sans SC", "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono-maple: "Maple Mono CN", ui-monospace, monospace;
   --font-chiron: "Chiron GoRound TC", ui-sans-serif, system-ui, sans-serif;
   --color-surface: var(--surface);
   --color-surface-alt: var(--surface-alt);
@@ -195,8 +198,17 @@
   }
 
   /* ─── Prose ─────────────────────────────────────────────── */
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
+    margin-top: 1em;
+  }
   .prose p {
     margin-bottom: 1em;
+    margin-top: 0.3em;
   }
   .prose ul {
     list-style-type: disc;
@@ -208,8 +220,62 @@
     padding-left: 1.5em;
     margin-bottom: 1em;
   }
+  .prose ul.contains-task-list,
+  .prose ol.contains-task-list {
+    padding-left: 0;
+  }
   .prose li {
     margin-bottom: 0.25em;
+  }
+  .prose li.task-list-item {
+    list-style: none;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+  }
+  .prose li.task-list-item > .task-list-marker,
+  .prose li.task-list-item > input[type="checkbox"][disabled] {
+    inline-size: 1.05rem;
+    block-size: 1.05rem;
+    margin: 0.48rem 0 0;
+    flex: none;
+    transform: translateY(2px);
+  }
+  .prose li.task-list-item > .task-list-marker svg {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    color: var(--fg-muted);
+  }
+  .prose li.task-list-item > .task-list-marker.is-checked svg {
+    color: var(--accent);
+  }
+  .prose li.task-list-item > input[type="checkbox"][disabled] {
+    appearance: none;
+    -webkit-appearance: none;
+    display: grid;
+    place-content: center;
+    border: 2px solid var(--fg-muted);
+    border-radius: 0.2rem;
+    background: transparent;
+    pointer-events: none;
+    color: var(--fg-muted);
+  }
+  .prose li.task-list-item > input[type="checkbox"][disabled]::before {
+    content: "";
+    inline-size: 0.58rem;
+    block-size: 0.58rem;
+    transform: scale(0);
+    transform-origin: center;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
+    background-color: currentColor;
+  }
+  .prose li.task-list-item > input[type="checkbox"][disabled]:checked {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .prose li.task-list-item > input[type="checkbox"][disabled]:checked::before {
+    transform: scale(1);
   }
   .prose blockquote {
     border-left: 4px solid var(--accent);
@@ -217,19 +283,22 @@
     margin: 1.5em 0;
     color: var(--fg-muted);
   }
-  code {
+  .prose code {
+    font-family: var(--font-mono-maple), monospace;
     padding: 0.15em 0.4em;
     background-color: var(--surface-alt);
     border-radius: 0.25rem;
     font-size: 0.9em;
   }
-  pre {
+  .prose pre {
+    font-family: var(--font-mono-maple), monospace;
     padding: 1.25em 1.5em;
+    margin-bottom: 1.5em;
     border-radius: 0.75rem;
     overflow-x: auto;
     background-color: #141210;
   }
-  pre > code {
+  .prose pre > code {
     all: unset;
     font-size: 0.9em;
     color: #e8e0d5;
@@ -239,8 +308,20 @@
     border-top: 1px solid var(--border);
     margin: 2em 0;
   }
-  table {
+  .prose table {
     width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+  }
+  .prose th,
+  .prose td {
+    padding: 0.65rem 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid color-mix(in srgb, var(--fg-muted) 40%, transparent);
+  }
+  .prose th {
+    color: var(--fg-muted);
+    font-weight: 600;
   }
 } /* end @layer base */
 
@@ -330,6 +411,12 @@ a,
     }
     h2 {
       font-size: 1.5rem;
+    }
+  }
+  @media (max-width: 1024px) {
+    .prose li.task-list-item > .task-list-marker,
+    .prose li.task-list-item > input[type="checkbox"][disabled] {
+      margin-top: 0.35rem;
     }
   }
 }

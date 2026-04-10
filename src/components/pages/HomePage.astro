@@ -5,7 +5,7 @@ import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import BlogCard from "../BlogCard.astro";
 import { t, localePath, type Locale } from "../../i18n/utils";
-import { getBlogPostsForLocale } from "../../lib/blog";
+import { compareBlogPostsByDate, getBlogPostsForLocale } from "../../lib/blog";
 
 interface Props {
   locale: Locale;
@@ -15,7 +15,7 @@ const { locale } = Astro.props;
 const tr = t(locale);
 
 const recentPosts = getBlogPostsForLocale(await getCollection("blog"), locale)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .sort(compareBlogPostsByDate)
   .slice(0, 3);
 
 const latestGallery = (await getCollection("gallery"))
