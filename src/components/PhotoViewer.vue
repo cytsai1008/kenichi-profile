@@ -58,6 +58,7 @@ interface Props {
 const props = defineProps<Props>();
 const galleryEl = ref<HTMLElement | null>(null);
 const masonryReady = ref(false);
+const introReady = ref(false);
 const pressedPhoto = ref<string | null>(null);
 let lightbox: PhotoSwipeLightbox | null = null;
 let resizeObserver: ResizeObserver | null = null;
@@ -122,48 +123,68 @@ function updateMasonryLayout() {
   galleryEl.value.style.height = `${Math.max(0, ...columnHeights.map((value) => value - rowGap))}px`;
 }
 
-async function syncMasonryLayout() {
+function animateItemsIn(items: HTMLElement[]) {
+  if (!items.length) {
+    introReady.value = true;
+    return;
+  }
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    introReady.value = true;
+    items.forEach((item) => {
+      item.style.animation = "";
+      item.style.opacity = "";
+    });
+    return;
+  }
+
+  items.forEach((item, index) => {
+    item.style.animation = `photo-viewer-fade-in 0.48s ease-out ${index * 40}ms both`;
+    item.addEventListener(
+      "animationend",
+      () => {
+        item.style.animation = "";
+        item.style.opacity = "1";
+      },
+      { once: true }
+    );
+  });
+
+  introReady.value = true;
+}
+
+async function syncViewerLayout() {
   await nextTick();
 
+  if (!galleryEl.value) return;
+
+  const shouldAnimateIn = !introReady.value;
   const isFirstMasonry = props.alwaysShowText && !masonryReady.value;
 
-  if (isFirstMasonry && galleryEl.value) {
-    // Items already start at opacity:0 via the :style binding (!masonryReady),
+  if (isFirstMasonry) {
+    // Items already start at opacity:0 via the :style binding (!introReady),
     // so they are invisible in the SSR HTML before JS runs — no flash.
     masonryReady.value = true;
     await nextTick(); // wait for Vue to apply photo-viewer-masonry class
 
-    const items = Array.from(galleryEl.value.children) as HTMLElement[];
-
     updateMasonryLayout();
-
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches && items.length) {
-      // CSS keyframe animations are used here because:
-      // - animejs races with Vue's re-render microtask and never reliably fires
-      // - CSS transitions require observing a "from→to" state change across paint
-      //   cycles, which double-rAF doesn't guarantee
-      // CSS animations fire as soon as the property is applied; fill-mode:both
-      // holds the `from` state (opacity:0) during the delay, so pre-hidden items
-      // stay hidden until their turn without any extra timing tricks.
-      items.forEach((el, i) => {
-        const htmlEl = el as HTMLElement;
-        htmlEl.style.animation = `masonry-fade-in 0.48s ease-out ${i * 40}ms both`;
-        htmlEl.addEventListener(
-          "animationend",
-          () => {
-            htmlEl.style.animation = "";
-            htmlEl.style.opacity = "1";
-          },
-          { once: true }
-        );
-      });
-    } else {
-      items.forEach((el) => {
-        (el as HTMLElement).style.opacity = "";
-      });
-    }
   } else {
     updateMasonryLayout();
+  }
+
+  if (shouldAnimateIn) {
+    // CSS keyframe animations are used here because:
+    // - animejs races with Vue's re-render microtask and never reliably fires
+    // - CSS transitions require observing a "from→to" state change across paint
+    //   cycles, which double-rAF doesn't guarantee
+    // CSS animations fire as soon as the property is applied; fill-mode:both
+    // holds the `from` state (opacity:0) during the delay, so pre-hidden items
+    // stay hidden until their turn without any extra timing tricks.
+    animateItemsIn(
+      Array.from(galleryEl.value.children).filter(
+        (item) => (item as HTMLElement).offsetParent !== null
+      ) as HTMLElement[]
+    );
   }
 
   if (!props.alwaysShowText || !galleryEl.value || !resizeObserver) return;
@@ -193,7 +214,7 @@ onMounted(() => {
     updateMasonryLayout();
   });
 
-  void syncMasonryLayout();
+  void syncViewerLayout();
   window.addEventListener("resize", updateMasonryLayout);
 
   // Track which gallery button triggered the open so we can reliably restore
@@ -418,7 +439,7 @@ onMounted(() => {
 watch(
   () => props.photos,
   () => {
-    void syncMasonryLayout();
+    void syncViewerLayout();
   },
   { deep: true, flush: "post" }
 );
@@ -435,7 +456,6 @@ onUnmounted(() => {
 <template>
   <div
     ref="galleryEl"
-    data-animate-stagger
     class="photo-viewer-root"
     :class="
       props.alwaysShowText && masonryReady
@@ -448,7 +468,6 @@ onUnmounted(() => {
       :key="photo.src"
       type="button"
       v-bind="{
-        ...(!props.alwaysShowText ? { 'data-animate': '' } : {}),
         ...(photo.width && photo.height
           ? { 'data-pswp-width': photo.width, 'data-pswp-height': photo.height }
           : {}),
@@ -463,7 +482,7 @@ onUnmounted(() => {
       :style="[
         props.alwaysShowText ? undefined : 'aspect-ratio: 1 / 1',
         pressedPhoto === photo.src ? { scale: '0.97' } : {},
-        props.alwaysShowText && !masonryReady ? { opacity: 0 } : {},
+        !introReady ? { opacity: 0 } : {},
       ]"
       @pointerdown="pressedPhoto = photo.src"
       @pointerup="pressedPhoto = null"
@@ -556,7 +575,7 @@ onUnmounted(() => {
   will-change: transform, opacity;
 }
 
-@keyframes masonry-fade-in {
+@keyframes photo-viewer-fade-in {
   from {
     opacity: 0;
   }
