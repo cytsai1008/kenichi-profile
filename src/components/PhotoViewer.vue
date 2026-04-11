@@ -125,12 +125,46 @@ function updateMasonryLayout() {
 async function syncMasonryLayout() {
   await nextTick();
 
-  if (props.alwaysShowText && !masonryReady.value) {
-    masonryReady.value = true;
-    await nextTick();
-  }
+  const isFirstMasonry = props.alwaysShowText && !masonryReady.value;
 
-  updateMasonryLayout();
+  if (isFirstMasonry && galleryEl.value) {
+    // Items already start at opacity:0 via the :style binding (!masonryReady),
+    // so they are invisible in the SSR HTML before JS runs — no flash.
+    masonryReady.value = true;
+    await nextTick(); // wait for Vue to apply photo-viewer-masonry class
+
+    const items = Array.from(galleryEl.value.children) as HTMLElement[];
+
+    updateMasonryLayout();
+
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches && items.length) {
+      // CSS keyframe animations are used here because:
+      // - animejs races with Vue's re-render microtask and never reliably fires
+      // - CSS transitions require observing a "from→to" state change across paint
+      //   cycles, which double-rAF doesn't guarantee
+      // CSS animations fire as soon as the property is applied; fill-mode:both
+      // holds the `from` state (opacity:0) during the delay, so pre-hidden items
+      // stay hidden until their turn without any extra timing tricks.
+      items.forEach((el, i) => {
+        const htmlEl = el as HTMLElement;
+        htmlEl.style.animation = `masonry-fade-in 0.48s ease-out ${i * 40}ms both`;
+        htmlEl.addEventListener(
+          "animationend",
+          () => {
+            htmlEl.style.animation = "";
+            htmlEl.style.opacity = "1";
+          },
+          { once: true }
+        );
+      });
+    } else {
+      items.forEach((el) => {
+        (el as HTMLElement).style.opacity = "";
+      });
+    }
+  } else {
+    updateMasonryLayout();
+  }
 
   if (!props.alwaysShowText || !galleryEl.value || !resizeObserver) return;
 
@@ -369,16 +403,16 @@ onUnmounted(() => {
       :is="props.alwaysShowText ? 'div' : 'a'"
       v-for="photo in photos"
       :key="photo.src"
-      data-animate
+      v-bind="{
+        ...(!props.alwaysShowText ? { 'data-animate': '' } : {}),
+        ...(photo.width && photo.height
+          ? { 'data-pswp-width': photo.width, 'data-pswp-height': photo.height }
+          : {}),
+      }"
       data-pswp
       :href="props.alwaysShowText ? undefined : photo.src"
       :data-pswp-src="photo.src"
       :data-pswp-msrc="photo.thumb"
-      v-bind="
-        photo.width && photo.height
-          ? { 'data-pswp-width': photo.width, 'data-pswp-height': photo.height }
-          : {}
-      "
       :data-cropped="true"
       :data-category="photo.category"
       class="group block overflow-hidden rounded-lg bg-surface-alt transition-transform duration-150"
@@ -386,6 +420,7 @@ onUnmounted(() => {
       :style="[
         props.alwaysShowText ? undefined : 'aspect-ratio: 1 / 1',
         pressedPhoto === photo.src ? { scale: '0.97' } : {},
+        props.alwaysShowText && !masonryReady ? { opacity: 0 } : {},
       ]"
       @pointerdown="pressedPhoto = photo.src"
       @pointerup="pressedPhoto = null"
@@ -397,6 +432,8 @@ onUnmounted(() => {
         <img
           :src="photo.thumb"
           :alt="photo.alt"
+          :width="props.alwaysShowText && photo.width ? photo.width : undefined"
+          :height="props.alwaysShowText && photo.height ? photo.height : undefined"
           loading="lazy"
           class="block w-full transition-transform duration-300"
           :class="[props.thumbClass, !props.disableHoverZoom && 'group-hover:scale-105']"
@@ -474,6 +511,15 @@ onUnmounted(() => {
 .photo-viewer-masonry > * {
   min-width: 0;
   will-change: transform, opacity;
+}
+
+@keyframes masonry-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* EXIF panel overlay in PhotoSwipe */
