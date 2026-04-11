@@ -228,16 +228,16 @@
   .prose li.task-list-item {
     list-style: none;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.55rem;
   }
   .prose li.task-list-item > .task-list-marker,
   .prose li.task-list-item > input[type="checkbox"][disabled] {
     inline-size: 1.05rem;
     block-size: 1.05rem;
-    margin: 0.48rem 0 0;
     flex: none;
-    transform: translateY(2px);
+    position: relative;
+    top: 1px;
   }
   .prose li.task-list-item > .task-list-marker svg {
     display: block;
@@ -409,12 +409,6 @@ a,
     }
     h2 {
       font-size: 1.5rem;
-    }
-  }
-  @media (max-width: 1024px) {
-    .prose li.task-list-item > .task-list-marker,
-    .prose li.task-list-item > input[type="checkbox"][disabled] {
-      margin-top: 0.35rem;
     }
   }
 }
