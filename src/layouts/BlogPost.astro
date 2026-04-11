@@ -14,6 +14,11 @@ type Props = CollectionEntry<"blog">["data"];
 const { title, description, pubDate, updatedDate, heroImage, tags } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url);
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+const stripped = Astro.url.pathname.replace(/^\/|\/$/g, "");
+const isHome = stripped === "" || stripped === "zh-tw" || stripped === "zh-cn";
+const pagePath = isHome ? (stripped ? `${stripped}_home` : "home") : stripped.replace(/\//g, "_");
+const ogFallbackSrc = `/og/${pagePath}.png`;
 const tr = t(locale);
 const blogFontClass =
   locale === "zh-tw" ? "font-noto-tc" : locale === "zh-cn" ? "font-noto-sc" : "";
@@ -22,6 +27,7 @@ const blogFontClass =
 <Layout
   title={title}
   description={description ?? ""}
+  image={heroImage}
   locale={locale}
   type="article"
   pubDate={pubDate}
@@ -45,13 +51,27 @@ const blogFontClass =
     }}
   />
   <article data-animate class:list={["mx-auto max-w-5xl px-4 py-12", blogFontClass]}>
-    {
-      heroImage && (
-        <div class="mb-8 overflow-hidden rounded-2xl">
-          <Image src={heroImage} alt="" width={1020} height={510} class="w-full object-cover" />
-        </div>
-      )
-    }
+    <div class="mb-8 max-h-72 overflow-hidden rounded-2xl">
+      {
+        heroImage ? (
+          <Image
+            src={heroImage}
+            alt=""
+            width={1020}
+            height={510}
+            class="h-72 w-full object-contain"
+          />
+        ) : (
+          <img
+            src={ogFallbackSrc}
+            alt=""
+            width={1020}
+            height={510}
+            class="h-72 w-full object-contain object-top"
+          />
+        )
+      }
+    </div>
 
     <header class="mb-8 text-center">
       <div class="mb-3 flex flex-wrap items-center justify-center gap-2 text-sm text-fg-muted">

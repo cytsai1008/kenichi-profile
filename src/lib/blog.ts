@@ -9,7 +9,9 @@ export function getBlogPostsForLocale(
   posts: CollectionEntry<"blog">[],
   locale: Locale
 ): CollectionEntry<"blog">[] {
-  return posts.filter((post) => post.id.startsWith(`${locale}/`));
+  return posts.filter(
+    (post) => post.id.startsWith(`${locale}/`) && (import.meta.env.DEV || !post.data.draft)
+  );
 }
 
 export function compareBlogPostsByDate(

@@ -32,7 +32,7 @@ const stripped = Astro.url.pathname.replace(/^\/|\/$/g, ""); // "" | "zh-tw" | "
 const isHome = stripped === "" || stripped === "zh-tw" || stripped === "zh-cn";
 const pagePath = isHome ? (stripped ? `${stripped}_home` : "home") : stripped.replace(/\//g, "_");
 const socialImage = image
-  ? new URL(image.src, Astro.site)
+  ? new URL(image.src, Astro.url.origin)
   : new URL(`/og/${pagePath}.png`, Astro.site);
 const fullTitle = `${SITE_TITLE} | ${title}`;
 ---

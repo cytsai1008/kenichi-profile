@@ -2,6 +2,7 @@
 title: "Markdown 基礎語法速查"
 description: "把最常用的 Markdown 語法整理在一起，查起來比較快。"
 pubDate: 2026-04-11
+# heroImage: ../../../assets/blog/basic-markdown-syntax/MrGreentea62_1.jpg
 tags:
   - markdown
   - guide
@@ -88,14 +89,18 @@ _斜體_
 連結寫成 `[文字](網址)`。
 
 ```md
-[OpenAI](https://openai.com)
+[YouTube](https://youtube.com)
 ```
+
+[YouTube](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
 
 圖片和連結很像，只是前面多一個 `!`。
 
 ```md
 ![一隻貓](./cat.jpg)
 ```
+
+![Example Image](../../../assets/blog/basic-markdown-syntax/MrGreentea62_1.jpg)
 
 ## 引用
 

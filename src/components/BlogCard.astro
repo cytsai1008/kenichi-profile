@@ -17,30 +17,36 @@ const tr = t(locale);
 const postHref = localePath(`/blog/${getBlogSlug(post.id)}/`, locale);
 const blogFontClass =
   locale === "zh-tw" ? "font-noto-tc" : locale === "zh-cn" ? "font-noto-sc" : "";
+
+const ogPath = `/og/${postHref.replace(/^\/|\/$/g, "").replace(/\//g, "_")}.png`;
 ---
 
 <article
   data-animate
   class:list={[
-    "group overflow-hidden rounded-2xl border border-border bg-surface-alt transition-shadow hover:shadow-lg",
+    "group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface-alt transition-shadow hover:shadow-lg",
     blogFontClass,
-    featured ? "flex flex-col sm:flex-row" : "flex flex-col",
   ]}
 >
   {
-    post.data.heroImage && (
-      <a
-        href={postHref}
-        class:list={["block overflow-hidden", featured ? "sm:w-2/5 sm:shrink-0" : ""]}
-        tabindex="-1"
-        aria-hidden="true"
-      >
+    post.data.heroImage ? (
+      <a href={postHref} class="block h-36 overflow-hidden" tabindex="-1" aria-hidden="true">
         <Image
           src={post.data.heroImage}
           alt=""
-          width={featured ? 480 : 720}
-          height={featured ? 320 : 240}
-          class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          width={720}
+          height={240}
+          class="h-36 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+      </a>
+    ) : (
+      <a href={postHref} class="block h-36 overflow-hidden" tabindex="-1" aria-hidden="true">
+        <img
+          src={ogPath}
+          alt=""
+          width={720}
+          height={240}
+          class="h-36 w-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
         />
       </a>
     )

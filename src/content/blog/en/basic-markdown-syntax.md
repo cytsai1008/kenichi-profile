@@ -2,6 +2,7 @@
 title: "A simple Markdown guide"
 description: "The Markdown syntax for me to quick reference."
 pubDate: 2026-04-11
+# heroImage: ../../../assets/blog/basic-markdown-syntax/MrGreentea62_1.jpg
 tags:
   - markdown
   - guide
@@ -88,14 +89,18 @@ For steps or ranked items, use numbers.
 Links use `[text](url)`.
 
 ```md
-[OpenAI](https://openai.com)
+[YouTube](https://youtube.com)
 ```
+
+[YouTube](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
 
 Images look the same, with a `!` in front.
 
 ```md
 ![A cat](./cat.jpg)
 ```
+
+![Example Image](../../../assets/blog/basic-markdown-syntax/MrGreentea62_1.jpg)
 
 ## Blockquotes
 
