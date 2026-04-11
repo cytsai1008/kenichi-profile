@@ -1,6 +1,4 @@
 @import "tailwindcss";
-@import "@chinese-fonts/maple-mono-cn/dist/MapleMono-CN-Regular/result.css";
-@import "@chinese-fonts/maple-mono-cn/dist/MapleMono-CN-Bold/result.css";
 
 /* ─── Enable .dark class strategy ───────────────────────── */
 @variant dark (&:where(.dark, .dark *));
