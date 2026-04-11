@@ -38,8 +38,9 @@ const socialLinks = [
             <div class="overflow-hidden rounded-2xl shadow-md ring-1 ring-border">
               <Image
                 src={refSheet}
-                alt={`${tr.about.character} ref sheet`}
+                alt={`${tr.about.name} ${tr.gallery.refSheet}`}
                 sizes="(min-width: 640px) 50vw, 100vw"
+                fetchpriority="high"
               />
             </div>
             <figcaption class="mt-2 text-center text-xs text-fg-muted">

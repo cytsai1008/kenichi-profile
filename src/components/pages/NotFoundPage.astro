@@ -26,7 +26,7 @@ const tr = t(locale);
         id="go-back-btn"
         class="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-accent-bg px-6 py-3 text-sm font-semibold text-fg transition-colors hover:bg-accent-dim"
       >
-        <ArrowLeft size={14} />
+        <ArrowLeft size={14} aria-hidden="true" />
         {tr.notFound.goBack}
       </button>
 
@@ -34,7 +34,7 @@ const tr = t(locale);
         href={localePath("/", locale)}
         class="inline-flex items-center gap-2 rounded-full bg-surface-alt/55 px-6 py-3 text-sm font-semibold text-fg no-underline transition-colors hover:border-accent/40 hover:bg-surface-alt"
       >
-        <House size={14} />
+        <House size={14} aria-hidden="true" />
         {tr.notFound.backHome}
       </a>
     </div>

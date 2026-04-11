@@ -105,11 +105,12 @@ const galleryItems: PhotoItem[] = await Promise.all(
       <p class="mt-2 text-lg text-fg-muted">{tr.gallery.description}</p>
     </header>
 
-    <!-- Category filter tabs -->
+    <!-- Category filter buttons -->
     <div
       data-animate
       class="relative mb-10 flex flex-wrap gap-2 border-b border-border pb-6"
-      role="tablist"
+      id="gallery-filters"
+      role="group"
       aria-label="Filter by category"
     >
       <div aria-hidden="true" class="gallery-filter-pill"></div>
@@ -122,10 +123,9 @@ const galleryItems: PhotoItem[] = await Promise.all(
               : galleryItems.filter((item) => item.category === cat).length;
           return (
             <button
-              role="tab"
               data-category={cat}
               class="gallery-filter relative z-10 rounded-full border border-border px-4 py-1.5 text-sm font-medium text-fg-muted transition-colors"
-              aria-selected={cat === "all" ? "true" : "false"}
+              aria-pressed={cat === "all" ? "true" : "false"}
             >
               {label}
               <span class="ml-1 text-xs opacity-60">({count})</span>
@@ -135,26 +135,28 @@ const galleryItems: PhotoItem[] = await Promise.all(
       }
     </div>
 
-    {
-      galleryItems.length === 0 ? (
-        <p class="text-fg-muted">No artwork yet.</p>
-      ) : (
-        <PhotoViewer
-          client:load
-          photos={galleryItems}
-          closeLabel={tr.photos.close}
-          zoomLabel={tr.photos.zoom}
-          prevLabel={tr.photos.previous}
-          nextLabel={tr.photos.next}
-          creatorLabel={tr.gallery.creator}
-          showDownloadButton={false}
-          showExifPanel={false}
-          itemClass="gallery-item border border-border"
-          alwaysShowText={true}
-          disableHoverZoom={true}
-        />
-      )
-    }
+    <div id="gallery-panel">
+      {
+        galleryItems.length === 0 ? (
+          <p class="text-fg-muted">No artwork yet.</p>
+        ) : (
+          <PhotoViewer
+            client:load
+            photos={galleryItems}
+            closeLabel={tr.photos.close}
+            zoomLabel={tr.photos.zoom}
+            prevLabel={tr.photos.previous}
+            nextLabel={tr.photos.next}
+            creatorLabel={tr.gallery.creator}
+            showDownloadButton={false}
+            showExifPanel={false}
+            itemClass="gallery-item border border-border"
+            alwaysShowText={true}
+            disableHoverZoom={true}
+          />
+        )
+      }
+    </div>
   </div>
 </Layout>
 
@@ -162,7 +164,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
   import { animate, stagger } from "animejs";
 
   const filters = Array.from(document.querySelectorAll<HTMLButtonElement>(".gallery-filter"));
-  const filterBar = document.querySelector<HTMLElement>("[role='tablist']");
+  const filterBar = document.getElementById("gallery-filters");
   const filterPill = document.querySelector<HTMLElement>(".gallery-filter-pill");
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -181,7 +183,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
   function setActiveFilter(activeButton: HTMLButtonElement) {
     filters.forEach((button) => {
       const isActive = button === activeButton;
-      button.setAttribute("aria-selected", isActive ? "true" : "false");
+      button.setAttribute("aria-pressed", isActive ? "true" : "false");
       button.classList.toggle("text-white", isActive);
       button.classList.toggle("border-transparent", isActive);
       button.classList.toggle("text-fg-muted", !isActive);
@@ -280,7 +282,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
 
     isTransitioning = true;
     filters.forEach((filter) => {
-      filter.disabled = true;
+      filter.style.pointerEvents = "none";
     });
 
     try {
@@ -341,7 +343,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
     } finally {
       isTransitioning = false;
       filters.forEach((filter) => {
-        filter.disabled = false;
+        filter.style.pointerEvents = "";
       });
     }
   }

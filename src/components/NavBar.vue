@@ -508,13 +508,14 @@ function isActive(href: string) {
               :aria-label="activeTheme.label"
               @click="cycleTheme"
             >
-              <component :is="activeTheme.icon" :size="16" />
+              <component :is="activeTheme.icon" :size="16" aria-hidden="true" />
             </button>
 
             <!-- Full panel: absolute right-aligned, fades in on hover -->
             <div
               ref="themePanel"
-              class="absolute right-0 flex items-center overflow-hidden rounded-lg border border-border"
+              :inert="!themeHovered"
+              class="absolute right-0 flex items-center rounded-lg border border-border"
               style="opacity: 0; pointer-events: none"
               role="group"
               aria-label="Theme"
@@ -522,7 +523,7 @@ function isActive(href: string) {
               <button
                 v-for="opt in themeOptions"
                 :key="opt.mode"
-                class="p-1.5 transition-colors"
+                class="p-1.5 transition-colors first:rounded-l-lg last:rounded-r-lg"
                 :class="
                   theme === opt.mode
                     ? 'bg-accent-bg text-white'
@@ -532,7 +533,7 @@ function isActive(href: string) {
                 :aria-pressed="theme === opt.mode"
                 @click="setTheme(opt.mode)"
               >
-                <component :is="opt.icon" :size="16" />
+                <component :is="opt.icon" :size="16" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -548,7 +549,7 @@ function isActive(href: string) {
               @click.stop="langOpen ? closeLangDropdown() : (langOpen = true)"
               @keydown="handleLangKeydown"
             >
-              <Languages :size="16" class="text-fg-muted" />
+              <Languages :size="16" class="text-fg-muted" aria-hidden="true" />
               <!-- Text hidden by default, revealed on controls hover -->
               <span
                 ref="langText"
@@ -568,6 +569,7 @@ function isActive(href: string) {
                 :size="14"
                 class="transition-transform"
                 :class="langOpen ? 'rotate-180' : ''"
+                aria-hidden="true"
               />
             </button>
 
@@ -588,7 +590,7 @@ function isActive(href: string) {
                   :aria-selected="loc === locale"
                   class="w-full rounded-lg px-3 py-1.5 text-left text-sm transition-colors hover:bg-surface-alt"
                   :class="[
-                    loc === locale ? 'font-semibold text-accent' : 'text-fg',
+                    loc === locale ? 'bg-accent-bg font-semibold' : 'text-fg',
                     loc === 'zh-tw'
                       ? 'font-noto-tc'
                       : loc === 'zh-cn'
@@ -614,8 +616,14 @@ function isActive(href: string) {
           >
             <span class="relative block h-5 w-5">
               <Transition :css="false" @enter="onIconEnter" @leave="onIconLeave">
-                <X v-if="menuOpen" :key="'close'" :size="20" class="absolute inset-0" />
-                <Menu v-else :key="'open'" :size="20" class="absolute inset-0" />
+                <X
+                  v-if="menuOpen"
+                  :key="'close'"
+                  :size="20"
+                  class="absolute inset-0"
+                  aria-hidden="true"
+                />
+                <Menu v-else :key="'open'" :size="20" class="absolute inset-0" aria-hidden="true" />
               </Transition>
             </span>
           </button>
@@ -660,14 +668,14 @@ function isActive(href: string) {
         class="mobile-menu-controls mt-3 flex items-center justify-between border-t border-border pt-3"
       >
         <div
-          class="flex items-center overflow-hidden rounded-lg border border-border"
+          class="flex items-center rounded-lg border border-border"
           role="group"
           aria-label="Theme"
         >
           <button
             v-for="opt in themeOptions"
             :key="opt.mode"
-            class="p-1.5 transition-colors"
+            class="p-1.5 transition-colors first:rounded-l-lg last:rounded-r-lg"
             :class="
               theme === opt.mode
                 ? 'bg-accent-bg text-white'
@@ -677,7 +685,7 @@ function isActive(href: string) {
             :aria-pressed="theme === opt.mode"
             @click="setTheme(opt.mode)"
           >
-            <component :is="opt.icon" :size="16" />
+            <component :is="opt.icon" :size="16" aria-hidden="true" />
           </button>
         </div>
       </div>

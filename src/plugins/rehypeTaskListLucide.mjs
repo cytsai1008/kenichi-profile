@@ -61,6 +61,7 @@ function createLucideIconNode(checked) {
       role: "checkbox",
       "aria-checked": String(checked),
       "aria-disabled": "true",
+      "aria-label": checked ? "Completed" : "Not completed",
     },
     children: [
       {

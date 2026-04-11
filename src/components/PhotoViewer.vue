@@ -196,6 +196,18 @@ onMounted(() => {
   void syncMasonryLayout();
   window.addEventListener("resize", updateMasonryLayout);
 
+  // Track which gallery button triggered the open so we can reliably restore
+  // focus on close — screen readers activate via virtual cursor without always
+  // updating document.activeElement, so PhotoSwipe's built-in returnFocus fails.
+  let triggerEl: HTMLElement | null = null;
+  galleryEl.value.addEventListener(
+    "click",
+    (e) => {
+      triggerEl = (e.target as HTMLElement).closest<HTMLElement>("[data-pswp]");
+    },
+    { capture: true }
+  );
+
   lightbox = new PhotoSwipeLightbox({
     gallery: galleryEl.value,
     children: "[data-pswp]",
@@ -205,6 +217,7 @@ onMounted(() => {
     maxZoomLevel: 4,
     preload: [2, 3],
     wheelToZoom: true,
+    returnFocus: false,
     closeTitle: props.closeLabel ?? "Close",
     zoomTitle: props.zoomLabel ?? "Zoom",
     arrowPrevTitle: props.prevLabel ?? "Previous",
@@ -224,6 +237,34 @@ onMounted(() => {
 
   lightbox.on("openingAnimationStart", () => {
     lightbox?.pswp?.element?.classList.add("pswp--opening");
+
+    const pswpEl = lightbox?.pswp?.element;
+    if (!pswpEl) return;
+
+    // Mark as modal dialog so screen readers announce it correctly
+    pswpEl.setAttribute("role", "dialog");
+    pswpEl.setAttribute("aria-modal", "true");
+    pswpEl.setAttribute("aria-labelledby", "pswp-sr-label");
+
+    // Visually hidden live region — announces current photo on open and slide change
+    let liveRegion = pswpEl.querySelector<HTMLElement>("#pswp-sr-label");
+    if (!liveRegion) {
+      liveRegion = document.createElement("div");
+      liveRegion.id = "pswp-sr-label";
+      liveRegion.setAttribute("aria-live", "polite");
+      liveRegion.className = "sr-only";
+      pswpEl.appendChild(liveRegion);
+    }
+
+    const region = liveRegion;
+    const announce = () => {
+      const data = getLightboxPhotos()[lightbox?.pswp?.currIndex ?? 0];
+      const parts = [data?.title, data?.alt].filter(Boolean);
+      region.textContent = parts.length ? parts.join(" — ") : "Photo viewer";
+    };
+
+    announce();
+    lightbox?.pswp?.on("change", announce);
   });
 
   lightbox.on("openingAnimationEnd", () => {
@@ -234,6 +275,8 @@ onMounted(() => {
   });
   lightbox.on("destroy", () => {
     lightbox?.pswp?.element?.classList.remove("pswp--opening");
+    triggerEl?.focus();
+    triggerEl = null;
   });
 
   // Inject EXIF panel into PhotoSwipe UI
@@ -343,6 +386,7 @@ onMounted(() => {
     if (activePhoto) {
       itemData.w = activePhoto.width;
       itemData.h = activePhoto.height;
+      itemData.alt = activePhoto.alt;
     }
 
     const img = el?.querySelector<HTMLImageElement>("img");
@@ -399,10 +443,10 @@ onUnmounted(() => {
         : 'grid grid-cols-2 items-start gap-3 sm:grid-cols-3 lg:grid-cols-4'
     "
   >
-    <component
-      :is="props.alwaysShowText ? 'div' : 'a'"
+    <button
       v-for="photo in photos"
       :key="photo.src"
+      type="button"
       v-bind="{
         ...(!props.alwaysShowText ? { 'data-animate': '' } : {}),
         ...(photo.width && photo.height
@@ -410,13 +454,12 @@ onUnmounted(() => {
           : {}),
       }"
       data-pswp
-      :href="props.alwaysShowText ? undefined : photo.src"
       :data-pswp-src="photo.src"
       :data-pswp-msrc="photo.thumb"
       :data-cropped="true"
       :data-category="photo.category"
       class="group block overflow-hidden rounded-lg bg-surface-alt transition-transform duration-150"
-      :class="[props.itemClass, props.alwaysShowText ? 'cursor-pointer' : 'relative']"
+      :class="[props.itemClass, props.alwaysShowText ? 'cursor-pointer text-left' : 'relative']"
       :style="[
         props.alwaysShowText ? undefined : 'aspect-ratio: 1 / 1',
         pressedPhoto === photo.src ? { scale: '0.97' } : {},
@@ -495,7 +538,7 @@ onUnmounted(() => {
           <template v-else>{{ photo.subtitle }}</template>
         </p>
       </div>
-    </component>
+    </button>
   </div>
 </template>
 

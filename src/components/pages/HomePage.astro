@@ -103,26 +103,32 @@ const latestPhotos = await Promise.all(
           </p>
         </div>
 
-        <div class="mt-10 flex flex-wrap items-center gap-3">
-          <a
-            href={localePath("/about", locale)}
-            class="rounded-xl bg-accent-bg px-6 py-3 text-sm font-semibold text-white no-underline transition-colors hover:bg-accent-dim"
-          >
-            {tr.nav.about}
-          </a>
-          <a
-            href={localePath("/gallery", locale)}
-            class="rounded-full bg-surface-alt/55 px-6 py-3 text-sm font-semibold text-fg no-underline transition-colors hover:border-accent/40 hover:bg-surface-alt"
-          >
-            {tr.nav.gallery}
-          </a>
-          <a
-            href={localePath("/photos", locale)}
-            class="rounded-full bg-surface-alt/55 px-6 py-3 text-sm font-semibold text-fg no-underline transition-colors hover:border-accent/40 hover:bg-surface-alt"
-          >
-            {tr.nav.photos}
-          </a>
-        </div>
+        <ul class="mt-10 flex list-none flex-wrap items-center gap-3 p-0">
+          <li>
+            <a
+              href={localePath("/about", locale)}
+              class="rounded-xl bg-accent-bg px-6 py-3 text-sm font-semibold text-white no-underline transition-colors hover:bg-accent-dim"
+            >
+              {tr.nav.about}
+            </a>
+          </li>
+          <li>
+            <a
+              href={localePath("/gallery", locale)}
+              class="rounded-full bg-surface-alt/55 px-6 py-3 text-sm font-semibold text-fg no-underline transition-colors hover:border-accent/40 hover:bg-surface-alt"
+            >
+              {tr.nav.gallery}
+            </a>
+          </li>
+          <li>
+            <a
+              href={localePath("/photos", locale)}
+              class="rounded-full bg-surface-alt/55 px-6 py-3 text-sm font-semibold text-fg no-underline transition-colors hover:border-accent/40 hover:bg-surface-alt"
+            >
+              {tr.nav.photos}
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   </section>
