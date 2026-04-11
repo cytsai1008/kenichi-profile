@@ -23,7 +23,7 @@ Run Prettier and ESLint on any changed `.astro`, `.vue`, or `.ts` files before c
 - **Never duplicate page logic.** Every page has one shared component in `src/components/pages/` that accepts a `locale` prop. The actual route files in `src/pages/` and `src/pages/zh-{tw,cn}/` are 3-line wrappers that pass the locale.
 - Translation strings live in `src/i18n/{en,zh-tw,zh-cn}.json`. Use `t(locale)` from `src/i18n/utils.ts` to get the full typed object.
 - Use `localePath(path, locale)` to build locale-prefixed hrefs. Use `getLocaleFromUrl(url)` to detect locale in layouts/components.
-- The middleware at `src/middleware.ts` auto-detects locale on `/` from `Accept-Language`, but defers to the `preferred-locale` cookie set when the user manually switches language via the NavBar.
+- The root path `/` is prerendered. Locale detection happens client-side in `src/components/BaseHead.astro`, which defers to the `preferred-locale` cookie set when the user manually switches language via the NavBar and otherwise checks `navigator.languages`.
 
 ### Color system — Tailwind v4 with `@theme inline`
 

@@ -61,7 +61,7 @@ Useful commands:
 - English is the default locale, so its routes do not use a URL prefix.
 - Traditional Chinese routes live under `/zh-tw/...`.
 - Simplified Chinese routes live under `/zh-cn/...`.
-- `src/middleware.ts` redirects `/` by checking the `preferred-locale` cookie first and `Accept-Language` after that.
+- The root path `/` is prerendered; locale redirection now happens client-side in `src/components/BaseHead.astro` by checking the `preferred-locale` cookie first and `navigator.languages` after that.
 - Shared page logic lives in `src/components/pages/`; route files in `src/pages/` mainly pass the locale through.
 
 ## Content workflows
@@ -158,6 +158,7 @@ date: 2026-04-08
 ## Deployment notes
 
 - The site uses the Cloudflare Astro adapter with `output: "static"`.
+- Because the site is prerendered, request-time Astro middleware is not used for locale detection.
 - `wrangler.jsonc` is already configured for the custom domain `kenichi.photocat.blue`.
 - Open Graph images are generated during the build and written to `public/og/`.
 
