@@ -30,7 +30,6 @@
     "@lucide/vue": "^1.7.0",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.2.2",
-    "@vue/eslint-config-prettier": "^10.2.0",
     "animejs": "^4.3.6",
     "astro": "^6.1.1",
     "astro-seo-meta": "^6.0.0",
@@ -46,6 +45,7 @@
   },
   "devDependencies": {
     "@typescript-eslint/parser": "^8.57.2",
+    "@vue/eslint-config-prettier": "^10.2.0",
     "eslint": "^10.2.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^1.6.0",
