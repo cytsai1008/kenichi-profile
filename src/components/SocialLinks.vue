@@ -26,7 +26,6 @@ defineProps<{
       rel="noopener noreferrer"
       class="inline-flex h-11 w-11 items-center justify-center rounded-full text-fg! no-underline transition-colors hover:bg-surface-alt hover:text-fg/70!"
       :aria-label="link.label"
-      :title="link.label"
     >
       <span class="sr-only">{{ link.label }}</span>
       <Icon
