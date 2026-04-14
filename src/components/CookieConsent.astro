@@ -1,0 +1,226 @@
+---
+import "vanilla-cookieconsent/dist/cookieconsent.css";
+import { getLocaleFromUrl, localeLang } from "../i18n/utils";
+import en from "../i18n/en.json";
+import zhTw from "../i18n/zh-tw.json";
+import zhCn from "../i18n/zh-cn.json";
+
+const locale = getLocaleFromUrl(Astro.url);
+const currentLanguage = localeLang[locale]; // 'en', 'zh-TW', or 'zh-CN'
+
+const allTranslations = {
+  en: en.cookieConsent,
+  "zh-TW": zhTw.cookieConsent,
+  "zh-CN": zhCn.cookieConsent,
+};
+---
+
+<script is:inline define:vars={{ allTranslations, currentLanguage }}>
+  window.COOKIE_CONSENT_TRANSLATIONS = allTranslations;
+  window.COOKIE_CONSENT_LANGUAGE = currentLanguage;
+</script>
+
+<script>
+  import { run, setLanguage } from "vanilla-cookieconsent";
+
+  const handlePersonalization = (categories: string[]) => {
+    if (!categories.includes("personalization")) {
+      localStorage.removeItem("theme");
+    }
+  };
+
+  let initialized = false;
+
+  const initCookieConsent = async () => {
+    // Guard: run() must only be called once. Both the direct call below
+    // and the astro:page-load listener may race on initial page load.
+    if (initialized) return;
+    initialized = true;
+
+    const translations = (window as any).COOKIE_CONSENT_TRANSLATIONS;
+    const currentLang = (window as any).COOKIE_CONSENT_LANGUAGE;
+
+    await run({
+      guiOptions: {
+        consentModal: {
+          layout: "box inline",
+          position: "bottom right",
+          equalWeightButtons: false,
+          flipButtons: false,
+        },
+        preferencesModal: {
+          layout: "box",
+          position: "right",
+          equalWeightButtons: true,
+          flipButtons: false,
+        },
+      },
+      categories: {
+        necessary: {
+          readOnly: true,
+          enabled: true,
+        },
+        personalization: {
+          enabled: true,
+          readOnly: false,
+          autoClear: {
+            cookies: [{ name: "preferred-locale" }],
+          },
+        },
+        analytics: {
+          enabled: false,
+          readOnly: false,
+          autoClear: {
+            cookies: [{ name: /^(_ga|_gid)/ }, { name: /^_cl/ }],
+          },
+        },
+      },
+      language: {
+        default: currentLang,
+        translations: translations,
+      },
+      onFirstConsent: () => {
+        window.dispatchEvent(new CustomEvent("cc:onConsent"));
+      },
+      onConsent: ({ cookie }) => {
+        handlePersonalization(cookie.categories);
+        window.dispatchEvent(new CustomEvent("cc:onConsent"));
+      },
+      onChange: ({ cookie }) => {
+        handlePersonalization(cookie.categories);
+        window.dispatchEvent(new CustomEvent("cc:onConsent"));
+      },
+    });
+
+    await setLanguage(currentLang);
+  };
+
+  // Direct call: guarantees initialization even if astro:page-load fires
+  // before this module script has registered its listener (a race that can
+  // occur on initial page load with Astro View Transitions).
+  initCookieConsent();
+
+  // astro:page-load fires on every navigation after the first.
+  // initCookieConsent() is a no-op once initialized; only setLanguage runs.
+  document.addEventListener("astro:page-load", async () => {
+    if (!initialized) {
+      await initCookieConsent();
+    } else {
+      const currentLang = (window as any).COOKIE_CONSENT_LANGUAGE;
+      await setLanguage(currentLang);
+    }
+  });
+</script>
+
+<style is:global>
+  /**
+   * Style overrides for vanilla-cookieconsent v3 to match kenichi-profile theme
+   */
+  :root {
+    --cc-modal-border-radius: 1rem;
+    --cc-btn-border-radius: 0.5rem;
+    --cc-font-family: var(--font-sans);
+    --cc-z-index: 2147483647;
+
+    --cc-bg: color-mix(in srgb, var(--surface), transparent 10%);
+    --cc-primary-color: var(--fg);
+    --cc-secondary-color: var(--fg-muted);
+
+    --cc-btn-primary-bg: var(--accent-bg);
+    --cc-btn-primary-color: #fff;
+    --cc-btn-primary-border-color: var(--accent-bg);
+    --cc-btn-primary-hover-bg: var(--accent-dim);
+    --cc-btn-primary-hover-color: #fff;
+    --cc-btn-primary-hover-border-color: var(--accent-dim);
+
+    --cc-btn-secondary-bg: transparent;
+    --cc-btn-secondary-color: var(--fg);
+    --cc-btn-secondary-border-color: transparent;
+    --cc-btn-secondary-hover-bg: var(--surface-alt);
+    --cc-btn-secondary-hover-color: var(--fg);
+    --cc-btn-secondary-hover-border-color: transparent;
+
+    --cc-separator-border-color: var(--border);
+    --cc-cookie-category-block-bg: transparent;
+    --cc-cookie-category-block-border: transparent;
+    --cc-cookie-category-block-hover-bg: var(--surface-alt);
+    --cc-cookie-category-block-hover-border: transparent;
+    --cc-cookie-category-expanded-block-bg: transparent;
+    --cc-cookie-category-expanded-block-hover-bg: var(--surface-alt);
+    --cc-section-category-border: transparent;
+
+    --cc-toggle-on-bg: var(--accent);
+    --cc-toggle-off-bg: var(--fg-muted);
+    --cc-toggle-on-knob-bg: #fff;
+    --cc-toggle-off-knob-bg: #fff;
+    --cc-toggle-enabled-icon-color: var(--cc-bg);
+    --cc-toggle-disabled-icon-color: var(--cc-bg);
+    --cc-toggle-readonly-bg: var(--border);
+    --cc-toggle-readonly-knob-bg: var(--fg-muted);
+    --cc-toggle-readonly-knob-icon-color: var(--border);
+
+    --cc-footer-bg: var(--surface-alt);
+    --cc-footer-color: var(--fg-muted);
+    --cc-footer-border-color: var(--border);
+
+    --cc-overlay-bg: rgba(0, 0, 0, 0.45);
+    --cc-link-color: var(--accent);
+  }
+
+  #cc-main .cm,
+  #cc-main .pm {
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+  }
+
+  #cc-main .cm__title,
+  #cc-main .pm__title {
+    font-weight: 700;
+  }
+  #cc-main .cm__btn,
+  #cc-main .pm__btn {
+    font-weight: 600;
+  }
+
+  #cc-main [data-cc="save"] {
+    background: transparent;
+    color: var(--fg);
+    border-color: var(--border);
+  }
+
+  #cc-main [data-cc="save"]:hover {
+    background: var(--surface-alt);
+    border-color: var(--border);
+  }
+
+  #cc-main .pm__table-head > tr {
+    border-bottom: 1px solid var(--border);
+    color: var(--fg-muted);
+  }
+
+  #cc-main .pm__table-tr:hover {
+    background: transparent;
+  }
+
+  #cc-main .pm__table-caption,
+  #cc-main .pm__table-td,
+  #cc-main .pm__table-th {
+    padding: 0.625em 1.2em;
+    border-color: var(--border);
+  }
+
+  /* Give Expiration column more space */
+  #cc-main .pm__table-th:last-child,
+  #cc-main .pm__table-td:last-child {
+    min-width: 90px;
+    white-space: nowrap;
+  }
+
+  #cc-main .pm__section-desc-wrapper {
+    background: transparent !important;
+  }
+  #cc-main .cc__link:hover,
+  #cc-main a:hover {
+    color: var(--accent-dim);
+  }
+</style>

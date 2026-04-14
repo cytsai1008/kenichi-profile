@@ -85,6 +85,121 @@
   },
   "footer": {},
   "a11y": {
-    "skipToContent": "跳至主要内容"
+    "skipToContent": "跳到主要内容"
+  },
+  "cookieConsent": {
+    "consentModal": {
+      "title": "Cookie 使用声明",
+      "description": "本站使用 Cookie 以确保网站正常运作，并改善您的浏览体验。您可随时管理您的偏好设置。",
+      "acceptAllBtn": "全部接受",
+      "acceptNecessaryBtn": "仅必要项目",
+      "showPreferencesBtn": "管理偏好设置"
+    },
+    "preferencesModal": {
+      "title": "Cookie 偏好设置",
+      "acceptAllBtn": "全部接受",
+      "acceptNecessaryBtn": "仅必要项目",
+      "savePreferencesBtn": "保存设置",
+      "closeIconLabel": "关闭",
+      "sections": [
+        {
+          "title": "Cookie 使用说明",
+          "description": "本站使用 Cookie 及类似技术以提供核心功能，并了解访客与内容的互动方式。您可在下方控制各类别的启用状态。"
+        },
+        {
+          "title": "严格必要",
+          "description": "这些 Cookie 为网站正常运作所必需，无法停用，且不收集任何个人身份信息。",
+          "linkedCategory": "necessary",
+          "cookieTable": {
+            "headers": {
+              "name": "名称",
+              "domain": "域名",
+              "description": "说明",
+              "expiration": "有效期限"
+            },
+            "body": [
+              {
+                "name": "cc_cookie",
+                "domain": "本站",
+                "description": "存储您的 Cookie 同意偏好，避免重复显示提示。",
+                "expiration": "6 个月"
+              },
+              {
+                "name": "__cf_bm / _cfuvid / __cfruid",
+                "domain": ".cloudflare.com",
+                "description": "Cloudflare 基础设施 Cookie，用于安全防护、机器人检测及流量限制。",
+                "expiration": "会话 – 30 分钟"
+              }
+            ]
+          }
+        },
+        {
+          "title": "个性化",
+          "description": "这些 Cookie 使网站能够记住您的偏好设置（如语言与显示主题），以便在不同访问间持续保留。",
+          "linkedCategory": "personalization",
+          "cookieTable": {
+            "headers": {
+              "name": "名称",
+              "domain": "域名",
+              "description": "说明",
+              "expiration": "有效期限"
+            },
+            "body": [
+              {
+                "name": "preferred-locale",
+                "domain": "本站",
+                "description": "存储您偏好的显示语言。停用后，语言选择将不会在会话间保留。",
+                "expiration": "1 年"
+              },
+              {
+                "name": "theme (localStorage)",
+                "domain": "浏览器（本地）",
+                "description": "存储您偏好的配色模式（浅色或深色）。停用个性化后将自动清除。",
+                "expiration": "永久"
+              }
+            ]
+          }
+        },
+        {
+          "title": "数据分析",
+          "description": "这些 Cookie 帮助了解访客如何使用本站。所有数据均经汇总处理，仅用于改善内容质量与网站性能。",
+          "linkedCategory": "analytics",
+          "cookieTable": {
+            "headers": {
+              "name": "名称",
+              "domain": "域名",
+              "description": "说明",
+              "expiration": "有效期限"
+            },
+            "body": [
+              {
+                "name": "_ga / _ga_*",
+                "domain": "本站",
+                "description": "Google Analytics — 识别独立访客并汇总使用统计数据。",
+                "expiration": "2 年"
+              },
+              {
+                "name": "_clck / _clsk / CLID / ANONCHK / MR / SM",
+                "domain": ".clarity.ms",
+                "description": "Microsoft Clarity — 记录匿名会话数据，用于热点图与会话回放。",
+                "expiration": "1 年 / 会话"
+              },
+              {
+                "name": "MUID / _EDGE_V / SRCHD / SRCHUID / SRCHUSR / SRM_B / USRLOC / _RwBf / _Rwho / _SS",
+                "domain": ".bing.com",
+                "description": "Microsoft/Bing 辅助 Cookie，由 Clarity 用于跨站去重与用户洞察。",
+                "expiration": "会话 – 2 年"
+              },
+              {
+                "name": "Cloudflare Web Analytics",
+                "domain": "cloudflareinsights.com",
+                "description": "无 Cookie 的真实用户监控 (RUM) — 测量核心网页指标与页面加载性能，不存储任何个人数据。",
+                "expiration": "无"
+              }
+            ]
+          }
+        }
+      ]
+    }
   }
 }

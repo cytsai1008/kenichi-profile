@@ -4,6 +4,7 @@ import { animate, spring, stagger } from "animejs";
 import { ChevronDown, Languages, type LucideIcon, Menu, Monitor, Moon, Sun, X } from "@lucide/vue";
 import type { Locale } from "../i18n/utils";
 import { switchLocalePath, locales, t } from "../i18n/utils";
+import { validCookie, hasConsent } from "../lib/cookie-consent-helper";
 
 interface NavLink {
   href: string;
@@ -27,6 +28,20 @@ onMounted(() => {
   reducedMotion.value = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 });
 
+/**
+ * Enhanced hasConsent that defaults to true for personalization
+ * if the user hasn't made a choice yet.
+ */
+function shouldAllowPersonalization(): boolean {
+  if (typeof window === "undefined") return false;
+
+  // If the user hasn't made a choice yet (v3: validCookie() is false) -> default ON
+  if (!validCookie()) return true;
+
+  // Otherwise, strictly follow their consent choice
+  return hasConsent("personalization");
+}
+
 /* ─── Theme ─────────────────────────────────────────────── */
 type ThemeMode = "system" | "light" | "dark";
 
@@ -38,17 +53,30 @@ function applyTheme(mode: ThemeMode) {
   document.documentElement.classList.toggle("dark", isDark);
 }
 
+function onConsentChange() {
+  if (!shouldAllowPersonalization()) {
+    theme.value = "system";
+    applyTheme("system");
+  }
+}
+
 onMounted(() => {
   const stored = localStorage.getItem("theme") as ThemeMode | null;
   theme.value = stored ?? "system";
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
     if (theme.value === "system") applyTheme("system");
   });
+
+  // When personalization consent is revoked, reset theme to system default
+  // so the visual state reflects the cleared localStorage immediately.
+  window.addEventListener("cc:onConsent", onConsentChange);
 });
 
 function setTheme(mode: ThemeMode) {
   theme.value = mode;
-  localStorage.setItem("theme", mode);
+  if (shouldAllowPersonalization()) {
+    localStorage.setItem("theme", mode);
+  }
   applyTheme(mode);
 }
 
@@ -303,6 +331,7 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener("click", handleOutsideClick);
   window.removeEventListener("scroll", handleScroll);
+  window.removeEventListener("cc:onConsent", onConsentChange);
 });
 
 /* ─── Language switcher ──────────────────────────────────── */
@@ -434,8 +463,10 @@ watch(langOpen, async (open) => {
 });
 
 function switchLang(targetLocale: Locale) {
-  const maxAge = 60 * 60 * 24 * 365;
-  document.cookie = `preferred-locale=${targetLocale}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  if (shouldAllowPersonalization()) {
+    const maxAge = 60 * 60 * 24 * 365;
+    document.cookie = `preferred-locale=${targetLocale}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  }
   try {
     window.location.href = switchLocalePath(new URL(window.location.href), targetLocale);
   } catch {

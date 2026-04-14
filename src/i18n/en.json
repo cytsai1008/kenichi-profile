@@ -86,5 +86,120 @@
   "footer": {},
   "a11y": {
     "skipToContent": "Skip to main content"
+  },
+  "cookieConsent": {
+    "consentModal": {
+      "title": "Cookie Notice",
+      "description": "This site uses cookies to ensure essential functionality and to improve your browsing experience. You can manage your preferences at any time.",
+      "acceptAllBtn": "Accept all",
+      "acceptNecessaryBtn": "Necessary only",
+      "showPreferencesBtn": "Manage preferences"
+    },
+    "preferencesModal": {
+      "title": "Cookie Preferences",
+      "acceptAllBtn": "Accept all",
+      "acceptNecessaryBtn": "Necessary only",
+      "savePreferencesBtn": "Save preferences",
+      "closeIconLabel": "Close",
+      "sections": [
+        {
+          "title": "Cookie Usage",
+          "description": "This site uses cookies and similar technologies to provide essential functionality and to understand how visitors interact with the content. You can control which categories are active below."
+        },
+        {
+          "title": "Strictly Necessary",
+          "description": "These cookies are required for the site to function correctly and cannot be disabled. They do not collect any personally identifiable information.",
+          "linkedCategory": "necessary",
+          "cookieTable": {
+            "headers": {
+              "name": "Name",
+              "domain": "Domain",
+              "description": "Description",
+              "expiration": "Expiration"
+            },
+            "body": [
+              {
+                "name": "cc_cookie",
+                "domain": "This site",
+                "description": "Stores your cookie consent preferences so you are not prompted again.",
+                "expiration": "6 months"
+              },
+              {
+                "name": "__cf_bm / _cfuvid / __cfruid",
+                "domain": ".cloudflare.com",
+                "description": "Cloudflare infrastructure cookies for security, bot mitigation, and rate limiting.",
+                "expiration": "Session – 30 min"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Personalization",
+          "description": "These cookies allow the site to remember your preferences — such as your chosen language and display theme — so they persist across visits.",
+          "linkedCategory": "personalization",
+          "cookieTable": {
+            "headers": {
+              "name": "Name",
+              "domain": "Domain",
+              "description": "Description",
+              "expiration": "Expiration"
+            },
+            "body": [
+              {
+                "name": "preferred-locale",
+                "domain": "This site",
+                "description": "Stores your preferred display language. If disabled, language selections will not persist between sessions.",
+                "expiration": "1 year"
+              },
+              {
+                "name": "theme (localStorage)",
+                "domain": "Browser (local)",
+                "description": "Stores your preferred color scheme (light or dark mode). Cleared when personalization is disabled.",
+                "expiration": "Persistent"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Analytics",
+          "description": "These cookies help understand how visitors use the site. The data is aggregated and used solely to improve content and performance.",
+          "linkedCategory": "analytics",
+          "cookieTable": {
+            "headers": {
+              "name": "Name",
+              "domain": "Domain",
+              "description": "Description",
+              "expiration": "Expiration"
+            },
+            "body": [
+              {
+                "name": "_ga / _ga_*",
+                "domain": "This site",
+                "description": "Google Analytics — identifies unique visitors and aggregates usage statistics.",
+                "expiration": "2 years"
+              },
+              {
+                "name": "_clck / _clsk / CLID / ANONCHK / MR / SM",
+                "domain": ".clarity.ms",
+                "description": "Microsoft Clarity — records anonymized session data for heatmaps and session replays.",
+                "expiration": "1 year / Session"
+              },
+              {
+                "name": "MUID / _EDGE_V / SRCHD / SRCHUID / SRCHUSR / SRM_B / USRLOC / _RwBf / _Rwho / _SS",
+                "domain": ".bing.com",
+                "description": "Microsoft/Bing auxiliary cookies set by Clarity for cross-site deduplication and user insights.",
+                "expiration": "Session – 2 years"
+              },
+              {
+                "name": "Cloudflare Web Analytics",
+                "domain": "cloudflareinsights.com",
+                "description": "Cookieless Real User Monitoring (RUM) — measures Core Web Vitals and page load performance. No personal data is stored.",
+                "expiration": "None"
+              }
+            ]
+          }
+        }
+      ]
+    }
   }
 }
