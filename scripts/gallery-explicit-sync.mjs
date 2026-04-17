@@ -419,7 +419,7 @@ function pkcs8Wrap(seed) {
     oidBytes,
   ]);
   const seq = Buffer.concat([
-    Buffer.from("0201000000", "hex").slice(0, 3), // INTEGER 0 = 02 01 00
+    Buffer.from("020100", "hex"), // INTEGER 0 = 02 01 00
     algorithmSeq,
     outerOctet,
   ]);
@@ -452,7 +452,7 @@ async function buildSignedHeaders(method, urlPath, bodyBuf, signingKey) {
   return {
     "CF-Access-Client-Id": CF_CLIENT_ID,
     "CF-Access-Client-Secret": CF_CLIENT_SECRET,
-    "x-key-id": "default",
+    "x-key-id": "default", // TODO: remove — unused by server
     "x-timestamp": timestamp,
     "x-nonce": nonce,
     "x-content-sha256": bodyHash,
@@ -467,7 +467,7 @@ async function buildSignedHeaders(method, urlPath, bodyBuf, signingKey) {
 function mimeFromUrl(url) {
   const ext = url.split("?")[0].split(".").pop().toLowerCase();
   return (
-    { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif", avif: "image/avif" }[ext] ?? "image/jpeg"
+    { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif", avif: "image/avif", json: "application/json" }[ext] ?? "image/jpeg"
   );
 }
 
@@ -512,20 +512,7 @@ async function uploadFile(url, srcPath, expectedHash, signingKey) {
 
 async function updateManifestEntry(entry, signingKey) {
   const body = Buffer.from(JSON.stringify(entry), "utf8");
-  const urlObj = new URL(`${SYNC_HOST}/_manifest/gallery-explicit.json`);
-  const headers = await buildSignedHeaders("PUT", urlObj.pathname, body, signingKey);
-  headers["Content-Type"] = "application/json";
-  const res = await fetch(`${SYNC_HOST}/_manifest/gallery-explicit.json`, {
-    method: "PUT",
-    headers,
-    body,
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(
-      `Failed to update manifest entry for ${entry.relativePath}: HTTP ${res.status} ${text}`
-    );
-  }
+  await signedRequest("PUT", `${SYNC_HOST}/_manifest/gallery-explicit.json`, body, signingKey);
 }
 
 // ---------------------------------------------------------------------------
