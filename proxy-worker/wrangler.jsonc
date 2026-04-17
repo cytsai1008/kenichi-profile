@@ -6,6 +6,7 @@
   // Or add a [vars] block below and set UPSTREAM_OVERRIDE = "http://localhost:8080"
   "name": "kenichi-media-proxy",
   "main": "src/index.js",
+  "tsconfig": "tsconfig.json",
   "compatibility_date": "2026-04-08",
   "routes": [
     {
