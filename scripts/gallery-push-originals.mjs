@@ -148,7 +148,6 @@ async function main() {
       process.env.GALLERY_OVERWRITE === "1";
     const uploadUrlWithForce = doOverwrite ? `${uploadUrl}?force=true` : uploadUrl;
 
-    console.log("[debug] upload URL:", uploadUrlWithForce);
     let json;
     try {
       const res = await signedRequest("PUT", uploadUrlWithForce, buf, signingKey);

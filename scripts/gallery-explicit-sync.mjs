@@ -31,7 +31,7 @@
 
 import { createHash, randomBytes } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
@@ -372,7 +372,7 @@ async function sha256Buffer(buf) {
 
 async function fileExists(filePath) {
   try {
-    await readFile(filePath);
+    await stat(filePath);
     return true;
   } catch {
     return false;

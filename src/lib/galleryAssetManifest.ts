@@ -7,7 +7,6 @@
  * Run `npm run gallery:sync` to generate that file before starting the dev server.
  */
 
-// @ts-ignore — virtual module resolved by Vite at build/dev time
 import manifestData from "virtual:gallery-manifest";
 import type { BuildManifest, BuildManifestEntry } from "./galleryAssetShared.js";
 

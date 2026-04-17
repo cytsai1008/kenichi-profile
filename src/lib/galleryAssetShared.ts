@@ -16,9 +16,9 @@ export interface RemoteManifestEntry {
   relativePath: string;
   /** SHA-256 hex of the stored original file */
   sourceHash: string;
-  /** Hashed viewer filename, e.g. "Baka_inuta.abcd1234.jpg" */
+  /** Hashed viewer filename, e.g. "Baka_inuta.abcd1234.webp" */
   viewerFile: string;
-  /** Hashed thumb filename, e.g. "Baka_inuta.abcd1234.jpg" */
+  /** Hashed thumb filename, e.g. "Baka_inuta.abcd1234.webp" */
   thumbFile: string;
   /** ISO date string of when the entry was last updated */
   updatedAt: string;

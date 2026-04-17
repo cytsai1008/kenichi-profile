@@ -20,7 +20,7 @@ Run Prettier and ESLint on any changed `.astro`, `.vue`, or `.ts` files before c
 1. **Upload original** — `npm run gallery:push-originals -- ./image.jpg`
    - Uploads to private sync host under `gallery-explicit/<filename>` by default
    - `--remote-path gallery-explicit/sub/name.jpg` to set an explicit path
-   - `--force` to overwrite an existing original
+   - `--overwrite` to overwrite an existing original (or `GALLERY_OVERWRITE=1`)
 2. **Sync** — `npm run gallery:sync`
    - Downloads originals, generates viewer + thumb derivatives, uploads them, updates the build manifest
 3. **Dev server** reads the build manifest from `node_modules/.astro/gallery-explicit-build-manifest.json`
