@@ -1,0 +1,22 @@
+{
+  // Proxy Worker for kenichi.photocat.blue/alt-media/* → kenichi-explicit.photocat.blue
+  //
+  // Local dev: point at a local mock server by setting UPSTREAM_OVERRIDE
+  //   wrangler dev --var UPSTREAM_OVERRIDE:http://localhost:8080
+  // Or add a [vars] block below and set UPSTREAM_OVERRIDE = "http://localhost:8080"
+  "name": "kenichi-media-proxy",
+  "main": "src/index.js",
+  "compatibility_date": "2026-04-08",
+  "routes": [
+    {
+      "pattern": "kenichi.photocat.blue/alt-media/*",
+      "zone_name": "photocat.blue",
+    },
+  ],
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+    },
+  },
+}

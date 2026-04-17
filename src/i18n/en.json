@@ -41,7 +41,13 @@
     "creator": "Creator",
     "commission": "Commission",
     "giftArt": "Gift Art",
-    "other": "Other"
+    "other": "Other",
+    "explicitToggle": "18+",
+    "explicitWarningTag": "Content Warning",
+    "explicitWarningTitle": "Adult Content (18+)",
+    "explicitWarningBody": "This section contains explicit artwork intended for adults only. By continuing, you confirm that you are 18 years of age or older depends on your location.",
+    "explicitShow": "I'm 18+",
+    "explicitCancel": "Cancel"
   },
   "photos": {
     "title": "Photos",
@@ -135,7 +141,7 @@
         },
         {
           "title": "Personalization",
-          "description": "These cookies allow the site to remember your preferences — such as your chosen language and display theme — so they persist across visits.",
+          "description": "These cookies allow the site to remember your preferences — such as your chosen language, display theme, and adult content visibility — so they persist across visits. Certain features may be unavailable if you disable personalization.",
           "linkedCategory": "personalization",
           "cookieTable": {
             "headers": {
@@ -155,6 +161,12 @@
                 "name": "theme (localStorage)",
                 "domain": "Browser (local)",
                 "description": "Stores your preferred color scheme (light or dark mode). Cleared when personalization is disabled.",
+                "expiration": "Persistent"
+              },
+              {
+                "name": "gallery-explicit-shown (localStorage)",
+                "domain": "Browser (local)",
+                "description": "Stores your consent to view adult (+18) artwork in the gallery. Cleared when personalization is disabled.",
                 "expiration": "Persistent"
               }
             ]

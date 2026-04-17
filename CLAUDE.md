@@ -15,6 +15,23 @@ npx eslint <file> --fix       # lint a file
 Always use **npm** (not yarn) — the project uses Tailwind CSS.
 Run Prettier and ESLint on any changed `.astro`, `.vue`, or `.ts` files before committing.
 
+### Gallery image upload workflow
+
+1. **Upload original** — `npm run gallery:push-originals -- ./image.jpg`
+   - Uploads to private sync host under `gallery-explicit/<filename>` by default
+   - `--remote-path gallery-explicit/sub/name.jpg` to set an explicit path
+   - `--force` to overwrite an existing original
+2. **Sync** — `npm run gallery:sync`
+   - Downloads originals, generates viewer + thumb derivatives, uploads them, updates the build manifest
+3. **Dev server** reads the build manifest from `node_modules/.astro/gallery-explicit-build-manifest.json`
+
+**Local dev against `../kenichi-profile-ext-server`** — set in `.env.builder.dev`:
+```
+GALLERY_SYNC_HOST=http://localhost:8081     # private endpoints
+GALLERY_PUBLIC_HOST=http://localhost:8080   # viewer/thumb asset URLs baked into build manifest
+```
+All `gallery:*` and `prebuild` npm scripts load `.env.builder.dev` automatically via `--env-file`.
+
 ## Architecture
 
 ### i18n — three locales, file-based routing

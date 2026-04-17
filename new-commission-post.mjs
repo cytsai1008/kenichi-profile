@@ -14,6 +14,7 @@ const ROOT = process.cwd();
 const GALLERY_DIR = path.join(ROOT, "src", "content", "gallery");
 const SRC_DIR = path.join(ROOT, "src");
 const ASSET_DIR = path.join(SRC_DIR, "assets", "commissions");
+const ALT_MEDIA_DIR = path.join(ROOT, "alt-media");
 const DEFAULT_NAME = "Kenichi";
 const UNKNOWN_ARTIST_EN = "Unknown";
 const UNKNOWN_ARTIST_ZH_TW = "未知";
@@ -138,6 +139,8 @@ async function main() {
       throw new Error("Source image must have a file extension.");
     }
 
+    const isExplicit = sourcePath.startsWith(`${ALT_MEDIA_DIR}${path.sep}`);
+
     const baseSlug = slugify(path.parse(sourcePath).name);
     const slug = slugify(await promptText(rl, "Post slug", baseSlug, true));
     const sourceBaseName = path.parse(sourcePath).name;
@@ -219,13 +222,20 @@ async function main() {
     const artistUrl = await promptText(rl, "Artist URL", inferArtistUrl(xUsername), false);
     const featured = await promptBoolean(rl, "Featured", preset.featured);
 
-    const sourceAssetPath = getSourceAssetPath(sourcePath);
-    const imageTarget = sourceAssetPath ?? path.join(ASSET_DIR, path.basename(sourcePath));
-    const postTarget = path.join(GALLERY_DIR, `${slug}.md`);
-    const frontmatterImagePath = toGalleryImagePath(imageTarget);
+    const explicitGalleryDir = path.join(GALLERY_DIR, "explicit");
+    const postDir = isExplicit ? explicitGalleryDir : GALLERY_DIR;
+    const postTarget = path.join(postDir, `${slug}.md`);
+
+    // Explicit content: image stays in alt-media, frontmatter uses logical remote path.
+    // Non-explicit: copy image to src/assets/commissions as before.
+    const sourceAssetPath = isExplicit ? null : getSourceAssetPath(sourcePath);
+    const imageTarget = isExplicit ? null : (sourceAssetPath ?? path.join(ASSET_DIR, path.basename(sourcePath)));
+    const frontmatterImagePath = isExplicit
+      ? `gallery-explicit/${path.basename(sourcePath)}`
+      : toGalleryImagePath(imageTarget);
 
     await assertDoesNotExist(postTarget, "Gallery post");
-    if (path.resolve(sourcePath) !== path.resolve(imageTarget)) {
+    if (imageTarget && path.resolve(sourcePath) !== path.resolve(imageTarget)) {
       await assertDoesNotExist(imageTarget, "Target image");
     }
 
@@ -250,14 +260,16 @@ async function main() {
       },
       artistUrl,
       featured,
+      explicit: isExplicit,
     });
 
     console.log("");
     console.log("Summary");
-    console.log(`- image: ${path.relative(ROOT, imageTarget)}`);
+    console.log(`- image: ${isExplicit ? frontmatterImagePath : path.relative(ROOT, imageTarget)}`);
     console.log(`- post:  ${path.relative(ROOT, postTarget)}`);
     console.log(`- image type: ${imageType}`);
     console.log(`- category: ${category}`);
+    console.log(`- explicit: ${isExplicit}`);
     console.log(`- artist: ${artist || "(empty)"}`);
 
     const shouldWrite = values["dry-run"] ? false : await promptBoolean(rl, "Write files", true);
@@ -267,17 +279,23 @@ async function main() {
       process.exit(0);
     }
 
-    await mkdir(ASSET_DIR, { recursive: true });
-    await mkdir(GALLERY_DIR, { recursive: true });
+    await mkdir(postDir, { recursive: true });
 
-    if (path.resolve(sourcePath) !== path.resolve(imageTarget)) {
-      await copyFile(sourcePath, imageTarget);
+    if (isExplicit) {
+      await writeFile(postTarget, `${frontmatter}\n`, "utf8");
+      console.log("");
+      console.log(`Created post: ${path.relative(ROOT, postTarget)}`);
+      console.log(`Next: npm run gallery:push-originals -- ${path.relative(ROOT, sourcePath)}`);
+    } else {
+      await mkdir(ASSET_DIR, { recursive: true });
+      if (imageTarget && path.resolve(sourcePath) !== path.resolve(imageTarget)) {
+        await copyFile(sourcePath, imageTarget);
+        console.log("");
+        console.log(`Created image: ${path.relative(ROOT, imageTarget)}`);
+      }
+      await writeFile(postTarget, `${frontmatter}\n`, "utf8");
+      console.log(`Created post: ${path.relative(ROOT, postTarget)}`);
     }
-    await writeFile(postTarget, `${frontmatter}\n`, "utf8");
-
-    console.log("");
-    console.log(`Created image: ${path.relative(ROOT, imageTarget)}`);
-    console.log(`Created post: ${path.relative(ROOT, postTarget)}`);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
@@ -393,6 +411,9 @@ function buildFrontmatter(data) {
   if (data.featured) {
     lines.push("featured: true");
   }
+  if (data.explicit) {
+    lines.push("explicit: true");
+  }
   lines.push("---");
   return lines.join("\n");
 }
@@ -483,12 +504,25 @@ async function pathCompleter(line) {
   const input = line.trim();
   const normalizedInput = input.replace(/"/g, "");
   const hasSeparator = /[\\/]/.test(normalizedInput);
-  const searchBase = hasSeparator ? path.resolve(ROOT, path.dirname(normalizedInput)) : ASSET_DIR;
-  const partialName = hasSeparator ? path.basename(normalizedInput) : normalizedInput;
 
+  if (hasSeparator) {
+    const searchBase = path.resolve(ROOT, path.dirname(normalizedInput));
+    const partialName = path.basename(normalizedInput);
+    return [await listMatches(searchBase, partialName), line];
+  }
+
+  // No separator — search both ASSET_DIR and ALT_MEDIA_DIR and merge
+  const [fromAssets, fromAlt] = await Promise.all([
+    listMatches(ASSET_DIR, normalizedInput),
+    listMatches(ALT_MEDIA_DIR, normalizedInput),
+  ]);
+  return [[...fromAssets, ...fromAlt], line];
+}
+
+async function listMatches(searchBase, partialName) {
   try {
     const entries = await readdir(searchBase, { withFileTypes: true });
-    const matches = await Promise.all(
+    return Promise.all(
       entries
         .filter((entry) => entry.name.toLowerCase().startsWith(partialName.toLowerCase()))
         .map(async (entry) => {
@@ -498,9 +532,7 @@ async function pathCompleter(line) {
           return isDirectory ? `${relativePath}/` : relativePath;
         })
     );
-
-    return [matches, line];
   } catch {
-    return [[], line];
+    return [];
   }
 }

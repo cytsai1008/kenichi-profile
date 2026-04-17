@@ -6,6 +6,7 @@ import Layout from "../../layouts/Layout.astro";
 import { t, type Locale } from "../../i18n/utils";
 import PhotoViewer from "../PhotoViewer.vue";
 import type { PhotoItem } from "../PhotoViewer.vue";
+import { getManifestIndex } from "../../lib/galleryAssetManifest.js";
 
 interface Props {
   locale: Locale;
@@ -23,7 +24,12 @@ function localizedValue(
   return value;
 }
 
-// Resolve images via glob to avoid Astro content layer image() caching bug.
+// Remote manifest index: keyed by logical asset path (e.g. "gallery-explicit/Baka_inuta.jpg").
+// Falls back to an empty Map when the sync script has not been run yet.
+const manifestIndex = getManifestIndex();
+
+// Local asset glob — still used for entries whose image path points at src/assets
+// (repo-local assets, e.g. the ref-sheet which is checked in directly).
 // Frontmatter paths are relative to src/content/gallery/ (e.g. "../../assets/foo.jpg").
 // We extract everything after "assets/" and look up under /src/assets/.
 const imageModules = import.meta.glob<{ default: ImageMetadata }>(
@@ -42,6 +48,15 @@ const imageUrls = import.meta.glob<string>(
 function assetKey(relativePath: string): string {
   const m = relativePath.match(/assets\/(.+)$/);
   return m ? `/src/assets/${m[1]}` : "";
+}
+
+/**
+ * Detect whether a frontmatter image value is a logical remote asset path
+ * (e.g. "gallery-explicit/Baka_inuta.jpg") rather than a repo-local relative
+ * path (e.g. "../../assets/commissions/Baka_inuta.jpg").
+ */
+function isRemotePath(image: string): boolean {
+  return !image.startsWith(".") && !image.startsWith("/") && !image.includes("assets/");
 }
 
 const all = (await getCollection("gallery")).sort(
@@ -63,26 +78,23 @@ function isPhotoItem(item: PhotoItem | null): item is PhotoItem {
   return item !== null;
 }
 
-const galleryItems: PhotoItem[] = await Promise.all(
-  all.map(async (entry): Promise<PhotoItem | null> => {
-    const key = assetKey(entry.data.image);
-    const imageModule = imageModules[key]?.default;
-    const originalUrl = imageUrls[key];
-    if (!imageModule || !originalUrl) {
-      console.warn(`[gallery] image not found: ${entry.data.image} (key: ${key})`);
+async function buildPhotoItem(entry: (typeof all)[number]): Promise<PhotoItem | null> {
+  const imageValue = entry.data.image;
+
+  // --- Remote manifest path (explicit content) ---
+  if (isRemotePath(imageValue)) {
+    const manifestEntry = manifestIndex.get(imageValue);
+    if (!manifestEntry) {
+      console.warn(
+        `[gallery] remote asset not in build manifest: ${imageValue} — run gallery:sync`
+      );
       return null;
     }
-
-    const [thumb, viewerImage] = await Promise.all([
-      getImage({ src: imageModule, width: 640, quality: 85 }),
-      getImage({ src: imageModule, width: imageModule.width, quality: 92 }),
-    ]);
-
     return {
-      src: viewerImage.src,
-      thumb: thumb.src,
-      width: viewerImage.attributes.width ?? imageModule.width,
-      height: viewerImage.attributes.height ?? imageModule.height,
+      src: manifestEntry.viewerUrl,
+      thumb: manifestEntry.thumbUrl,
+      width: manifestEntry.width,
+      height: manifestEntry.height,
       alt: localizedValue(entry.data.title, entry.data.titleI18n) ?? entry.data.title,
       title: localizedValue(entry.data.title, entry.data.titleI18n),
       subtitle: localizedValue(entry.data.artist, entry.data.artistI18n)
@@ -94,8 +106,60 @@ const galleryItems: PhotoItem[] = await Promise.all(
       category: entry.data.category,
       featured: entry.data.featured,
     } satisfies PhotoItem;
+  }
+
+  // --- Repo-local asset path (regular content) ---
+  const key = assetKey(imageValue);
+  const imageModule = imageModules[key]?.default;
+  const originalUrl = imageUrls[key];
+  if (!imageModule || !originalUrl) {
+    console.warn(`[gallery] image not found: ${imageValue} (key: ${key})`);
+    return null;
+  }
+
+  const [thumb, viewerImage] = await Promise.all([
+    getImage({ src: imageModule, width: 640, quality: 85 }),
+    getImage({ src: imageModule, width: imageModule.width, quality: 92 }),
+  ]);
+
+  return {
+    src: viewerImage.src,
+    thumb: thumb.src,
+    width: viewerImage.attributes.width ?? imageModule.width,
+    height: viewerImage.attributes.height ?? imageModule.height,
+    alt: localizedValue(entry.data.title, entry.data.titleI18n) ?? entry.data.title,
+    title: localizedValue(entry.data.title, entry.data.titleI18n),
+    subtitle: localizedValue(entry.data.artist, entry.data.artistI18n)
+      ? `${tr.gallery.creator}: ${localizedValue(entry.data.artist, entry.data.artistI18n)}`
+      : undefined,
+    subtitleUrl: entry.data.artistUrl,
+    creator: localizedValue(entry.data.artist, entry.data.artistI18n),
+    creatorUrl: entry.data.artistUrl,
+    category: entry.data.category,
+    featured: entry.data.featured,
+  } satisfies PhotoItem;
+}
+
+// Build one sorted array; explicit items are marked isExplicit: true.
+const allItemsMaybe = await Promise.all(
+  all.map(async (entry) => {
+    const item = await buildPhotoItem(entry);
+    if (!item) return null;
+    return isRemotePath(entry.data.image) ? { ...item, isExplicit: true as const } : item;
   })
-).then((items) => items.filter(isPhotoItem));
+);
+
+const allItems = allItemsMaybe.filter(isPhotoItem);
+const regularItems = allItems.filter((i) => !i.isExplicit);
+const explicitItems = allItems.filter((i) => i.isExplicit);
+
+const droppedCount = all.length - allItems.length;
+if (droppedCount > 0) {
+  console.warn(
+    `[gallery] ${droppedCount} entries were dropped — ` +
+      `run \`npm run gallery:sync\` if remote assets are missing from the build manifest`
+  );
+}
 ---
 
 <Layout title={tr.gallery.title} description={tr.gallery.description ?? ""} locale={locale}>
@@ -108,7 +172,7 @@ const galleryItems: PhotoItem[] = await Promise.all(
     <!-- Category filter buttons -->
     <div
       data-animate
-      class="relative mb-10 flex flex-wrap gap-2 border-b border-border pb-6"
+      class="relative mb-10 flex flex-wrap items-center gap-2 border-b border-border pb-6"
       id="gallery-filters"
       role="group"
       aria-label="Filter by category"
@@ -117,32 +181,49 @@ const galleryItems: PhotoItem[] = await Promise.all(
       {
         categories.map((cat) => {
           const label = categoryLabels[cat];
-          const count =
+          const regularCount =
             cat === "all"
-              ? galleryItems.length
-              : galleryItems.filter((item) => item.category === cat).length;
+              ? regularItems.length
+              : regularItems.filter((item) => item.category === cat).length;
+          const explicitCount =
+            cat === "all"
+              ? explicitItems.length
+              : explicitItems.filter((item) => item.category === cat).length;
           return (
             <button
               data-category={cat}
+              data-regular-count={regularCount}
+              data-explicit-count={explicitCount}
               class="gallery-filter relative z-10 rounded-full border border-border px-4 py-1.5 text-sm font-medium text-fg-muted transition-colors"
               aria-pressed={cat === "all" ? "true" : "false"}
             >
               {label}
-              <span class="ml-1 text-xs opacity-60">({count})</span>
+              <span class="ml-1 text-xs opacity-60">({regularCount})</span>
             </button>
           );
         })
       }
+      {
+        explicitItems.length > 0 && (
+          <button
+            id="explicit-toggle"
+            class="explicit-toggle ml-auto rounded-full border border-explicit/50 px-4 py-1.5 text-sm font-medium text-explicit/80 transition-all duration-200 hover:border-explicit/70 hover:text-explicit"
+            aria-pressed="false"
+          >
+            {tr.gallery.explicitToggle}
+          </button>
+        )
+      }
     </div>
 
-    <div id="gallery-panel">
+    <div id="gallery-panel" class="explicit-hidden">
       {
-        galleryItems.length === 0 ? (
+        allItems.length === 0 ? (
           <p class="text-fg-muted">No artwork yet.</p>
         ) : (
           <PhotoViewer
             client:load
-            photos={galleryItems}
+            photos={allItems}
             closeLabel={tr.photos.close}
             zoomLabel={tr.photos.zoom}
             prevLabel={tr.photos.previous}
@@ -157,11 +238,61 @@ const galleryItems: PhotoItem[] = await Promise.all(
         )
       }
     </div>
+
+    <!-- +18 warning modal -->
+    {
+      explicitItems.length > 0 && (
+        <div
+          id="explicit-modal"
+          class="fixed inset-0 z-[200] hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="explicit-modal-title"
+        >
+          <div id="explicit-modal-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <div class="relative flex h-full items-center justify-center p-4">
+            <div class="explicit-modal-box overflow-hidden rounded-2xl border border-border shadow-2xl">
+              <div class="px-6 pt-6 pb-4">
+                <p class="mb-1 text-xs font-semibold tracking-widest text-explicit uppercase">
+                  {tr.gallery.explicitWarningTag}
+                </p>
+                <h2 id="explicit-modal-title" class="text-xl font-bold text-fg">
+                  {tr.gallery.explicitWarningTitle}
+                </h2>
+              </div>
+              <div class="px-6 pb-5">
+                <p class="max-w-xs text-sm leading-relaxed text-fg-muted">
+                  {tr.gallery.explicitWarningBody}
+                </p>
+              </div>
+              <div class="flex gap-2 border-t border-border bg-surface-alt/60 px-6 py-4">
+                <button
+                  id="explicit-cancel"
+                  class="flex-1 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap text-fg transition-colors"
+                >
+                  {tr.gallery.explicitCancel}
+                </button>
+                <button
+                  id="explicit-confirm"
+                  class="flex-1 rounded-lg bg-explicit-bg px-4 py-2 text-sm font-semibold whitespace-nowrap text-white transition-colors focus-visible:outline-2 focus-visible:outline-explicit"
+                >
+                  {tr.gallery.explicitShow}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
   </div>
 </Layout>
 
 <script>
   import { animate, stagger } from "animejs";
+
+  // Read explicit preference first — needed by matchesCategory
+  const EXPLICIT_KEY = "gallery-explicit-shown";
+  let explicitEnabled = localStorage.getItem(EXPLICIT_KEY) === "true";
 
   const filters = Array.from(document.querySelectorAll<HTMLButtonElement>(".gallery-filter"));
   const filterBar = document.getElementById("gallery-filters");
@@ -177,7 +308,18 @@ const galleryItems: PhotoItem[] = await Promise.all(
   }
 
   function matchesCategory(item: HTMLElement, category: string) {
+    if (item.dataset.explicit && !explicitEnabled) return false;
     return category === "all" || item.dataset.category === category;
+  }
+
+  function updateFilterCounts() {
+    filters.forEach((button) => {
+      const regular = parseInt(button.dataset.regularCount ?? "0");
+      const explicit = parseInt(button.dataset.explicitCount ?? "0");
+      const total = explicitEnabled ? regular + explicit : regular;
+      const span = button.querySelector("span");
+      if (span) span.textContent = `(${total})`;
+    });
   }
 
   function setActiveFilter(activeButton: HTMLButtonElement) {
@@ -375,6 +517,84 @@ const galleryItems: PhotoItem[] = await Promise.all(
       initFilters();
     });
   }
+
+  // === Explicit +18 toggle ===
+  const explicitToggle = document.getElementById("explicit-toggle");
+  const galleryPanel = document.getElementById("gallery-panel");
+  const explicitModal = document.getElementById("explicit-modal");
+
+  function enableExplicit() {
+    explicitEnabled = true;
+    galleryPanel?.classList.remove("explicit-hidden");
+    explicitToggle?.setAttribute("aria-pressed", "true");
+    localStorage.setItem(EXPLICIT_KEY, "true");
+    updateFilterCounts();
+    setVisibility(activeCategory);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event("resize"));
+      });
+    });
+  }
+
+  function disableExplicit() {
+    explicitEnabled = false;
+    galleryPanel?.classList.add("explicit-hidden");
+    explicitToggle?.setAttribute("aria-pressed", "false");
+    localStorage.removeItem(EXPLICIT_KEY);
+    updateFilterCounts();
+    setVisibility(activeCategory);
+  }
+
+  function showModal() {
+    explicitModal?.classList.remove("hidden");
+    document.getElementById("explicit-confirm")?.focus();
+  }
+
+  function hideModal() {
+    explicitModal?.classList.add("hidden");
+    explicitToggle?.focus();
+  }
+
+  explicitToggle?.addEventListener("click", () => {
+    if (explicitEnabled) disableExplicit();
+    else showModal();
+  });
+
+  document.getElementById("explicit-confirm")?.addEventListener("click", () => {
+    hideModal();
+    enableExplicit();
+  });
+
+  document.getElementById("explicit-cancel")?.addEventListener("click", hideModal);
+  document.getElementById("explicit-modal")?.addEventListener("click", (e) => {
+    if (!(e.target as HTMLElement).closest(".explicit-modal-box")) hideModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !explicitModal?.classList.contains("hidden")) {
+      hideModal();
+    }
+  });
+
+  window.addEventListener("cc:explicitDisabled", () => {
+    if (explicitEnabled) disableExplicit();
+  });
+
+  // On load: strip data-pswp from explicit items so the lightbox ignores them
+  // until the user enables explicit mode. Run in rAF to let Vue hydrate first.
+  requestAnimationFrame(() => {
+    if (explicitEnabled) {
+      galleryPanel?.classList.remove("explicit-hidden");
+      explicitToggle?.setAttribute("aria-pressed", "true");
+      updateFilterCounts();
+      requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    } else {
+      document.querySelectorAll<HTMLElement>("[data-explicit]").forEach((item) => {
+        item.removeAttribute("data-pswp");
+      });
+    }
+  });
 </script>
 
 <style>
@@ -396,5 +616,37 @@ const galleryItems: PhotoItem[] = await Promise.all(
     .gallery-filter-pill {
       transition: none;
     }
+  }
+
+  .explicit-modal-box {
+    background: color-mix(in srgb, var(--surface), transparent 10%);
+    backdrop-filter: blur(16px);
+    width: fit-content;
+    min-width: 16rem;
+    max-width: min(90vw, 30rem);
+  }
+
+  #explicit-cancel:hover {
+    background: color-mix(in srgb, var(--border) 60%, var(--surface-alt));
+  }
+
+  #explicit-confirm:hover {
+    background: color-mix(in srgb, var(--explicit-bg), #000 20%);
+  }
+
+  /* Hide explicit items until the toggle is on */
+  :global(.explicit-hidden [data-explicit]) {
+    display: none;
+  }
+
+  .explicit-toggle[aria-pressed="true"] {
+    background: var(--explicit-bg);
+    border-color: transparent;
+    color: #fff;
+  }
+
+  :global(.gallery-item[data-explicit]) {
+    background-color: color-mix(in srgb, var(--surface-alt) 82%, var(--explicit-bg) 18%);
+    border-color: color-mix(in srgb, var(--explicit) 35%, transparent);
   }
 </style>

@@ -19,6 +19,8 @@
   --highlight: #d4a84b;
   --highlight-dim: #b88c35;
   --border: #d5e0e8;
+  --explicit: #ae5555;
+  --explicit-bg: #8a3838;
 }
 
 .dark {
@@ -32,6 +34,8 @@
   --highlight: #d4a84b;
   --highlight-dim: #b88c35;
   --border: #30323c;
+  --explicit: #c47878;
+  --explicit-bg: #7a3232;
 }
 
 /* ─── Step 2: Tailwind tokens via @theme inline ─────────── *
@@ -58,6 +62,8 @@
   --color-highlight: var(--highlight);
   --color-highlight-dim: var(--highlight-dim);
   --color-border: var(--border);
+  --color-explicit: var(--explicit);
+  --color-explicit-bg: var(--explicit-bg);
 }
 
 /* ─── Filled backgrounds: white text, stays white on hover ─ */
