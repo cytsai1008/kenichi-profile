@@ -49,6 +49,7 @@ const gallery = defineCollection({
         .optional(),
       artistUrl: z.url().optional(),
       featured: z.boolean().default(false),
+      explicit: z.boolean().default(false),
     }),
 });
 

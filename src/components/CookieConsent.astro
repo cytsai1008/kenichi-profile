@@ -23,9 +23,14 @@ const allTranslations = {
 <script>
   import { run, setLanguage } from "vanilla-cookieconsent";
 
-  const handlePersonalization = (categories: string[]) => {
+  const handlePersonalization = (categories: string[], changed?: string[]) => {
     if (!categories.includes("personalization")) {
       localStorage.removeItem("theme");
+      const wasChanged = !changed || changed.includes("personalization");
+      if (wasChanged) {
+        localStorage.removeItem("gallery-explicit-shown");
+        window.dispatchEvent(new CustomEvent("cc:explicitDisabled"));
+      }
     }
   };
 
@@ -86,8 +91,8 @@ const allTranslations = {
         handlePersonalization(cookie.categories);
         window.dispatchEvent(new CustomEvent("cc:onConsent"));
       },
-      onChange: ({ cookie }) => {
-        handlePersonalization(cookie.categories);
+      onChange: ({ cookie, changedCategories }) => {
+        handlePersonalization(cookie.categories, changedCategories);
         window.dispatchEvent(new CustomEvent("cc:onConsent"));
       },
     });

@@ -6,7 +6,6 @@ import Layout from "../../layouts/Layout.astro";
 import BlogCard from "../BlogCard.astro";
 import { t, localePath, type Locale } from "../../i18n/utils";
 import { compareBlogPostsByDate, getBlogPostsForLocale } from "../../lib/blog";
-
 interface Props {
   locale: Locale;
 }
@@ -18,14 +17,6 @@ const recentPosts = getBlogPostsForLocale(await getCollection("blog"), locale)
   .sort(compareBlogPostsByDate)
   .slice(0, 3);
 
-const latestGallery = (await getCollection("gallery"))
-  .sort(
-    (a, b) =>
-      Number(b.data.featured) - Number(a.data.featured) ||
-      b.data.date.valueOf() - a.data.date.valueOf()
-  )
-  .slice(0, 6);
-
 const photoModules = import.meta.glob<{ default: ImageMetadata }>(
   "/src/content/photos/**/*.{jpg,JPG,jpeg,JPEG,png,PNG,webp,WEBP,avif,AVIF,tiff,TIFF,tif,TIF,heic,HEIC,heif,HEIF}",
   { eager: true }
@@ -35,6 +26,20 @@ const galleryImageModules = import.meta.glob<{ default: ImageMetadata }>(
   "/src/assets/**/*.{jpg,jpeg,JPG,JPEG,png,PNG,webp,WEBP,avif,AVIF,gif,GIF}",
   { eager: true }
 );
+
+const latestGallery = (await getCollection("gallery"))
+  .sort(
+    (a, b) =>
+      Number(b.data.featured) - Number(a.data.featured) ||
+      b.data.date.valueOf() - a.data.date.valueOf()
+  )
+  // Exclude all remote (explicit) gallery entries from the home page — they are opt-in
+  // only and should never surface by default on the landing page.
+  .filter((entry) => {
+    const img = entry.data.image;
+    return img.startsWith(".") || img.startsWith("/") || img.includes("assets/");
+  })
+  .slice(0, 6);
 
 function galleryAssetKey(relativePath: string): string {
   const m = relativePath.match(/assets\/(.+)$/);

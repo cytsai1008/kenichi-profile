@@ -41,7 +41,13 @@
     "creator": "创作者",
     "commission": "委托作品",
     "giftArt": "赠图",
-    "other": "其他"
+    "other": "其他",
+    "explicitToggle": "18+",
+    "explicitWarningTag": "内容警告",
+    "explicitWarningTitle": "成人限定内容（18+）",
+    "explicitWarningBody": "本区域包含限制级作品，仅供成人观看。继续浏览即代表您确认已年满 18 岁或您所在地的法订成年年龄。",
+    "explicitShow": "我已满 18 岁",
+    "explicitCancel": "取消"
   },
   "photos": {
     "title": "照片",
@@ -135,7 +141,7 @@
         },
         {
           "title": "个性化",
-          "description": "这些 Cookie 使网站能够记住您的偏好设置（如语言与显示主题），以便在不同访问间持续保留。",
+          "description": "这些 Cookie 使网站能够记住您的偏好设置（如语言、显示主题及成人内容显示设置），以便在不同访问间持续保留。关闭后部分功能将无法使用，且相关 Cookie 将被清除。",
           "linkedCategory": "personalization",
           "cookieTable": {
             "headers": {
@@ -155,6 +161,12 @@
                 "name": "theme (localStorage)",
                 "domain": "浏览器（本地）",
                 "description": "存储您偏好的配色模式（浅色或深色）。停用个性化后将自动清除。",
+                "expiration": "永久"
+              },
+              {
+                "name": "gallery-explicit-shown (localStorage)",
+                "domain": "浏览器（本地）",
+                "description": "存储您同意浏览限制级（+18）作品的设置。停用个性化后将自动清除。",
                 "expiration": "永久"
               }
             ]

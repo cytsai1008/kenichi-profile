@@ -16,6 +16,7 @@ export interface PhotoItem {
   subtitleUrl?: string;
   featured?: boolean;
   category?: string;
+  isExplicit?: boolean;
   creator?: string;
   creatorUrl?: string;
   exif?: {
@@ -473,6 +474,7 @@ onUnmounted(() => {
           : {}),
       }"
       data-pswp
+      :data-explicit="photo.isExplicit || undefined"
       :data-pswp-src="photo.src"
       :data-pswp-msrc="photo.thumb"
       :data-cropped="true"
