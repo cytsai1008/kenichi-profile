@@ -411,6 +411,8 @@ if (droppedCount > 0) {
       item.style.display = isMatch ? "" : "none";
 
       if (isMatch) {
+        item.style.opacity = "";
+        item.style.transform = "";
         item.setAttribute("data-pswp", "");
       } else {
         item.removeAttribute("data-pswp");
