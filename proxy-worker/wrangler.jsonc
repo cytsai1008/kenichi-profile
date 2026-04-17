@@ -10,13 +10,13 @@
   "routes": [
     {
       "pattern": "kenichi.photocat.blue/alt-media/*",
-      "zone_name": "photocat.blue",
-    },
+      "zone_name": "photocat.blue"
+    }
   ],
   "observability": {
     "logs": {
       "enabled": true,
-      "invocation_logs": true,
-    },
-  },
+      "invocation_logs": true
+    }
+  }
 }
