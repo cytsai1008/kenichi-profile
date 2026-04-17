@@ -13,9 +13,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "new:commission": "node ./new-commission-post.mjs",
-    "gallery:sync": "node --env-file=.env.builder.dev ./scripts/gallery-explicit-sync.mjs",
-    "gallery:sync:dry": "node --env-file=.env.builder.dev ./scripts/gallery-explicit-sync.mjs --dry-run",
-    "gallery:push-originals": "node --env-file=.env.builder.dev ./scripts/gallery-push-originals.mjs",
+    "gallery:sync": "node --env-file=.env.builder.prod ./scripts/gallery-explicit-sync.mjs",
+    "gallery:sync:dry": "node --env-file=.env.builder.prod ./scripts/gallery-explicit-sync.mjs --dry-run",
+    "gallery:push-originals": "node --env-file=.env.builder.prod ./scripts/gallery-push-originals.mjs",
     "lint": "eslint src ./*.mjs scripts/ --fix",
     "format": "prettier --write src ./*.mjs scripts/ ./*.md",
     "lf": "npm run lint && npm run format"
