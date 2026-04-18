@@ -166,7 +166,7 @@
               {
                 "name": "gallery-explicit-shown (localStorage)",
                 "domain": "瀏覽器（本機）",
-                "description": "儲存您同意瀏覽限制級（+18）作品的設定。停用個人化後將自動清除。",
+                "description": "儲存您同意瀏覽限制級（18+）作品的設定。停用個人化後將自動清除。",
                 "expiration": "永久"
               }
             ]

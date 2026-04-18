@@ -166,7 +166,7 @@
               {
                 "name": "gallery-explicit-shown (localStorage)",
                 "domain": "Browser (local)",
-                "description": "Stores your consent to view adult (+18) artwork in the gallery. Cleared when personalization is disabled.",
+                "description": "Stores your consent to view adult (18+) artwork in the gallery. Cleared when personalization is disabled.",
                 "expiration": "Persistent"
               }
             ]
