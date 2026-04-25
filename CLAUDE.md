@@ -37,53 +37,60 @@ All `gallery:*` and `prebuild` npm scripts load `.env.builder.dev` automatically
 ### i18n — three locales, file-based routing
 
 - Locales: `en` (default, no prefix), `zh-tw` (`/zh-tw/…`), `zh-cn` (`/zh-cn/…`)
-- **Never duplicate page logic.** Every page has one shared component in `src/components/pages/` that accepts a `locale` prop. The actual route files in `src/pages/` and `src/pages/zh-{tw,cn}/` are 3-line wrappers that pass the locale.
-- Translation strings live in `src/i18n/{en,zh-tw,zh-cn}.json`. Use `t(locale)` from `src/i18n/utils.ts` to get the full typed object.
-- Use `localePath(path, locale)` to build locale-prefixed hrefs. Use `getLocaleFromUrl(url)` to detect locale in layouts/components.
-- The root path `/` is prerendered. Locale detection happens client-side in `src/components/BaseHead.astro`, which defers to the `preferred-locale` cookie set when the user manually switches language via the NavBar and otherwise checks `navigator.languages`.
+- **Never duplicate page logic.** Every page has one shared component in `src/components/pages/` that accepts a `locale` prop. Route files in `src/pages/` and `src/pages/zh-{tw,cn}/` are 3-line wrappers.
+- Translation strings in `src/i18n/{en,zh-tw,zh-cn}.json`. Use `t(locale)` from `src/i18n/utils.ts`.
+- Use `localePath(path, locale)` for locale-prefixed hrefs; `getLocaleFromUrl(url)` to detect locale.
+- Root `/` is prerendered. Locale detection is client-side in `BaseHead.astro` (defers to `preferred-locale` cookie, then `navigator.languages`).
 
 ### Color system — Tailwind v4 with `@theme inline`
 
-Defined in `src/styles/global.css`:
+Defined in `src/styles/global.css`. Raw CSS variables in `:root` / `.dark` are mapped into Tailwind tokens via `@theme inline` so utilities output `var(…)` and respond to `.dark` at runtime.
 
-1. Raw CSS variables in `:root` / `.dark` (e.g. `--surface`, `--fg`, `--accent-bg`)
-2. Mapped into Tailwind tokens via `@theme inline` so utilities output `var(…)` and respond to `.dark` at runtime — **not** static hex values.
+Dark mode: add/remove `.dark` on `<html>`. Inline script in `BaseHead.astro` applies it before first paint.
 
-Dark mode is toggled by adding/removing the `.dark` class on `<html>`. The inline script in `BaseHead.astro` applies it before first paint to prevent flash.
+Key token rules:
+- `text-accent` / `border-accent` — medium blue, for text/borders on light backgrounds
+- `bg-accent-bg` / `bg-accent-dim` — darker blue for filled backgrounds (white text auto-applied via global CSS rule — never add `text-white` manually)
+- `bg-highlight` / `bg-highlight-dim` — warm amber fills (also auto-white text)
 
-Key token distinction:
+See `DESIGN.md` for the full palette, typography, component patterns, and layout principles.
 
-- `text-accent` / `border-accent` — the medium blue, for text/borders on light backgrounds
-- `bg-accent-bg` / `bg-accent-dim` — the darker blue, for filled backgrounds where white text must be legible (WCAG AA ≥ 4.5:1)
-- Filled backgrounds (`.bg-accent-bg`, `.bg-highlight`, etc.) auto-get `color: #fff` via a global CSS rule — no need to add `text-white`.
+### Scroll animations
 
-All page content wrappers use `max-w-5xl` to match the nav, preventing layout shift. `scrollbar-gutter: stable` on `html` prevents the scrollbar-width shift between pages.
+`src/scripts/scrollAnimations.ts` drives `data-animate` / `data-animate-stagger` attributes via IntersectionObserver. Elements start at `opacity: 0` (gated by `html.js` class applied before paint). Optional `data-opacity="0.5"` settles at sub-1 opacity. `data-animate-on-load-only` skips the observer and fires immediately.
+
+Interactive animations (nav, gallery filters, mobile menu) use **anime.js v4** with spring physics. `prefers-reduced-motion` is respected throughout.
 
 ### Content collections
 
 Defined in `src/content.config.ts`:
 
-| Collection | Source                           | Notes                                                                                                                                                                                                                                       |
-| ---------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `blog`     | `src/content/blog/*.{md,mdx}`    | Standard Astro glob loader                                                                                                                                                                                                                  |
-| `gallery`  | `src/content/gallery/*.{md,mdx}` | Artwork; frontmatter includes `image`, `category`, `artist`                                                                                                                                                                                 |
-| `photos`   | `src/content/photos/` images     | **Custom loader** (`src/loaders/photosLoader.ts`) — drop image files here and EXIF is read automatically at build time via `exifreader`. Optional sidecar `.md` of the same base name overrides `title`, `description`, `location`, `date`. |
+| Collection | Source | Notes |
+|---|---|---|
+| `blog` | `src/content/blog/{locale}/*.{md,mdx}` | Locale-prefixed subdirectories; filtered per locale by `getBlogPostsForLocale()` |
+| `gallery` | `src/content/gallery/*.{md,mdx}` | Frontmatter: `image`, `category`, `artist`; `image` can be a repo-local path or a remote manifest key |
+| `photos` | `src/content/photos/` images | Custom loader (`src/loaders/photosLoader.ts`) — EXIF auto-read via `exifreader`; optional sidecar `.md` overrides `title`, `description`, `location`, `date` |
+
+Gallery entries whose `image` value is a bare logical path (e.g. `gallery-explicit/foo.jpg`) are treated as remote/explicit content resolved through the build manifest.
 
 ### Components
 
-- **Astro components** for static structure (layouts, cards, footer, head)
-- **Vue SFCs** for interactive islands: `NavBar.vue` (theme toggle, language switcher, mobile menu), `PhotoViewer.vue` (PhotoSwipe lightbox with EXIF overlay)
-- Interactive Vue components use `client:load`
+- **Astro components** for static structure: `Layout.astro`, `BlogPost.astro`, `BlogCard.astro`, `SiteFooter.astro`, `BaseHead.astro`, `CookieConsent.astro`
+- **Vue SFCs** (`client:load`) for interactive islands:
+  - `NavBar.vue` — theme toggle (light/system/dark), language switcher, mobile menu
+  - `PhotoViewer.vue` — PhotoSwipe lightbox with EXIF overlay; used by both `/photos` and `/gallery`
+  - `SocialLinks.vue` — animated social icon row
+  - `BlogLightbox.vue` — lightbox for blog post inline images
 
 ### Layouts
 
-- `src/layouts/Layout.astro` — base HTML shell; builds locale-prefixed nav links and passes them to `NavBar.vue`
+- `src/layouts/Layout.astro` — base HTML shell; builds locale-prefixed nav links, injects `NavBar.vue`
 - `src/layouts/BlogPost.astro` — wraps Layout, adds article header with date and back link
 
 ## Adding content
 
-**Blog post** — create `src/content/blog/my-post.md` with frontmatter: `title`, `description`, `pubDate`, optional `heroImage`, `tags`.
+**Blog post** — create `src/content/blog/{locale}/my-post.md` (e.g. `en/`, `zh-tw/`, `zh-cn/`). Frontmatter: `title`, `description`, `pubDate`, optional `heroImage`, `tags`, `draft` (bool). The locale prefix is stripped from URLs by `getBlogSlug()` in `src/lib/blog.ts`.
 
-**Gallery artwork** — create `src/content/gallery/my-art.md` with frontmatter: `title`, `image`, `date`, `category` (`ref-sheet` | `commission` | `gift-art` | `other`), optional `artist`, `artistUrl`.
+**Gallery artwork** — create `src/content/gallery/my-art.md` with frontmatter: `title`, `image` (relative asset path or remote manifest key), `date`, `category` (`ref-sheet` | `commission` | `gift-art` | `other`), optional `artist`, `artistUrl`, `featured` (bool), `titleI18n`, `artistI18n`.
 
-**Photo** — drop `photo.jpg` into `src/content/photos/`. EXIF is extracted automatically. Optionally create `photo.md` to add `title`, `location`, `description`.
+**Photo** — drop `photo.jpg` into `src/content/photos/`. EXIF extracted automatically. Optionally create `photo.md` to add `title`, `location`, `description`.
