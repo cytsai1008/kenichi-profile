@@ -21,7 +21,7 @@
     "lf": "npm run lint && npm run format"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.1.7",
+    "@astrojs/cloudflare": "^13.1.10",
     "@astrojs/mdx": "^5.0.3",
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.2",
@@ -36,7 +36,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.2.2",
     "animejs": "^4.3.6",
-    "astro": "^6.1.1",
+    "astro": "^6.1.9",
     "astro-seo-meta": "^6.0.0",
     "astro-seo-schema": "^6.0.0",
     "exifreader": "^4.37.1",
