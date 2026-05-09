@@ -262,12 +262,27 @@ onMounted(() => {
   // mismatch to "correct", and animations.stopAll() kills any pending spring.
   let swipeOffset = 0;
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
-  let navCooldown: ReturnType<typeof setTimeout> | null = null;
-  let isNavigating = false;
+  let pendingCurrItemUpdate = false;
 
   const p = () => lightbox?.pswp as any;
   const slideWidth = () => p()?.mainScroll?.slideWidth || p()?.viewportSize?.x || window.innerWidth;
-  const baseX = () => -(p()?.currIndex ?? 0) * slideWidth();
+  // Use getCurrSlideX() so baseX() is correct immediately after next()/prev()
+  // (currIndex is only updated later by updateCurrItem(), but _currPositionIndex
+  // is updated immediately inside moveIndexBy()).
+  const baseX = () => p()?.mainScroll?.getCurrSlideX?.() ?? -(p()?.currIndex ?? 0) * slideWidth();
+
+  const forceAppendHeavy = () => {
+    // appendHeavy() guards on isShifted(). Briefly align mainScroll.x with the
+    // slide center so isShifted() returns false, then restore the dragging x.
+    // appendHeavy() only initiates async image loading — it doesn't use x for
+    // layout, so restoring x afterwards is safe.
+    const ms = p()?.mainScroll;
+    if (!ms) return;
+    const savedX = ms.x;
+    ms.x = ms.getCurrSlideX ? ms.getCurrSlideX() : savedX;
+    p()?.appendHeavy?.();
+    ms.x = savedX;
+  };
 
   const setX = (x: number) => {
     p()?.animations?.stopAll?.();
@@ -277,16 +292,31 @@ onMounted(() => {
       c.style.transition = "none";
       c.style.transform = `translate3d(${x}px,0px,0px)`;
     }
+    // stopAll() kills the spring whose onComplete fires updateCurrItem() +
+    // appendHeavy(). Replicate both here, once per navigation.
+    if (pendingCurrItemUpdate) {
+      pendingCurrItemUpdate = false;
+      p()?.mainScroll?.updateCurrItem?.();
+      forceAppendHeavy();
+    }
   };
 
   const snapBack = () => {
     swipeOffset = 0;
+    // Consume any pending navigation whose updateCurrItem() was never called
+    // (happens when the user stops swiping mid-burst without a subsequent event).
+    if (pendingCurrItemUpdate) {
+      pendingCurrItemUpdate = false;
+      p()?.mainScroll?.updateCurrItem?.();
+    }
     const target = baseX();
     if (p()?.mainScroll) p().mainScroll.x = target;
     const c: HTMLElement | undefined = p()?.container;
     if (!c) return;
     c.style.transition = "transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
     c.style.transform = `translate3d(${target}px,0px,0px)`;
+    // mainScroll.x now equals getCurrSlideX() so isShifted() is false.
+    p()?.appendHeavy?.();
   };
 
   const onTrackpadSwipe = (e: WheelEvent) => {
@@ -295,20 +325,6 @@ onMounted(() => {
     e.preventDefault();
 
     swipeOffset += e.deltaX;
-
-    // After navigation PhotoSwipe is mid-animation. Calling setX() → stopAll()
-    // during this window breaks the slide rendering. Ignore small residual
-    // deltas (coasting from the previous gesture). A deliberate new gesture
-    // (> 30 px accumulated) exits the guard immediately so there's no felt lag.
-    if (isNavigating) {
-      if (Math.abs(swipeOffset) < 30) return;
-      isNavigating = false;
-      if (navCooldown) {
-        clearTimeout(navCooldown);
-        navCooldown = null;
-      }
-    }
-
     setX(baseX() - swipeOffset);
 
     if (idleTimer) clearTimeout(idleTimer);
@@ -321,15 +337,9 @@ onMounted(() => {
       }
       const goNext = swipeOffset > 0;
       swipeOffset = 0;
-      isNavigating = true;
+      pendingCurrItemUpdate = true;
       if (goNext) lightbox?.pswp?.next();
       else lightbox?.pswp?.prev();
-      // Fallback: clear guard after one animation cycle in case no further
-      // wheel events arrive to clear it via the dead-zone path above.
-      navCooldown = setTimeout(() => {
-        isNavigating = false;
-        navCooldown = null;
-      }, 350);
     }
   };
 
@@ -378,12 +388,8 @@ onMounted(() => {
       clearTimeout(idleTimer);
       idleTimer = null;
     }
-    if (navCooldown) {
-      clearTimeout(navCooldown);
-      navCooldown = null;
-    }
-    isNavigating = false;
     swipeOffset = 0;
+    pendingCurrItemUpdate = false;
     lightbox?.pswp?.element?.classList.remove("pswp--opening");
     triggerEl?.focus();
     triggerEl = null;
