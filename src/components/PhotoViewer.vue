@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
-import { Pin } from "@lucide/vue";
+import { createApp, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { PanelBottomClose, PanelBottomOpen, Pin } from "@lucide/vue";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
 
@@ -230,6 +230,8 @@ onMounted(() => {
     { capture: true }
   );
 
+  let isFilmstripHidden = false;
+
   lightbox = new PhotoSwipeLightbox({
     gallery: galleryEl.value,
     children: "[data-pswp]",
@@ -246,7 +248,9 @@ onMounted(() => {
     arrowNextTitle: props.nextLabel ?? "Next",
     paddingFn: (viewportSize) => {
       const edgePadding = viewportSize.x < 768 ? 12 : 24;
-      const bottomPadding = viewportSize.x < 768 ? 88 : 24;
+      const hasFilmstrip = getLightboxElements().length > 1;
+      const bottomPadding =
+        hasFilmstrip && !isFilmstripHidden ? (viewportSize.x < 768 ? 108 : 100) : edgePadding;
 
       return {
         top: edgePadding,
@@ -264,6 +268,9 @@ onMounted(() => {
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
   let pendingCurrItemUpdate = false;
   let isFastBrowsing = false;
+  let updateFilmstripFromScroll:
+    | ((behavior?: ScrollBehavior, positionOverride?: number) => void)
+    | null = null;
 
   const p = () => lightbox?.pswp as any;
   const slideWidth = () => p()?.mainScroll?.slideWidth || p()?.viewportSize?.x || window.innerWidth;
@@ -322,6 +329,7 @@ onMounted(() => {
     }
     const target = baseX();
     if (p()?.mainScroll) p().mainScroll.x = target;
+    updateFilmstripFromScroll?.("smooth", p()?.currIndex ?? 0);
     const c: HTMLElement | undefined = p()?.container;
     if (!c) return;
     c.style.transition = "transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
@@ -337,6 +345,18 @@ onMounted(() => {
 
     swipeOffset += e.deltaX;
     setX(baseX() - swipeOffset);
+
+    const pswp = p();
+    const photoCount = getLightboxPhotos().length;
+    const currentIndex = pswp?.currIndex ?? 0;
+    const dragProgress = swipeOffset / slideWidth();
+    const isWrapping =
+      (currentIndex === 0 && dragProgress < 0) ||
+      (currentIndex === photoCount - 1 && dragProgress > 0);
+    const filmstripPosition = isWrapping
+      ? currentIndex
+      : Math.min(photoCount - 1, Math.max(0, currentIndex + dragProgress));
+    updateFilmstripFromScroll?.("auto", filmstripPosition);
 
     if (idleTimer) clearTimeout(idleTimer);
     idleTimer = setTimeout(snapBack, 100);
@@ -445,6 +465,137 @@ onMounted(() => {
         },
       });
     }
+
+    lightbox!.pswp!.ui!.registerElement({
+      name: "thumbnail-filmstrip-toggle",
+      order: 10,
+      isButton: true,
+      appendTo: "root",
+      title: "Hide thumbnails",
+      html: "",
+      onInit: (el, pswp) => {
+        const hasFilmstrip = getLightboxPhotos().length > 1;
+        if (!hasFilmstrip) {
+          el.remove();
+          return;
+        }
+
+        const iconHost = document.createElement("span");
+        let iconApp: ReturnType<typeof createApp> | null = null;
+
+        el.classList.add("pswp-thumbstrip-toggle");
+        el.appendChild(iconHost);
+
+        const renderIcon = () => {
+          iconApp?.unmount();
+          iconHost.innerHTML = "";
+          iconApp = createApp(isFilmstripHidden ? PanelBottomOpen : PanelBottomClose, {
+            size: 16,
+            strokeWidth: 2,
+            "aria-hidden": "true",
+          });
+          iconApp.mount(iconHost);
+        };
+
+        const syncToggleState = () => {
+          pswp.element?.classList.toggle("pswp--thumbstrip-hidden", isFilmstripHidden);
+          el.setAttribute("aria-label", isFilmstripHidden ? "Show thumbnails" : "Hide thumbnails");
+          el.setAttribute("title", isFilmstripHidden ? "Show thumbnails" : "Hide thumbnails");
+          el.setAttribute("aria-pressed", String(isFilmstripHidden));
+          renderIcon();
+          pswp.updateSize(true);
+        };
+
+        el.addEventListener("click", () => {
+          isFilmstripHidden = !isFilmstripHidden;
+          syncToggleState();
+          if (!isFilmstripHidden) updateFilmstripFromScroll?.("auto");
+        });
+
+        syncToggleState();
+        pswp.on("destroy", () => {
+          iconApp?.unmount();
+          iconApp = null;
+        });
+      },
+    });
+
+    lightbox!.pswp!.ui!.registerElement({
+      name: "thumbnail-filmstrip",
+      order: 11,
+      isButton: false,
+      appendTo: "root",
+      html: "",
+      onInit: (el, pswp) => {
+        const photos = getLightboxPhotos();
+        if (photos.length < 2) {
+          el.remove();
+          return;
+        }
+
+        el.className = "pswp-thumbstrip";
+        el.setAttribute("aria-label", "Photo thumbnails");
+
+        const buttons = photos.map((photo, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "pswp-thumbstrip-button";
+          button.setAttribute("aria-label", photo.title || photo.alt || `Photo ${index + 1}`);
+
+          const img = document.createElement("img");
+          img.src = photo.thumb;
+          img.alt = "";
+          img.loading = "lazy";
+          img.decoding = "async";
+
+          button.appendChild(img);
+          button.addEventListener("click", () => {
+            pswp.goTo(index);
+          });
+
+          el.appendChild(button);
+          return button;
+        });
+
+        const updateActiveThumbnail = (
+          behavior: ScrollBehavior = "smooth",
+          positionOverride = pswp.currIndex
+        ) => {
+          const position = Math.min(buttons.length - 1, Math.max(0, positionOverride));
+          const activeIndex = Math.round(position);
+
+          buttons.forEach((button, index) => {
+            const isActive = index === activeIndex;
+            button.toggleAttribute("aria-current", isActive);
+          });
+
+          window.requestAnimationFrame(() => {
+            const lowerIndex = Math.floor(position);
+            const upperIndex = Math.min(buttons.length - 1, lowerIndex + 1);
+            const mix = position - lowerIndex;
+            const lowerButton = buttons[lowerIndex];
+            const upperButton = buttons[upperIndex];
+            const lowerCenter = lowerButton.offsetLeft + lowerButton.offsetWidth / 2;
+            const upperCenter = upperButton.offsetLeft + upperButton.offsetWidth / 2;
+            const targetCenter = lowerCenter + (upperCenter - lowerCenter) * mix;
+
+            el.scrollTo({
+              left: Math.max(0, targetCenter - el.clientWidth / 2),
+              behavior,
+            });
+          });
+        };
+
+        updateFilmstripFromScroll = updateActiveThumbnail;
+        updateActiveThumbnail("auto", pswp.currIndex);
+        pswp.on("change", () => updateActiveThumbnail("smooth", pswp.currIndex));
+        pswp.on("slideActivate", () => updateActiveThumbnail("smooth", pswp.currIndex));
+        pswp.on("initialZoomInEnd", () => updateActiveThumbnail("auto", pswp.currIndex));
+        pswp.on("destroy", () => {
+          updateFilmstripFromScroll = null;
+        });
+      },
+    });
 
     lightbox!.pswp!.ui!.registerElement({
       name: "info-panel",
@@ -760,10 +911,127 @@ onUnmounted(() => {
   pointer-events: auto;
 }
 
+.pswp-thumbstrip {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  left: 16px;
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+  justify-content: flex-start;
+  width: max-content;
+  max-width: min(1040px, calc(100vw - 48px));
+  margin: 0 auto;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 5px 0 8px;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  scrollbar-width: none;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.pswp-thumbstrip::-webkit-scrollbar {
+  display: none;
+}
+
+.pswp-thumbstrip-button {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 1px solid rgba(244, 231, 212, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  opacity: 0.68;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+
+.pswp-thumbstrip-button:hover,
+.pswp-thumbstrip-button:focus-visible,
+.pswp-thumbstrip-button[aria-current] {
+  background: rgba(255, 255, 255, 0.14);
+  opacity: 1;
+}
+
+.pswp-thumbstrip-button:focus-visible {
+  outline: 2px solid #f4e7d4;
+  outline-offset: 2px;
+}
+
+.pswp-thumbstrip-button[aria-current] {
+  border-color: rgba(244, 231, 212, 0.72);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.26),
+    0 0 0 1px rgba(244, 231, 212, 0.2);
+  transform: translateY(-3px);
+}
+
+.pswp-thumbstrip-button img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.pswp--thumbstrip-hidden .pswp-thumbstrip {
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(18px) scale(0.98);
+}
+
+.pswp__button.pswp-thumbstrip-toggle {
+  position: absolute;
+  bottom: 76px;
+  left: 18px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(18, 18, 20, 0.36);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+  color: #f4e7d4;
+  backdrop-filter: blur(16px) saturate(1.12);
+  transition:
+    background-color 150ms ease,
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+
+.pswp__button.pswp-thumbstrip-toggle:hover,
+.pswp__button.pswp-thumbstrip-toggle:focus-visible,
+.pswp__button.pswp-thumbstrip-toggle[aria-pressed="true"] {
+  background: rgba(244, 231, 212, 0.18);
+  opacity: 1;
+}
+
+.pswp__button.pswp-thumbstrip-toggle[aria-pressed="true"] {
+  transform: none;
+}
+
+.pswp--thumbstrip-hidden .pswp__button.pswp-thumbstrip-toggle {
+  bottom: 18px;
+}
+
+.pswp-thumbstrip-toggle span {
+  display: grid;
+  place-items: center;
+}
+
 @media (max-width: 767px) {
   .pswp-exif-wrap {
     right: 12px;
-    bottom: 72px;
+    bottom: 132px;
     max-width: calc(100vw - 24px);
     padding: 8px 12px;
   }
@@ -771,6 +1039,30 @@ onUnmounted(() => {
   .pswp-exif-wrap table {
     font-size: 11px;
     line-height: 1.5;
+  }
+
+  .pswp-thumbstrip {
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    justify-content: flex-start;
+    max-width: calc(100vw - 20px);
+  }
+
+  .pswp-thumbstrip-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .pswp__button.pswp-thumbstrip-toggle {
+    bottom: 66px;
+    left: 12px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .pswp--thumbstrip-hidden .pswp__button.pswp-thumbstrip-toggle {
+    bottom: 14px;
   }
 }
 </style>

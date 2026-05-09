@@ -20,7 +20,7 @@ Tailwind outputs `var(…)` at runtime — no static hex baked into build.
 ### Light mode
 
 | Semantic name                   | Hex       | Role                                                                                     |
-|---------------------------------|-----------|------------------------------------------------------------------------------------------|
+| ------------------------------- | --------- | ---------------------------------------------------------------------------------------- |
 | Surface — cool off-white        | `#f3f8fb` | Page background (`bg-surface`)                                                           |
 | Surface Alt — pale blue-gray    | `#e8f0f5` | Card/container fills, code inline backgrounds                                            |
 | Foreground — dark slate-navy    | `#37424c` | Body text, headings                                                                      |
@@ -37,7 +37,7 @@ Tailwind outputs `var(…)` at runtime — no static hex baked into build.
 ### Dark mode overrides (same semantic roles)
 
 | Token                     | Dark hex                          |
-|---------------------------|-----------------------------------|
+| ------------------------- | --------------------------------- |
 | Surface                   | `#17181c`                         |
 | Surface Alt               | `#1f2028`                         |
 | Foreground                | `#e5e1db`                         |
@@ -62,14 +62,14 @@ auto-get `color: #fff` via global CSS. Never add `text-white` to these.
 ### Typefaces
 
 | Token               | Stack                                         | Use                                                                                                         |
-|---------------------|-----------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| ------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `--font-sans`       | Atkinson Hyperlegible → Noto Sans → system-ui | Default body + headings (accessibility-first)                                                               |
 | `--font-sans-tc`    | Atkinson Hyperlegible → **Noto Sans TC** → …  | Injected as `--font-sans` when `<html lang="zh-TW">`                                                        |
 | `--font-sans-sc`    | Atkinson Hyperlegible → **Noto Sans SC** → …  | Injected as `--font-sans` when `<html lang="zh-CN">`                                                        |
 | `--font-noto`       | Noto Sans → system-ui                         | Pure Noto Sans; UI strings needing native script regardless of locale (e.g. "English" in language switcher) |
-| `--font-noto-tc`    | Noto Sans TC → Noto Sans → system-ui          | Traditional Chinese UI strings (e.g. "繁體中文" in language switcher)                                           |
-| `--font-noto-sc`    | Noto Sans SC → Noto Sans → system-ui          | Simplified Chinese UI strings (e.g. "简体中文" in language switcher)                                            |
-| `--font-chiron`     | Chiron GoRound TC                             | Hero display only: `健一 / Kenichi` logotype                                                                  |
+| `--font-noto-tc`    | Noto Sans TC → Noto Sans → system-ui          | Traditional Chinese UI strings (e.g. "繁體中文" in language switcher)                                       |
+| `--font-noto-sc`    | Noto Sans SC → Noto Sans → system-ui          | Simplified Chinese UI strings (e.g. "简体中文" in language switcher)                                        |
+| `--font-chiron`     | Chiron GoRound TC                             | Hero display only: `健一 / Kenichi` logotype                                                                |
 | `--font-mono-maple` | Maple Mono CN → ui-monospace                  | Inline `code` + fenced code blocks                                                                          |
 
 ### Scale & rhythm
@@ -93,7 +93,7 @@ Active: `--accent`; hover shifts to `--accent-dim`.
 ### Buttons
 
 | Variant                  | Shape                         | Fill                                                             | Text                        |
-|--------------------------|-------------------------------|------------------------------------------------------------------|-----------------------------|
+| ------------------------ | ----------------------------- | ---------------------------------------------------------------- | --------------------------- |
 | Primary CTA              | Subtly rounded (`rounded-xl`) | `bg-accent-bg` → `bg-accent-dim` on hover                        | White (auto-applied)        |
 | Secondary/Ghost          | Pill (`rounded-full`)         | `bg-surface-alt/55` → `bg-surface-alt` on hover                  | `text-fg`                   |
 | Nav — active             | Gently rounded (`rounded-lg`) | `bg-accent-bg` → `bg-accent-dim`                                 | White                       |
@@ -107,7 +107,7 @@ Sizing: `px-6 py-3` hero CTAs; `px-4 py-1.5` filter pills; `p-1.5` icon buttons.
 ### Cards
 
 | Type                    | Corner roundness                   | Background              | Border               | Shadow                                          |
-|-------------------------|------------------------------------|-------------------------|----------------------|-------------------------------------------------|
+| ----------------------- | ---------------------------------- | ----------------------- | -------------------- | ----------------------------------------------- |
 | Blog card               | Generously rounded (`rounded-2xl`) | `bg-surface-alt`        | `border-border`      | `hover:shadow-lg`                               |
 | Gallery/photo thumbnail | Generously rounded (`rounded-2xl`) | `bg-surface-alt`        | `border-border`      | none                                            |
 | Hero card               | Very large rounded (`rounded-4xl`) | `bg-surface/88` frosted | `border-border/30`   | `0 24px 80px rgba(61,53,48,0.08)` warm diffused |

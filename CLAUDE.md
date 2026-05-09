@@ -18,11 +18,11 @@ Run Prettier + ESLint on changed `.astro`, `.vue`, `.ts` before commit.
 ### Gallery image upload workflow
 
 1. **Upload original** — `npm run gallery:push-originals -- ./image.jpg`
-    - Uploads to private sync host under `gallery-explicit/<filename>` by default
-    - `--remote-path gallery-explicit/sub/name.jpg` for explicit path
-    - `--overwrite` to overwrite existing original (or `GALLERY_OVERWRITE=1`)
+   - Uploads to private sync host under `gallery-explicit/<filename>` by default
+   - `--remote-path gallery-explicit/sub/name.jpg` for explicit path
+   - `--overwrite` to overwrite existing original (or `GALLERY_OVERWRITE=1`)
 2. **Sync** — `npm run gallery:sync`
-    - Downloads originals, generates viewer + thumb derivatives, uploads them, updates build manifest
+   - Downloads originals, generates viewer + thumb derivatives, uploads them, updates build manifest
 3. **Dev server** reads build manifest from `node_modules/.astro/gallery-explicit-build-manifest.json`
 
 **Local dev against `../kenichi-profile-ext-server`** — set in `.env.builder.dev`:
@@ -76,7 +76,7 @@ Interactive animations (nav, gallery filters, mobile menu) use **anime.js v4** w
 Defined in `src/content.config.ts`:
 
 | Collection | Source                                 | Notes                                                                                                                                                        |
-|------------|----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `blog`     | `src/content/blog/{locale}/*.{md,mdx}` | Locale-prefixed subdirs; filtered per locale by `getBlogPostsForLocale()`                                                                                    |
 | `gallery`  | `src/content/gallery/*.{md,mdx}`       | Frontmatter: `image`, `category`, `artist`; `image` can be repo-local path or remote manifest key                                                            |
 | `photos`   | `src/content/photos/` images           | Custom loader (`src/loaders/photosLoader.ts`) — EXIF auto-read via `exifreader`; optional sidecar `.md` overrides `title`, `description`, `location`, `date` |
@@ -88,10 +88,10 @@ Gallery entries with bare logical `image` path (e.g. `gallery-explicit/foo.jpg`)
 - **Astro components** for static structure: `Layout.astro`, `BlogPost.astro`, `BlogCard.astro`, `SiteFooter.astro`,
   `BaseHead.astro`, `CookieConsent.astro`
 - **Vue SFCs** (`client:load`) for interactive islands:
-    - `NavBar.vue` — theme toggle (light/system/dark), language switcher, mobile menu
-    - `PhotoViewer.vue` — PhotoSwipe lightbox with EXIF overlay; used by `/photos` + `/gallery`
-    - `SocialLinks.vue` — animated social icon row
-    - `BlogLightbox.vue` — lightbox for blog post inline images
+  - `NavBar.vue` — theme toggle (light/system/dark), language switcher, mobile menu
+  - `PhotoViewer.vue` — PhotoSwipe lightbox with EXIF overlay; used by `/photos` + `/gallery`
+  - `SocialLinks.vue` — animated social icon row
+  - `BlogLightbox.vue` — lightbox for blog post inline images
 
 ### Layouts
 
