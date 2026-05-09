@@ -263,6 +263,7 @@ onMounted(() => {
   let swipeOffset = 0;
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
   let pendingCurrItemUpdate = false;
+  let isFastBrowsing = false;
 
   const p = () => lightbox?.pswp as any;
   const slideWidth = () => p()?.mainScroll?.slideWidth || p()?.viewportSize?.x || window.innerWidth;
@@ -297,17 +298,27 @@ onMounted(() => {
     if (pendingCurrItemUpdate) {
       pendingCurrItemUpdate = false;
       p()?.mainScroll?.updateCurrItem?.();
-      forceAppendHeavy();
+      if (!isFastBrowsing) forceAppendHeavy();
     }
   };
 
   const snapBack = () => {
+    // Unblock content loading before any slide setup so updateCurrItem() and
+    // appendHeavy() below can load images for the slide the user settled on.
+    isFastBrowsing = false;
     swipeOffset = 0;
     // Consume any pending navigation whose updateCurrItem() was never called
     // (happens when the user stops swiping mid-burst without a subsequent event).
     if (pendingCurrItemUpdate) {
       pendingCurrItemUpdate = false;
       p()?.mainScroll?.updateCurrItem?.();
+    }
+    // contentLoadImage was blocked during fast browse, so img.src was never set
+    // (content.state === 'idle'). The element and sizes ARE correct. Just need
+    // to call loadImage() now that isFastBrowsing is false.
+    for (const holder of p()?.mainScroll?.itemHolders ?? []) {
+      const content = (holder as any)?.slide?.content;
+      if (content?.state === "idle" && content?.element) content.loadImage?.(false);
     }
     const target = baseX();
     if (p()?.mainScroll) p().mainScroll.x = target;
@@ -337,6 +348,7 @@ onMounted(() => {
       }
       const goNext = swipeOffset > 0;
       swipeOffset = 0;
+      isFastBrowsing = true;
       pendingCurrItemUpdate = true;
       if (goNext) lightbox?.pswp?.next();
       else lightbox?.pswp?.prev();
@@ -390,6 +402,7 @@ onMounted(() => {
     }
     swipeOffset = 0;
     pendingCurrItemUpdate = false;
+    isFastBrowsing = false;
     lightbox?.pswp?.element?.classList.remove("pswp--opening");
     triggerEl?.focus();
     triggerEl = null;
@@ -518,6 +531,15 @@ onMounted(() => {
       itemData.h = img.naturalHeight;
     }
     return itemData;
+  });
+
+  // Block img.src assignment for slides navigated through during fast trackpad browse.
+  // contentLoadImage fires inside loadImage() after the img element is already created
+  // and sizes are calculated — preventing it leaves the element intact (so zoom/pan math
+  // still works) but keeps content.state === 'idle'. snapBack() calls loadImage() again
+  // once the user settles, which is now unblocked.
+  lightbox.on("contentLoadImage", (e) => {
+    if (isFastBrowsing) e.preventDefault();
   });
 
   lightbox.addFilter("placeholderSrc", (placeholderSrc) => {
