@@ -430,6 +430,17 @@ onMounted(() => {
 
   // Inject EXIF panel into PhotoSwipe UI
   lightbox.on("uiRegister", () => {
+    let filmstripEl: HTMLElement | null = null;
+    const useInstantFilmstripScroll = () =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const resolveFilmstripScrollBehavior = (behavior: ScrollBehavior) =>
+      useInstantFilmstripScroll() ? "auto" : behavior;
+    const syncFilmstripVisibility = () => {
+      if (!filmstripEl) return;
+      filmstripEl.toggleAttribute("inert", isFilmstripHidden);
+      filmstripEl.setAttribute("aria-hidden", String(isFilmstripHidden));
+    };
+
     if (props.showDownloadButton) {
       lightbox!.pswp!.ui!.registerElement({
         name: "download-button",
@@ -484,6 +495,7 @@ onMounted(() => {
         let iconApp: ReturnType<typeof createApp> | null = null;
 
         el.classList.add("pswp-thumbstrip-toggle");
+        el.setAttribute("aria-controls", "pswp-thumbstrip");
         el.appendChild(iconHost);
 
         const renderIcon = () => {
@@ -502,6 +514,7 @@ onMounted(() => {
           el.setAttribute("aria-label", isFilmstripHidden ? "Show thumbnails" : "Hide thumbnails");
           el.setAttribute("title", isFilmstripHidden ? "Show thumbnails" : "Hide thumbnails");
           el.setAttribute("aria-pressed", String(isFilmstripHidden));
+          syncFilmstripVisibility();
           renderIcon();
           pswp.updateSize(true);
         };
@@ -534,7 +547,10 @@ onMounted(() => {
         }
 
         el.className = "pswp-thumbstrip";
+        el.id = "pswp-thumbstrip";
         el.setAttribute("aria-label", "Photo thumbnails");
+        filmstripEl = el;
+        syncFilmstripVisibility();
 
         const buttons = photos.map((photo, index) => {
           const button = document.createElement("button");
@@ -566,7 +582,8 @@ onMounted(() => {
 
           buttons.forEach((button, index) => {
             const isActive = index === activeIndex;
-            button.toggleAttribute("aria-current", isActive);
+            if (isActive) button.setAttribute("aria-current", "true");
+            else button.removeAttribute("aria-current");
           });
 
           window.requestAnimationFrame(() => {
@@ -581,7 +598,7 @@ onMounted(() => {
 
             el.scrollTo({
               left: Math.max(0, targetCenter - el.clientWidth / 2),
-              behavior,
+              behavior: resolveFilmstripScrollBehavior(behavior),
             });
           });
         };
@@ -592,6 +609,7 @@ onMounted(() => {
         pswp.on("slideActivate", () => updateActiveThumbnail("smooth", pswp.currIndex));
         pswp.on("initialZoomInEnd", () => updateActiveThumbnail("auto", pswp.currIndex));
         pswp.on("destroy", () => {
+          filmstripEl = null;
           updateFilmstripFromScroll = null;
         });
       },
