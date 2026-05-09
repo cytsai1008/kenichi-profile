@@ -257,7 +257,61 @@ onMounted(() => {
     },
   });
 
+  // Trackpad grab: directly drives the pswp container transform.
+  // mainScroll.x is kept in sync on every frame so PhotoSwipe never sees a
+  // mismatch to "correct", and animations.stopAll() kills any pending spring.
+  let swipeOffset = 0;
+  let idleTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const p = () => lightbox?.pswp as any;
+  const slideWidth = () => p()?.mainScroll?.slideWidth || p()?.viewportSize?.x || window.innerWidth;
+  const baseX = () => -(p()?.currIndex ?? 0) * slideWidth();
+
+  const setX = (x: number) => {
+    p()?.animations?.stopAll?.();
+    if (p()?.mainScroll) p().mainScroll.x = x;
+    const c: HTMLElement | undefined = p()?.container;
+    if (c) {
+      c.style.transition = "none";
+      c.style.transform = `translate3d(${x}px,0px,0px)`;
+    }
+  };
+
+  const snapBack = () => {
+    swipeOffset = 0;
+    const target = baseX();
+    if (p()?.mainScroll) p().mainScroll.x = target;
+    const c: HTMLElement | undefined = p()?.container;
+    if (!c) return;
+    c.style.transition = "transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
+    c.style.transform = `translate3d(${target}px,0px,0px)`;
+  };
+
+  const onTrackpadSwipe = (e: WheelEvent) => {
+    if (e.ctrlKey) return;
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    e.preventDefault();
+
+    swipeOffset += e.deltaX;
+    setX(baseX() - swipeOffset);
+
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(snapBack, 100);
+
+    if (Math.abs(swipeOffset) > 120) {
+      if (idleTimer) {
+        clearTimeout(idleTimer);
+        idleTimer = null;
+      }
+      const goNext = swipeOffset > 0;
+      swipeOffset = 0;
+      if (goNext) lightbox?.pswp?.next();
+      else lightbox?.pswp?.prev();
+    }
+  };
+
   lightbox.on("openingAnimationStart", () => {
+    lightbox?.pswp?.element?.addEventListener("wheel", onTrackpadSwipe, { passive: false });
     lightbox?.pswp?.element?.classList.add("pswp--opening");
 
     const pswpEl = lightbox?.pswp?.element;
@@ -296,6 +350,12 @@ onMounted(() => {
     lightbox?.pswp?.element?.classList.add("pswp--opening");
   });
   lightbox.on("destroy", () => {
+    lightbox?.pswp?.element?.removeEventListener("wheel", onTrackpadSwipe);
+    if (idleTimer) {
+      clearTimeout(idleTimer);
+      idleTimer = null;
+    }
+    swipeOffset = 0;
     lightbox?.pswp?.element?.classList.remove("pswp--opening");
     triggerEl?.focus();
     triggerEl = null;
