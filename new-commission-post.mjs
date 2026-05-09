@@ -229,7 +229,9 @@ async function main() {
     // Explicit content: image stays in alt-media, frontmatter uses logical remote path.
     // Non-explicit: copy image to src/assets/commissions as before.
     const sourceAssetPath = isExplicit ? null : getSourceAssetPath(sourcePath);
-    const imageTarget = isExplicit ? null : (sourceAssetPath ?? path.join(ASSET_DIR, path.basename(sourcePath)));
+    const imageTarget = isExplicit
+      ? null
+      : (sourceAssetPath ?? path.join(ASSET_DIR, path.basename(sourcePath)));
     const frontmatterImagePath = isExplicit
       ? `gallery-explicit/${path.basename(sourcePath)}`
       : toGalleryImagePath(imageTarget);
@@ -386,14 +388,6 @@ function slugify(value) {
     .replace(/[\s_]+/g, "-")
     .replace(/-+/g, "-")
     .toLowerCase();
-}
-
-function titleFromSlug(value) {
-  return value
-    .split("-")
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
 }
 
 function buildFrontmatter(data) {

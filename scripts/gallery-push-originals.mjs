@@ -39,7 +39,8 @@ const DEFAULT_NAMESPACE = process.env.GALLERY_NAMESPACE ?? "gallery-explicit";
 const CF_CLIENT_ID = process.env.GALLERY_CF_CLIENT_ID ?? "";
 const CF_CLIENT_SECRET = process.env.GALLERY_CF_CLIENT_SECRET ?? "";
 const SIGNING_KEY_B64 = process.env.GALLERY_SIGNING_KEY ?? "";
-const DEV_SKIP_AUTH = process.env.GALLERY_DEV_SKIP_AUTH === "true" || process.env.GALLERY_DEV_SKIP_AUTH === "1";
+const DEV_SKIP_AUTH =
+  process.env.GALLERY_DEV_SKIP_AUTH === "true" || process.env.GALLERY_DEV_SKIP_AUTH === "1";
 
 const ROOT = process.cwd();
 
@@ -58,8 +59,6 @@ const { values, positionals } = parseArgs({
   },
   allowPositionals: true,
 });
-
-
 
 if (values.help || positionals.length === 0) {
   printHelp();
@@ -152,7 +151,9 @@ async function main() {
     try {
       const res = await signedRequest("PUT", uploadUrlWithForce, buf, signingKey);
       if (res.status === 409) {
-        console.warn(`[push-originals] skipped: ${remotePath} already exists — set GALLERY_OVERWRITE=1 to replace`);
+        console.warn(
+          `[push-originals] skipped: ${remotePath} already exists — set GALLERY_OVERWRITE=1 to replace`
+        );
         continue;
       }
       json = await res.json().catch(() => ({}));
@@ -261,7 +262,16 @@ async function buildSignedHeaders(method, urlPath, bodyBuf, signingKey, extra = 
 
 function mimeFromUrl(url) {
   const ext = url.split("?")[0].split(".").pop().toLowerCase();
-  return { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif", avif: "image/avif" }[ext] ?? "image/jpeg";
+  return (
+    {
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
+      webp: "image/webp",
+      gif: "image/gif",
+      avif: "image/avif",
+    }[ext] ?? "image/jpeg"
+  );
 }
 
 async function signedRequest(method, url, bodyBuf, signingKey, extraHeaders = {}) {

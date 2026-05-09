@@ -52,7 +52,8 @@ const THUMB_QUALITY = parseInt(process.env.GALLERY_THUMB_QUALITY ?? "85", 10);
 const CF_CLIENT_ID = process.env.GALLERY_CF_CLIENT_ID ?? "";
 const CF_CLIENT_SECRET = process.env.GALLERY_CF_CLIENT_SECRET ?? "";
 const SIGNING_KEY_B64 = process.env.GALLERY_SIGNING_KEY ?? "";
-const DEV_SKIP_AUTH = process.env.GALLERY_DEV_SKIP_AUTH === "true" || process.env.GALLERY_DEV_SKIP_AUTH === "1";
+const DEV_SKIP_AUTH =
+  process.env.GALLERY_DEV_SKIP_AUTH === "true" || process.env.GALLERY_DEV_SKIP_AUTH === "1";
 
 const ROOT = process.cwd();
 const ASTRO_CACHE_DIR = path.join(ROOT, "node_modules", ".astro");
@@ -467,7 +468,15 @@ async function buildSignedHeaders(method, urlPath, bodyBuf, signingKey) {
 function mimeFromUrl(url) {
   const ext = url.split("?")[0].split(".").pop().toLowerCase();
   return (
-    { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif", avif: "image/avif", json: "application/json" }[ext] ?? "image/jpeg"
+    {
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
+      webp: "image/webp",
+      gif: "image/gif",
+      avif: "image/avif",
+      json: "application/json",
+    }[ext] ?? "image/jpeg"
   );
 }
 

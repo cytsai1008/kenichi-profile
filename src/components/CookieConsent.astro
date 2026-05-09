@@ -98,6 +98,27 @@ const allTranslations = {
     });
 
     await setLanguage(currentLang);
+
+    // Tag the consent modal so AdGuard's generic rule
+    // ##.cc-window[aria-label="cookieconsent"] can hide it.
+    // Uses MutationObserver because .cm is inserted into the DOM after run() resolves.
+    const tagModal = (cm: Element) => {
+      cm.classList.add("cc-window");
+      cm.setAttribute("aria-label", "cookieconsent");
+    };
+    const existing = document.querySelector("#cc-main .cm");
+    if (existing) {
+      tagModal(existing);
+    } else {
+      const obs = new MutationObserver(() => {
+        const cm = document.querySelector("#cc-main .cm");
+        if (cm) {
+          tagModal(cm);
+          obs.disconnect();
+        }
+      });
+      obs.observe(document.body, { childList: true, subtree: true });
+    }
   };
 
   // Direct call: guarantees initialization even if astro:page-load fires
