@@ -262,6 +262,8 @@ onMounted(() => {
   // mismatch to "correct", and animations.stopAll() kills any pending spring.
   let swipeOffset = 0;
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
+  let navCooldown: ReturnType<typeof setTimeout> | null = null;
+  let isNavigating = false;
 
   const p = () => lightbox?.pswp as any;
   const slideWidth = () => p()?.mainScroll?.slideWidth || p()?.viewportSize?.x || window.innerWidth;
@@ -293,6 +295,20 @@ onMounted(() => {
     e.preventDefault();
 
     swipeOffset += e.deltaX;
+
+    // After navigation PhotoSwipe is mid-animation. Calling setX() → stopAll()
+    // during this window breaks the slide rendering. Ignore small residual
+    // deltas (coasting from the previous gesture). A deliberate new gesture
+    // (> 30 px accumulated) exits the guard immediately so there's no felt lag.
+    if (isNavigating) {
+      if (Math.abs(swipeOffset) < 30) return;
+      isNavigating = false;
+      if (navCooldown) {
+        clearTimeout(navCooldown);
+        navCooldown = null;
+      }
+    }
+
     setX(baseX() - swipeOffset);
 
     if (idleTimer) clearTimeout(idleTimer);
@@ -305,8 +321,15 @@ onMounted(() => {
       }
       const goNext = swipeOffset > 0;
       swipeOffset = 0;
+      isNavigating = true;
       if (goNext) lightbox?.pswp?.next();
       else lightbox?.pswp?.prev();
+      // Fallback: clear guard after one animation cycle in case no further
+      // wheel events arrive to clear it via the dead-zone path above.
+      navCooldown = setTimeout(() => {
+        isNavigating = false;
+        navCooldown = null;
+      }, 350);
     }
   };
 
@@ -355,6 +378,11 @@ onMounted(() => {
       clearTimeout(idleTimer);
       idleTimer = null;
     }
+    if (navCooldown) {
+      clearTimeout(navCooldown);
+      navCooldown = null;
+    }
+    isNavigating = false;
     swipeOffset = 0;
     lightbox?.pswp?.element?.classList.remove("pswp--opening");
     triggerEl?.focus();
