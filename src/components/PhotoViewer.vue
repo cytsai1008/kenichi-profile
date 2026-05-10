@@ -268,6 +268,8 @@ onMounted(() => {
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
   let pendingCurrItemUpdate = false;
   let isFastBrowsing = false;
+  let speedWindow: number[] = []; // rolling 3-event average (px/ms)
+  let prevEventTime = 0; // performance.now() timestamp
   let updateFilmstripFromScroll:
     | ((behavior?: ScrollBehavior, positionOverride?: number) => void)
     | null = null;
@@ -313,6 +315,8 @@ onMounted(() => {
     // Unblock content loading before any slide setup so updateCurrItem() and
     // appendHeavy() below can load images for the slide the user settled on.
     isFastBrowsing = false;
+    speedWindow = [];
+    prevEventTime = 0;
     swipeOffset = 0;
     // Consume any pending navigation whose updateCurrItem() was never called
     // (happens when the user stops swiping mid-burst without a subsequent event).
@@ -343,6 +347,25 @@ onMounted(() => {
     if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
     e.preventDefault();
 
+    const now = performance.now();
+    const dt = prevEventTime > 0 ? Math.max(now - prevEventTime, 1) : 16;
+    prevEventTime = now;
+    const speed = Math.abs(e.deltaX) / dt; // px/ms
+    speedWindow.push(speed);
+    if (speedWindow.length > 3) speedWindow.shift();
+    const avgSpeed = speedWindow.reduce((a, b) => a + b, 0) / speedWindow.length;
+
+    // Sustained high speed → suppress loading (single noisy events won't exit this)
+    if (avgSpeed > 0.6) isFastBrowsing = true;
+    // Average speed has dropped → user settling, load immediately
+    if (isFastBrowsing && avgSpeed < 0.25) {
+      isFastBrowsing = false;
+      for (const holder of p()?.mainScroll?.itemHolders ?? []) {
+        const content = (holder as any)?.slide?.content;
+        if (content?.state === "idle" && content?.element) content.loadImage?.(false);
+      }
+    }
+
     swipeOffset += e.deltaX;
     setX(baseX() - swipeOffset);
 
@@ -368,7 +391,6 @@ onMounted(() => {
       }
       const goNext = swipeOffset > 0;
       swipeOffset = 0;
-      isFastBrowsing = true;
       pendingCurrItemUpdate = true;
       if (goNext) lightbox?.pswp?.next();
       else lightbox?.pswp?.prev();
@@ -423,6 +445,8 @@ onMounted(() => {
     swipeOffset = 0;
     pendingCurrItemUpdate = false;
     isFastBrowsing = false;
+    speedWindow = [];
+    prevEventTime = 0;
     lightbox?.pswp?.element?.classList.remove("pswp--opening");
     triggerEl?.focus();
     triggerEl = null;
