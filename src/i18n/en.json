@@ -80,6 +80,13 @@
     "pronounsValue": "He / Him",
     "hobbiesLabel": "Hobbies",
     "hobbiesValue": "Coding, Photography",
+    "gear": "Camera Gear",
+    "bodyLabel": "Body",
+    "bodyValue": "Nikon D800E",
+    "bodySpec": "2012 · 36.3MP FX · no low-pass filter",
+    "lensLabel": "Lens",
+    "lensValue": "AF-S NIKKOR 24-70mm f/2.8G ED",
+    "lensSpec": "2007 · 24–70mm · constant f/2.8 · ⌀82mm",
     "intro": "I'm Kenichi, a blue cat who enjoys coding and photography lives in Taiwan. \nThis site is where I collect things I make and share a bit about myself — from artwork to photos and everyday life. I enjoy building small things you can find on my GitHub, and taking photos when I spot cute furries. \nNice to meet you, hope you have a good time here."
   },
   "notFound": {

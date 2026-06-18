@@ -80,6 +80,13 @@
     "pronounsValue": "他",
     "hobbiesLabel": "興趣",
     "hobbiesValue": "寫程式、攝影",
+    "gear": "攝影器材",
+    "bodyLabel": "機身",
+    "bodyValue": "Nikon D800E",
+    "bodySpec": "2012 · 36.3MP FX · 無低通濾鏡",
+    "lensLabel": "鏡頭",
+    "lensValue": "AF-S NIKKOR 24-70mm f/2.8G ED",
+    "lensSpec": "2007 · 24–70mm · 恆定 f/2.8 · ⌀82mm",
     "intro": "我是健一，一隻喜歡寫程式和攝影的藍貓。這裡是我整理自己作品與生活片段的地方，從插畫、相片到各種小專案都有。\n喜歡做一些小東西，可以在我的 GitHub 上找到；也喜歡在看到可愛毛毛的時候按下快門。很高興認識你，希望你在這裡有愉快的體驗。"
   },
   "notFound": {

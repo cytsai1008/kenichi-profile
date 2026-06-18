@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import { Aperture, Camera } from "@lucide/astro";
 import Layout from "../../layouts/Layout.astro";
 import SocialLinks from "../SocialLinks.vue";
 import { t, nl, type Locale } from "../../i18n/utils";
@@ -83,6 +84,49 @@ const socialLinks = [
         <h2 class="mb-4 text-2xl font-bold">{tr.about.person}</h2>
         <div class="prose max-w-none">
           {nl(tr.about.intro).map((para) => <p>{para}</p>)}
+        </div>
+      </section>
+
+      <section data-animate>
+        <h2 class="mb-4 text-2xl font-bold">{tr.about.gear}</h2>
+        <div class="relative overflow-hidden rounded-2xl py-2 pr-6">
+          {/* oversized flat aperture mark — graphic anchor, not decoration */}
+          <Aperture
+            class="pointer-events-none absolute -right-6 -bottom-8 h-36 w-36 text-accent/10"
+            stroke-width={1}
+            aria-hidden="true"
+          />
+          {/* gold Nikkor ring traced on the aperture's edge */}
+          <span
+            class="pointer-events-none absolute -right-6 -bottom-8 h-36 w-36 rounded-full border-2 border-[#a89461]/40"
+            aria-hidden="true"></span>
+          <dl class="relative z-10 grid gap-6 sm:grid-cols-2">
+            <div class="relative overflow-hidden sm:min-h-40">
+              {/* camera emblem cut by the body cell's right edge, desktop only */}
+              <Camera
+                class="pointer-events-none absolute -right-6 -bottom-12 hidden h-40 w-40 text-accent/10 sm:block"
+                stroke-width={1}
+                aria-hidden="true"
+              />
+              <dt
+                class="font-mono-maple text-[0.7rem] tracking-[0.28em] text-accent-dim uppercase dark:text-accent"
+              >
+                {tr.about.bodyLabel}
+              </dt>
+              <dd class="mt-1.5 text-xl font-semibold text-fg">{tr.about.bodyValue}</dd>
+              <dd class="mt-1.5 font-mono-maple text-xs text-fg-muted">{tr.about.bodySpec}</dd>
+            </div>
+
+            <div>
+              <dt
+                class="font-mono-maple text-[0.7rem] tracking-[0.28em] text-accent-dim uppercase dark:text-accent"
+              >
+                {tr.about.lensLabel}
+              </dt>
+              <dd class="mt-1.5 text-xl font-semibold text-fg">{tr.about.lensValue}</dd>
+              <dd class="mt-1.5 font-mono-maple text-xs text-fg-muted">{tr.about.lensSpec}</dd>
+            </div>
+          </dl>
         </div>
       </section>
 
