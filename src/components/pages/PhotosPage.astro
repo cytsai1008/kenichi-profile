@@ -62,6 +62,7 @@ async function toPhotoItem(entry: (typeof entries)[number]): Promise<PhotoItem> 
     src: optimizedViewer?.src ?? originalUrl ?? entry.data.imagePath,
     downloadSrc: originalUrl ?? entry.data.imagePath,
     thumb: optimizedThumb?.src ?? entry.data.imagePath,
+    slug: entry.data.slug,
     width: optimizedViewer?.attributes.width ?? entry.data.exif.width ?? imageModule?.width ?? 0,
     height:
       optimizedViewer?.attributes.height ?? entry.data.exif.height ?? imageModule?.height ?? 0,

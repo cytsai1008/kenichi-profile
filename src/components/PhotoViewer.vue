@@ -11,6 +11,8 @@ export interface PhotoItem {
   height: number;
   alt: string;
   thumb: string;
+  /** Stable filename slug used for `#hash` deep-linking (optional). */
+  slug?: string;
   title?: string;
   subtitle?: string;
   subtitleUrl?: string;
@@ -63,6 +65,7 @@ const introReady = ref(false);
 const pressedPhoto = ref<string | null>(null);
 let lightbox: PhotoSwipeLightbox | null = null;
 let resizeObserver: ResizeObserver | null = null;
+let popStateCleanup: (() => void) | null = null;
 
 function getLightboxElements() {
   return Array.from(galleryEl.value?.querySelectorAll<HTMLElement>("[data-pswp]") ?? []);
@@ -744,6 +747,80 @@ onMounted(() => {
   });
 
   lightbox.init();
+
+  // === #filename deep-linking ===
+  // Open photo -> URL shows `#<slug>`; Back closes it; landing on `#<slug>`
+  // opens that image directly. No-op for items without a slug.
+  const currentSlug = () => getLightboxPhotos()[lightbox?.pswp?.currIndex ?? 0]?.slug;
+  const hashOf = (slug: string) => `#${encodeURIComponent(slug)}`;
+  const base = () => location.pathname + location.search;
+
+  let startedHash = false;
+  let addedEntry = false;
+  let suppressPopClose = false;
+
+  lightbox.on("change", () => {
+    const slug = currentSlug();
+    if (!slug) return;
+    const hash = hashOf(slug);
+    if (!startedHash) {
+      startedHash = true;
+      if (location.hash !== hash) {
+        // Normal click — add a history entry so Back closes the viewer.
+        history.pushState({ pswp: true }, "", hash);
+        addedEntry = true;
+      } else {
+        // Deep-link load — already on this hash, just mark the entry.
+        history.replaceState({ pswp: true }, "", hash);
+        addedEntry = false;
+      }
+    } else {
+      history.replaceState({ pswp: true }, "", hash);
+    }
+  });
+
+  lightbox.on("destroy", () => {
+    startedHash = false;
+    if (suppressPopClose) {
+      suppressPopClose = false;
+      return;
+    }
+    if (addedEntry) {
+      addedEntry = false;
+      history.back(); // pop the entry we pushed on open
+    } else if (location.hash) {
+      history.replaceState(null, "", base());
+    }
+  });
+
+  // Open the image whose slug matches the current `#<slug>`. Used both on initial
+  // mount and on every later hashchange (in-page links / pasted hash / history
+  // nav don't remount the island, so onMounted alone isn't enough). The
+  // `.pswp` check dedupes: only one viewer opens even across album instances.
+  const maybeOpenFromHash = () => {
+    if (document.querySelector(".pswp")) return;
+    const want = decodeURIComponent(location.hash.replace(/^#/, ""));
+    if (!want) return;
+    const idx = getLightboxElements().findIndex((el) => getPhotoByElement(el)?.slug === want);
+    if (idx >= 0) lightbox?.loadAndOpen(idx);
+  };
+
+  const onPopState = () => {
+    if (lightbox?.pswp && !(history.state as { pswp?: boolean } | null)?.pswp) {
+      suppressPopClose = true;
+      lightbox.pswp.close();
+    }
+  };
+  window.addEventListener("popstate", onPopState);
+  window.addEventListener("hashchange", maybeOpenFromHash);
+  popStateCleanup = () => {
+    window.removeEventListener("popstate", onPopState);
+    window.removeEventListener("hashchange", maybeOpenFromHash);
+  };
+
+  // Initial deep-link. Double rAF lets Vue hydrate and the Gallery explicit-strip
+  // script run first so hidden explicit items stay gated.
+  requestAnimationFrame(() => requestAnimationFrame(maybeOpenFromHash));
 });
 
 watch(
@@ -758,6 +835,8 @@ onUnmounted(() => {
   window.removeEventListener("resize", updateMasonryLayout);
   resizeObserver?.disconnect();
   resizeObserver = null;
+  popStateCleanup?.();
+  popStateCleanup = null;
   lightbox?.destroy();
   lightbox = null;
 });

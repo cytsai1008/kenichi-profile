@@ -50,6 +50,17 @@ function assetKey(relativePath: string): string {
   return m ? `/src/assets/${m[1]}` : "";
 }
 
+// Filename (minus extension) used for `#hash` deep-linking, e.g.
+// "gallery-explicit/Baka_inuta.jpg" -> "Baka_inuta".
+function slugFromImage(image: string): string {
+  return (
+    image
+      .split("/")
+      .pop()
+      ?.replace(/\.[^.]+$/, "") ?? image
+  );
+}
+
 /**
  * Detect whether a frontmatter image value is a logical remote asset path
  * (e.g. "gallery-explicit/Baka_inuta.jpg") rather than a repo-local relative
@@ -93,6 +104,7 @@ async function buildPhotoItem(entry: (typeof all)[number]): Promise<PhotoItem | 
     return {
       src: manifestEntry.viewerUrl,
       thumb: manifestEntry.thumbUrl,
+      slug: slugFromImage(imageValue),
       width: manifestEntry.width,
       height: manifestEntry.height,
       alt: localizedValue(entry.data.title, entry.data.titleI18n) ?? entry.data.title,
@@ -125,6 +137,7 @@ async function buildPhotoItem(entry: (typeof all)[number]): Promise<PhotoItem | 
   return {
     src: viewerImage.src,
     thumb: thumb.src,
+    slug: slugFromImage(imageValue),
     width: viewerImage.attributes.width ?? imageModule.width,
     height: viewerImage.attributes.height ?? imageModule.height,
     alt: localizedValue(entry.data.title, entry.data.titleI18n) ?? entry.data.title,
