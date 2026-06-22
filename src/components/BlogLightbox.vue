@@ -140,7 +140,7 @@ onUnmounted(() => {
         : 'my-6 grid grid-cols-2 gap-2 sm:grid-cols-3'
     "
   >
-    <figure v-for="item in items" :key="item.src" class="m-0">
+    <figure v-for="(item, i) in items" :key="i" class="m-0">
       <button
         type="button"
         data-pswp
