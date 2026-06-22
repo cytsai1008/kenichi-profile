@@ -1,6 +1,7 @@
 // @ts-check
 
 import cloudflare from "@astrojs/cloudflare";
+import { unified } from "@astrojs/markdown-remark";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import vue from "@astrojs/vue";
@@ -72,7 +73,9 @@ export default defineConfig({
   },
 
   markdown: {
-    rehypePlugins: [rehypeTaskListLucide, rehypeImageCaption],
+    processor: unified({
+      rehypePlugins: [rehypeTaskListLucide, rehypeImageCaption],
+    }),
   },
 
   vite: {

@@ -1,15 +1,16 @@
 {
   "compatibility_date": "2026-04-08",
+  "compatibility_flags": ["nodejs_compat"],
   "routes": [
     {
       "pattern": "kenichi.photocat.blue",
-      "custom_domain": true
-    }
+      "custom_domain": true,
+    },
   ],
   "observability": {
     "logs": {
       "enabled": true,
-      "invocation_logs": true
-    }
-  }
+      "invocation_logs": true,
+    },
+  },
 }
