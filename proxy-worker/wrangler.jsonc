@@ -8,6 +8,11 @@
   "main": "src/index.js",
   "tsconfig": "tsconfig.json",
   "compatibility_date": "2026-04-08",
+  // Tiered edge cache in front of this Worker; honors the Cache-Control headers
+  // set in src/index.js so repeat asset hits skip the upstream fetch.
+  "cache": {
+    "enabled": true
+  },
   "routes": [
     {
       "pattern": "kenichi.photocat.blue/alt-media/*",
