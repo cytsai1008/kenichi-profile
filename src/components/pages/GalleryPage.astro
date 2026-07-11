@@ -220,7 +220,7 @@ if (droppedCount > 0) {
         explicitItems.length > 0 && (
           <button
             id="explicit-toggle"
-            class="explicit-toggle ml-auto rounded-full border border-explicit/50 px-4 py-1.5 text-sm font-medium text-explicit/80 transition-all duration-200 hover:border-explicit/70 hover:text-explicit"
+            class="explicit-toggle ml-auto rounded-full border border-explicit/50 px-4 py-1.5 text-sm font-medium text-explicit/80 transition-colors duration-150 hover:border-explicit/70 hover:text-explicit"
             aria-pressed="false"
           >
             {tr.gallery.explicitToggle}
@@ -301,7 +301,7 @@ if (droppedCount > 0) {
 </Layout>
 
 <script>
-  import { animate, stagger } from "animejs";
+  import { animate } from "animejs";
 
   // Read explicit preference first — needed by matchesCategory
   const EXPLICIT_KEY = "gallery-explicit-shown";
@@ -313,7 +313,7 @@ if (droppedCount > 0) {
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   let activeCategory = "all";
-  let isTransitioning = false;
+  let switchToken = 0;
   let activeButton: HTMLButtonElement | null = null;
 
   function getItems() {
@@ -372,7 +372,7 @@ if (droppedCount > 0) {
     return metrics;
   }
 
-  async function moveFilterPill(button: HTMLButtonElement, instant = false) {
+  function moveFilterPill(button: HTMLButtonElement, instant = false) {
     if (!filterPill || !button) return;
 
     const next = getButtonMetrics(button);
@@ -392,21 +392,18 @@ if (droppedCount > 0) {
     const scaleX = prev.width / next.width;
     const scaleY = prev.height / next.height;
 
-    const travel = Math.max(Math.abs(deltaX), Math.abs(deltaY));
-    const drift = Math.max(-5, Math.min(5, deltaX * 0.04));
+    activeButton = button;
 
-    const pillAnimation = animate(filterPill, {
+    // Pill is morphing across the screen → ease-in-out, and it stays under the
+    // 300ms UI budget so it never gates the grid transition behind it.
+    animate(filterPill, {
       translateX: [deltaX, 0],
       translateY: [deltaY, 0],
-      scaleX: [Math.max(scaleX, 0.82) * 1.12, 1],
-      scaleY: [Math.max(scaleY, 0.88) * 0.92, 1],
-      rotate: [drift, 0],
-      duration: travel > 64 ? 560 : 440,
-      ease: "out(5)",
+      scaleX: [scaleX, 1],
+      scaleY: [scaleY, 1],
+      duration: 220,
+      ease: "inOut(3)",
     });
-
-    activeButton = button;
-    await pillAnimation.then();
   }
 
   function refreshMasonry() {
@@ -435,74 +432,66 @@ if (droppedCount > 0) {
   }
 
   async function switchFilter(category: string, button: HTMLButtonElement) {
-    if (isTransitioning || category === activeCategory) return;
+    if (category === activeCategory) return;
 
-    isTransitioning = true;
-    filters.forEach((filter) => {
-      filter.style.pointerEvents = "none";
+    activeCategory = category;
+    const token = ++switchToken;
+
+    setActiveFilter(button);
+    moveFilterPill(button); // runs alongside the grid — never gates it
+
+    if (prefersReducedMotion.matches) {
+      setVisibility(category);
+      return;
+    }
+
+    const items = getItems();
+    if (!items.length) return;
+
+    const visibleItems = items.filter((item) => item.style.display !== "none");
+    const incoming = items.filter((item) => matchesCategory(item, category));
+
+    if (visibleItems.length) {
+      // Target-only values (no `from`) so a click mid-transition retargets from
+      // wherever the items currently are instead of snapping back to opacity 1.
+      await animate(visibleItems, {
+        opacity: 0,
+        scale: 0.96,
+        translateY: 12,
+        duration: 150,
+        // Capped stagger — uncapped, 26 items add a ~400ms tail to the exit
+        // alone, and the whole grid transition is stuck behind it.
+        delay: (_el: HTMLElement, i: number) => Math.min(i, 5) * 12,
+        ease: "out(3)",
+      }).then();
+    }
+
+    if (token !== switchToken) return; // a newer click took over
+
+    visibleItems.forEach((item) => {
+      item.style.display = "none";
+      item.removeAttribute("data-pswp");
     });
 
-    try {
-      setActiveFilter(button);
-      await moveFilterPill(button);
+    incoming.forEach((item) => {
+      item.style.display = "";
+      item.setAttribute("data-pswp", "");
+    });
 
-      if (prefersReducedMotion.matches) {
-        setVisibility(category);
-        activeCategory = category;
-        return;
-      }
+    refreshMasonry();
 
-      const items = getItems();
-      if (!items.length) {
-        activeCategory = category;
-        return;
-      }
-
-      const visibleItems = items.filter((item) => item.style.display !== "none");
-      const incoming = items.filter((item) => matchesCategory(item, category));
-
-      if (visibleItems.length) {
-        await animate(visibleItems, {
-          opacity: [1, 0],
-          scale: [1, 0.92],
-          translateY: [0, 24],
-          duration: 260,
-          delay: stagger(24, { from: "center" }),
-          ease: "in(3)",
-        }).then();
-      }
-
-      visibleItems.forEach((item) => {
-        item.style.display = "none";
-        item.removeAttribute("data-pswp");
-      });
-
-      incoming.forEach((item) => {
-        item.style.display = "";
-        item.setAttribute("data-pswp", "");
-      });
-
-      refreshMasonry();
-
-      if (incoming.length) {
-        await animate(incoming, {
-          opacity: [0, 1],
-          scale: [0.92, 1],
-          translateY: [22, 0],
-          duration: 420,
-          delay: stagger(48),
-          ease: "out(5)",
-        }).then();
-      }
-
-      refreshMasonry();
-      activeCategory = category;
-    } finally {
-      isTransitioning = false;
-      filters.forEach((filter) => {
-        filter.style.pointerEvents = "";
-      });
+    if (incoming.length) {
+      await animate(incoming, {
+        opacity: [0, 1],
+        scale: [0.96, 1],
+        translateY: [12, 0],
+        duration: 240,
+        delay: (_el: HTMLElement, i: number) => Math.min(i, 8) * 25,
+        ease: "out(3)",
+      }).then();
     }
+
+    refreshMasonry();
   }
 
   filters.forEach((button) => {
@@ -515,13 +504,13 @@ if (droppedCount > 0) {
     const first = filters[0];
     if (first) {
       setActiveFilter(first);
-      void moveFilterPill(first, true);
+      moveFilterPill(first, true);
     }
   }
 
   window.addEventListener("resize", () => {
     if (activeButton) {
-      void moveFilterPill(activeButton, true);
+      moveFilterPill(activeButton, true);
     }
   });
 
@@ -639,6 +628,26 @@ if (droppedCount > 0) {
     width: fit-content;
     min-width: 16rem;
     max-width: min(90vw, 30rem);
+    transition:
+      opacity 200ms cubic-bezier(0.23, 1, 0.32, 1),
+      transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  /* Entrance when the modal goes from display:none to rendered. Modal is
+     centered in the viewport, so transform-origin: center is correct here. */
+  @starting-style {
+    .explicit-modal-box {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+
+    #explicit-modal-backdrop {
+      opacity: 0;
+    }
+  }
+
+  #explicit-modal-backdrop {
+    transition: opacity 200ms ease;
   }
 
   #explicit-cancel:hover {

@@ -366,9 +366,12 @@ a,
   outline-offset: 3px;
   border-radius: 3px;
 }
+
+/* No transition: the skip link is keyboard-initiated (first Tab) and must be
+   there the instant it's focused. */
 .skip-link {
   position: absolute;
-  top: -100%;
+  top: 0;
   left: 0.5rem;
   padding: 0.5rem 1rem;
   background: var(--accent-bg);
@@ -376,10 +379,10 @@ a,
   border-radius: 0 0 0.5rem 0.5rem;
   font-weight: 700;
   z-index: 9999;
-  transition: top 0.2s ease;
+  transform: translateY(-150%);
 }
 .skip-link:focus-visible {
-  top: 0;
+  transform: translateY(0);
 }
 
 .sr-only {

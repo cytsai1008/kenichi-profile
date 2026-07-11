@@ -155,7 +155,7 @@ onUnmounted(() => {
           :width="item.width || undefined"
           :height="item.height || undefined"
           loading="lazy"
-          class="block h-auto w-full rounded-lg transition-transform duration-300 hover:scale-[1.02]"
+          class="block h-auto w-full rounded-lg transition-transform duration-150 hover:scale-[1.02]"
         />
       </button>
       <figcaption v-if="item.caption" class="mt-3 text-center text-sm leading-normal text-fg-muted">

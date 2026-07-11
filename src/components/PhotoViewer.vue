@@ -143,12 +143,17 @@ function animateItemsIn(items: HTMLElement[]) {
   }
 
   items.forEach((item, index) => {
-    item.style.animation = `photo-viewer-fade-in 0.48s ease-out ${index * 40}ms both`;
+    // Cap the stagger: an uncapped index * 40ms means the 60th photo lands 2.4s
+    // in. A cascade reads as a cascade after ~8 items.
+    const delay = Math.min(index, 8) * 40;
+    item.style.willChange = "transform, opacity";
+    item.style.animation = `photo-viewer-fade-in 0.28s cubic-bezier(0.23, 1, 0.32, 1) ${delay}ms both`;
     item.addEventListener(
       "animationend",
       () => {
         item.style.animation = "";
         item.style.opacity = "1";
+        item.style.willChange = "";
       },
       { once: true }
     );
@@ -887,7 +892,7 @@ onUnmounted(() => {
           :width="props.alwaysShowText && photo.width ? photo.width : undefined"
           :height="props.alwaysShowText && photo.height ? photo.height : undefined"
           loading="lazy"
-          class="block w-full transition-transform duration-300"
+          class="block w-full transition-transform duration-150"
           :class="[props.thumbClass, !props.disableHoverZoom && 'group-hover:scale-105']"
           :style="props.alwaysShowText ? 'height: auto' : 'height: 100%; object-fit: cover'"
         />
@@ -962,15 +967,18 @@ onUnmounted(() => {
 
 .photo-viewer-masonry > * {
   min-width: 0;
-  will-change: transform, opacity;
 }
 
+/* will-change is set inline for the duration of this animation only — a
+   permanent compositor layer per photo is real GPU memory on a large gallery. */
 @keyframes photo-viewer-fade-in {
   from {
     opacity: 0;
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -1136,12 +1144,10 @@ onUnmounted(() => {
   opacity: 1;
 }
 
-.pswp__button.pswp-thumbstrip-toggle[aria-pressed="true"] {
-  transform: none;
-}
-
+/* Slides down with the strip on the GPU. `bottom` is a layout property and was
+   not in the transition list above, so the button used to teleport. */
 .pswp--thumbstrip-hidden .pswp__button.pswp-thumbstrip-toggle {
-  bottom: 18px;
+  transform: translateY(58px);
 }
 
 .pswp-thumbstrip-toggle span {
@@ -1183,7 +1189,7 @@ onUnmounted(() => {
   }
 
   .pswp--thumbstrip-hidden .pswp__button.pswp-thumbstrip-toggle {
-    bottom: 14px;
+    transform: translateY(52px);
   }
 }
 </style>

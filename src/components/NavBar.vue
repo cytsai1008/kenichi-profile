@@ -24,8 +24,10 @@ const props = defineProps<Props>();
 
 /* ─── Reduced motion ─────────────────────────────────────── */
 const reducedMotion = ref(false);
+const canHover = ref(false);
 onMounted(() => {
   reducedMotion.value = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  canHover.value = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 });
 
 /**
@@ -99,8 +101,11 @@ const themeCompact = ref<HTMLElement | null>(null);
 const themePanel = ref<HTMLElement | null>(null);
 const themeHovered = ref(false);
 
+// Target-only values (no `from:`) throughout the hover reveals — anime picks up
+// the element's current state, so sweeping the cursor in and out retargets from
+// mid-animation instead of snapping back to the start.
 function showTheme() {
-  if (themeHovered.value) return;
+  if (!canHover.value || themeHovered.value) return;
   themeHovered.value = true;
 
   if (reducedMotion.value) {
@@ -116,20 +121,20 @@ function showTheme() {
   }
   if (themeCompact.value) {
     animate(themeCompact.value, {
-      opacity: { from: 1, to: 0 },
-      scale: { from: 1, to: 0.7 },
-      x: { from: 0, to: -4 },
+      opacity: 0,
+      scale: 0.95,
+      x: -4,
       duration: 160,
-      ease: "in(3)",
+      ease: "out(3)",
     });
   }
   if (themePanel.value) {
     themePanel.value.style.pointerEvents = "auto";
     animate(themePanel.value, {
-      opacity: { from: 0, to: 1 },
-      scale: { from: 0.75, to: 1 },
-      x: { from: 12, to: 0 },
-      ease: spring({ bounce: 0.45 }),
+      opacity: 1,
+      scale: 1,
+      x: 0,
+      ease: spring({ bounce: 0.2 }),
     });
   }
 }
@@ -151,20 +156,20 @@ function hideTheme() {
   }
   if (themeCompact.value) {
     animate(themeCompact.value, {
-      opacity: { from: 0, to: 1 },
-      scale: { from: 0.7, to: 1 },
-      x: { from: -4, to: 0 },
-      ease: spring({ bounce: 0.4 }),
+      opacity: 1,
+      scale: 1,
+      x: 0,
+      ease: spring({ bounce: 0.2 }),
     });
   }
   if (themePanel.value) {
     const panel = themePanel.value;
     animate(panel, {
-      opacity: { from: 1, to: 0 },
-      scale: { from: 1, to: 0.8 },
-      x: { from: 0, to: 10 },
+      opacity: 0,
+      scale: 0.95,
+      x: 10,
       duration: 200,
-      ease: "in(3)",
+      ease: "out(3)",
       onComplete() {
         panel.style.pointerEvents = "none";
       },
@@ -177,7 +182,7 @@ const langText = ref<HTMLElement | null>(null);
 const langHovered = ref(false);
 
 function showLangText() {
-  if (langHovered.value) return;
+  if (!canHover.value || langHovered.value) return;
   // The text is sm:inline only — skip on mobile where it should stay hidden
   if (window.innerWidth < 640) return;
   langHovered.value = true;
@@ -189,9 +194,9 @@ function showLangText() {
       return;
     }
     animate(langText.value, {
-      opacity: { from: 0, to: 1 },
-      x: { from: -10, to: 0 },
-      ease: spring({ bounce: 0.4 }),
+      opacity: 1,
+      x: 0,
+      ease: spring({ bounce: 0.2 }),
     });
   }
 }
@@ -209,10 +214,10 @@ function hideLangText() {
       return;
     }
     animate(el, {
-      opacity: { from: 1, to: 0 },
-      x: { from: 0, to: -8 },
+      opacity: 0,
+      x: -10,
       duration: 180,
-      ease: "in(3)",
+      ease: "out(3)",
       onComplete() {
         el.style.display = "none";
       },
@@ -246,8 +251,8 @@ watch(menuOpen, async (open) => {
     animate(el, {
       opacity: [0, 1],
       translateY: [-24, 0],
-      scale: [0.93, 1],
-      ease: spring({ stiffness: 260, damping: 18, mass: 0.85 }),
+      scale: [0.95, 1],
+      ease: spring({ stiffness: 260, damping: 20, mass: 0.85 }),
     });
 
     // Nav items fly in from the left, staggered
@@ -267,11 +272,11 @@ watch(menuOpen, async (open) => {
     }
 
     animate(el, {
-      opacity: [1, 0],
-      translateY: [0, -18],
-      scale: [1, 0.93],
+      opacity: 0,
+      translateY: -18,
+      scale: 0.95,
       duration: 200,
-      ease: "in(3)",
+      ease: "out(3)",
       onComplete() {
         el.style.display = "none";
       },
@@ -303,7 +308,7 @@ function onIconLeave(el: Element, done: () => void) {
     opacity: [1, 0],
     rotate: [0, 30],
     duration: 150,
-    ease: "in(3)",
+    ease: "out(3)",
     onComplete: done,
   });
 }
@@ -373,10 +378,10 @@ function closeLangDropdown() {
   if (window.innerWidth >= 640 && !langHovered.value && langText.value) {
     const el = langText.value;
     animate(el, {
-      opacity: { from: 1, to: 0 },
-      x: { from: 0, to: -8 },
+      opacity: 0,
+      x: -10,
       duration: 180,
-      ease: "in(3)",
+      ease: "out(3)",
       onComplete() {
         el.style.display = "none";
       },
@@ -395,17 +400,17 @@ watch(langOpen, async (open) => {
     if (open) {
       txt.style.display = "inline";
       if (!reducedMotion.value) {
-        animate(txt, { opacity: [0, 1], x: [-10, 0], ease: spring({ bounce: 0.4 }) });
+        animate(txt, { opacity: 1, x: 0, ease: spring({ bounce: 0.2 }) });
       } else {
         txt.style.opacity = "1";
       }
     } else {
       if (!reducedMotion.value) {
         animate(txt, {
-          opacity: [1, 0],
-          x: [0, -8],
+          opacity: 0,
+          x: -10,
           duration: 180,
-          ease: "in(3)",
+          ease: "out(3)",
           onComplete() {
             txt.style.display = "none";
           },
@@ -430,9 +435,9 @@ watch(langOpen, async (open) => {
     // Dropdown pops open from the top-right corner
     animate(el, {
       opacity: [0, 1],
-      scale: [0.78, 1],
+      scale: [0.95, 1],
       translateY: [-8, 0],
-      ease: spring({ stiffness: 440, damping: 22, mass: 0.55 }),
+      ease: spring({ stiffness: 440, damping: 26, mass: 0.55 }),
     });
 
     // Options slide in from the right, staggered
@@ -450,11 +455,11 @@ watch(langOpen, async (open) => {
     }
 
     animate(el, {
-      opacity: [1, 0],
-      scale: [1, 0.84],
-      translateY: [0, -6],
+      opacity: 0,
+      scale: 0.95,
+      translateY: -6,
       duration: 160,
-      ease: "in(3)",
+      ease: "out(3)",
       onComplete() {
         el.style.display = "none";
       },
@@ -547,7 +552,7 @@ function isActive(href: string) {
               ref="themePanel"
               :inert="!themeHovered"
               class="absolute right-0 flex items-center rounded-lg border border-border"
-              style="opacity: 0; pointer-events: none"
+              style="opacity: 0; transform: translateX(10px) scale(0.95); pointer-events: none"
               role="group"
               aria-label="Theme"
             >
@@ -592,7 +597,7 @@ function isActive(href: string) {
                       ? 'font-noto-sc'
                       : 'font-noto'
                 "
-                style="display: none; opacity: 0"
+                style="display: none; opacity: 0; transform: translateX(-10px)"
               >
                 {{ localeLabels[locale] }}
               </span>
