@@ -12,7 +12,7 @@
   --surface: #f3f8fb;
   --surface-alt: #e8f0f5;
   --fg: #37424c;
-  --fg-muted: #70808d;
+  --fg-muted: #66717c; /* AA 4.5:1 on --surface; was #70808d (3.8:1) */
   --accent: #6f93af;
   --accent-bg: #507392;
   --accent-dim: #405d78;
@@ -186,6 +186,14 @@
   a:hover {
     color: var(--accent-dim);
     text-decoration-color: currentColor;
+  }
+
+  /* Footer links are secondary meta — muted, not attention-grabbing. Hover reveals accent. */
+  footer a {
+    color: var(--fg-muted);
+  }
+  footer a:hover {
+    color: var(--accent);
   }
 
   p {

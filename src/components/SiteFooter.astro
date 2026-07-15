@@ -15,7 +15,7 @@ const year = new Date().getFullYear();
     data-animate-on-load-only
     class="mt-3 flex flex-col items-center gap-y-1 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6"
   >
-    <span data-animate data-opacity="0.5" class="text-xs">
+    <span data-animate class="text-xs">
       <a href={localePath("/blog", locale)}>Articles</a>
       <span class="mx-1.5" style="opacity: 0.4">&</span>
       <a href={localePath("/photos", locale)}>Photos</a>
@@ -29,7 +29,7 @@ const year = new Date().getFullYear();
     <span data-animate data-opacity="0.35" aria-hidden="true" class="hidden text-fg-muted sm:inline"
       >|</span
     >
-    <span data-animate data-opacity="0.5" class="text-xs">
+    <span data-animate class="text-xs">
       <a href={localePath("/gallery", locale)}>Art Collections</a>
       <span class="mx-1.5" style="opacity: 0.4">·</span>
       <a
@@ -41,7 +41,7 @@ const year = new Date().getFullYear();
     <span data-animate data-opacity="0.35" aria-hidden="true" class="hidden text-fg-muted sm:inline"
       >|</span
     >
-    <span data-animate data-opacity="0.5" class="text-xs">
+    <span data-animate class="text-xs">
       <a
         href="https://github.com/cytsai1008/kenichi-profile"
         target="_blank"
@@ -55,7 +55,7 @@ const year = new Date().getFullYear();
     <span data-animate data-opacity="0.35" aria-hidden="true" class="hidden text-fg-muted sm:inline"
       >|</span
     >
-    <span data-animate data-opacity="0.5" class="text-xs">
+    <span data-animate class="text-xs">
       <button
         type="button"
         data-cc="show-preferencesModal"
@@ -68,10 +68,9 @@ const year = new Date().getFullYear();
   <p
     data-animate
     data-animate-on-load-only
-    data-opacity="0.5"
     class="m-0 mt-3 text-xs font-medium tracking-widest text-fg-muted"
   >
-    &copy; {year}
+    <span>&copy; {year} </span>
     <a href="https://link.photocat.blue" target="_blank" rel="noopener noreferrer">健一 Kenichi</a>
   </p>
 </footer>
