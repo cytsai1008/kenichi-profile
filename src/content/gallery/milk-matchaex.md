@@ -1,5 +1,5 @@
 ---
-title: "健一和吐司玩水"
+title: "Kenichi & Toast playing in the water"
 description: "Kenichi & Toast playing in the water."
 titleI18n:
   zh-tw: "健一和吐司玩水"
