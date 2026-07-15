@@ -163,6 +163,17 @@ const allItemsMaybe = await Promise.all(
 );
 
 const allItems = allItemsMaybe.filter(isPhotoItem);
+
+// ponytail: warn on duplicate deep-link slugs; human renames the file to fix.
+const slugCounts = new Map<string, number>();
+for (const i of allItems) {
+  if (i.slug) slugCounts.set(i.slug, (slugCounts.get(i.slug) ?? 0) + 1);
+}
+for (const [slug, n] of slugCounts) {
+  if (n > 1)
+    console.warn(`[gallery] duplicate #hash slug "${slug}" (${n} images) — deep-link is ambiguous`);
+}
+
 const regularItems = allItems.filter((i) => !i.isExplicit);
 const explicitItems = allItems.filter((i) => i.isExplicit);
 
