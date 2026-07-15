@@ -57,6 +57,8 @@
     "zoom": "Zoom",
     "previous": "Previous photo",
     "next": "Next photo",
+    "showThumbnails": "Show thumbnails",
+    "hideThumbnails": "Hide thumbnails",
     "exif": {
       "camera": "Camera",
       "lens": "Lens",

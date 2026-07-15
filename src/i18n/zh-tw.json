@@ -57,6 +57,8 @@
     "zoom": "縮放",
     "previous": "上一張照片",
     "next": "下一張照片",
+    "showThumbnails": "顯示縮圖",
+    "hideThumbnails": "隱藏縮圖",
     "exif": {
       "camera": "相機",
       "lens": "鏡頭",

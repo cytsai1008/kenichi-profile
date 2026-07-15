@@ -48,6 +48,8 @@ interface Props {
   zoomLabel?: string;
   prevLabel?: string;
   nextLabel?: string;
+  showThumbnailsLabel?: string;
+  hideThumbnailsLabel?: string;
   creatorLabel?: string;
   showDownloadButton?: boolean;
   showExifPanel?: boolean;
@@ -230,6 +232,7 @@ onMounted(() => {
   // focus on close — screen readers activate via virtual cursor without always
   // updating document.activeElement, so PhotoSwipe's built-in returnFocus fails.
   let triggerEl: HTMLElement | null = null;
+  let inertedEls: HTMLElement[] = [];
   galleryEl.value.addEventListener(
     "click",
     (e) => {
@@ -417,6 +420,22 @@ onMounted(() => {
     pswpEl.setAttribute("aria-modal", "true");
     pswpEl.setAttribute("aria-labelledby", "pswp-sr-label");
 
+    // Real screen readers largely ignore aria-modal, so hard-hide everything
+    // behind the viewer with `inert` — otherwise the SR keeps reading and
+    // scrolling the page (title, all thumbnails) that sits behind the overlay.
+    inertedEls = Array.from(document.body.children).filter(
+      (el): el is HTMLElement =>
+        el instanceof HTMLElement &&
+        !el.contains(pswpEl) &&
+        el.tagName !== "SCRIPT" &&
+        el.tagName !== "STYLE" &&
+        !el.hasAttribute("inert")
+    );
+    for (const el of inertedEls) {
+      el.setAttribute("inert", "");
+      el.setAttribute("aria-hidden", "true");
+    }
+
     // Visually hidden live region — announces current photo on open and slide change
     let liveRegion = pswpEl.querySelector<HTMLElement>("#pswp-sr-label");
     if (!liveRegion) {
@@ -456,6 +475,12 @@ onMounted(() => {
     speedWindow = [];
     prevEventTime = 0;
     lightbox?.pswp?.element?.classList.remove("pswp--opening");
+    // Un-hide the page before restoring focus — focus can't land in an inert tree.
+    for (const el of inertedEls) {
+      el.removeAttribute("inert");
+      el.removeAttribute("aria-hidden");
+    }
+    inertedEls = [];
     triggerEl?.focus();
     triggerEl = null;
   });
@@ -514,7 +539,7 @@ onMounted(() => {
       order: 10,
       isButton: true,
       appendTo: "root",
-      title: "Hide thumbnails",
+      title: props.hideThumbnailsLabel ?? "Hide thumbnails",
       html: "",
       onInit: (el, pswp) => {
         const hasFilmstrip = getLightboxPhotos().length > 1;
@@ -543,8 +568,11 @@ onMounted(() => {
 
         const syncToggleState = () => {
           pswp.element?.classList.toggle("pswp--thumbstrip-hidden", isFilmstripHidden);
-          el.setAttribute("aria-label", isFilmstripHidden ? "Show thumbnails" : "Hide thumbnails");
-          el.setAttribute("title", isFilmstripHidden ? "Show thumbnails" : "Hide thumbnails");
+          const toggleLabel = isFilmstripHidden
+            ? (props.showThumbnailsLabel ?? "Show thumbnails")
+            : (props.hideThumbnailsLabel ?? "Hide thumbnails");
+          el.setAttribute("aria-label", toggleLabel);
+          el.setAttribute("title", toggleLabel);
           el.setAttribute("aria-pressed", String(isFilmstripHidden));
           syncFilmstripVisibility();
           renderIcon();
@@ -802,12 +830,17 @@ onMounted(() => {
   // mount and on every later hashchange (in-page links / pasted hash / history
   // nav don't remount the island, so onMounted alone isn't enough). The
   // `.pswp` check dedupes: only one viewer opens even across album instances.
+  // Returns true when there's nothing left to do (already open, no hash, or an
+  // open was initiated); false when the target hash is set but its item isn't
+  // matchable yet — the caller can retry.
   const maybeOpenFromHash = () => {
-    if (document.querySelector(".pswp")) return;
+    if (document.querySelector(".pswp")) return true;
     const want = decodeURIComponent(location.hash.replace(/^#/, ""));
-    if (!want) return;
+    if (!want) return true;
     const idx = getLightboxElements().findIndex((el) => getPhotoByElement(el)?.slug === want);
-    if (idx >= 0) lightbox?.loadAndOpen(idx);
+    if (idx < 0) return false;
+    lightbox?.loadAndOpen(idx);
+    return true;
   };
 
   const onPopState = () => {
@@ -823,9 +856,17 @@ onMounted(() => {
     window.removeEventListener("hashchange", maybeOpenFromHash);
   };
 
-  // Initial deep-link. Double rAF lets Vue hydrate and the Gallery explicit-strip
-  // script run first so hidden explicit items stay gated.
-  requestAnimationFrame(() => requestAnimationFrame(maybeOpenFromHash));
+  // Initial deep-link. The matching item isn't always queryable on the first
+  // frames (island hydration + Gallery explicit-strip gating + masonry can re-run),
+  // so retry across a bounded window instead of firing once — otherwise a pasted
+  // #<slug> URL silently fails to open and a screen reader lands on the page top.
+  // ponytail: caps at ~30 frames (~0.5s); a genuinely bad hash just no-ops.
+  let deepLinkTries = 0;
+  const tryDeepLink = () => {
+    if (maybeOpenFromHash()) return;
+    if (++deepLinkTries < 30) requestAnimationFrame(tryDeepLink);
+  };
+  requestAnimationFrame(() => requestAnimationFrame(tryDeepLink));
 });
 
 watch(

@@ -222,7 +222,7 @@ if (droppedCount > 0) {
               aria-pressed={cat === "all" ? "true" : "false"}
             >
               {label}
-              <span class="ml-1 text-xs opacity-60">({regularCount})</span>
+              <span class="ml-1 text-xs">({regularCount})</span>
             </button>
           );
         })
@@ -252,6 +252,8 @@ if (droppedCount > 0) {
             zoomLabel={tr.photos.zoom}
             prevLabel={tr.photos.previous}
             nextLabel={tr.photos.next}
+            showThumbnailsLabel={tr.photos.showThumbnails}
+            hideThumbnailsLabel={tr.photos.hideThumbnails}
             creatorLabel={tr.gallery.creator}
             showDownloadButton={false}
             showExifPanel={false}
