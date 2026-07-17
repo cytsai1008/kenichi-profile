@@ -8,7 +8,8 @@ This repository contains content under multiple licenses depending on the type o
 
 ## Source Code
 
-All source code in this repository (files under `src/`, configuration files, scripts, etc.)
+All source code in this repository (files under `src/`, configuration files, scripts, etc. except explicitly noted
+otherwise)
 is licensed under the **MIT License**.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
@@ -43,7 +44,7 @@ Full license text: <https://creativecommons.org/licenses/by/4.0/>
 
 ## Gallery (Artwork)
 
-All artwork in the gallery (`src/content/gallery/`) is **All Rights Reserved**.
+All artwork in the assets (`src/assets`) is **All Rights Reserved**.
 
 These images may not be reproduced, distributed, modified, or used in any form without
 explicit written permission from the respective copyright holder. Individual pieces may be
