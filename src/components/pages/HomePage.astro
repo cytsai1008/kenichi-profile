@@ -6,6 +6,7 @@ import Layout from "../../layouts/Layout.astro";
 import BlogCard from "../BlogCard.astro";
 import { t, localePath, type Locale } from "../../i18n/utils";
 import { compareBlogPostsByDate, getBlogPostsForLocale } from "../../lib/blog";
+import heroKenichi from "../../assets/hero-kenichi.png";
 interface Props {
   locale: Locale;
 }
@@ -96,57 +97,70 @@ const latestPhotos = await Promise.all(
   />
   <!-- Hero -->
   <section class="px-4 pt-14 pb-10 sm:pt-18 sm:pb-20">
-    <div data-animate class="mx-auto max-w-5xl p-7 sm:p-10">
-      <div class="space-y-4">
-        <div class="inline-block pt-8">
-          <div class="relative inline-block">
-            <p
-              class="absolute bottom-full left-0 mb-1.5 w-full px-0.5 py-1.5 text-[clamp(0.8rem,1.8vw,0.95rem)] font-normal tracking-[0.2em] whitespace-nowrap text-accent uppercase"
-            >
-              {tr.home.greeting}
-            </p>
-            <h1 class="text-4xl font-bold text-fg sm:text-5xl">
-              <span class="-ml-1 block font-chiron tracking-wider text-accent">健一</span>
-              <span
-                class="mt-0.5 block font-chiron text-2xl leading-[1.1em] font-normal tracking-[0.3em] text-fg-muted uppercase sm:text-3xl"
+    <div
+      data-animate
+      class="relative mx-auto flex max-w-5xl items-center justify-between gap-8 p-7 sm:p-10"
+    >
+      <div>
+        <div class="space-y-4">
+          <div class="inline-block pt-8">
+            <div class="relative inline-block">
+              <p
+                class="absolute bottom-full left-0 mb-1.5 w-full px-0.5 py-1.5 text-[clamp(0.8rem,1.8vw,0.95rem)] font-normal tracking-[0.2em] whitespace-nowrap text-accent uppercase"
               >
-                Kenichi
-              </span>
-            </h1>
+                {tr.home.greeting}
+              </p>
+              <h1 class="text-4xl font-bold text-fg sm:text-5xl">
+                <span class="-ml-1 block font-chiron tracking-wider text-accent">健一</span>
+                <span
+                  class="mt-0.5 block font-chiron text-2xl leading-[1.1em] font-normal tracking-[0.3em] text-fg-muted uppercase sm:text-3xl"
+                >
+                  Kenichi
+                </span>
+              </h1>
+            </div>
           </div>
+
+          <p class="max-w-2xl text-lg leading-8 text-fg-muted sm:text-xl">
+            {tr.home.tagline}
+          </p>
         </div>
 
-        <p class="max-w-2xl text-lg leading-8 text-fg-muted sm:text-xl">
-          {tr.home.tagline}
-        </p>
+        <ul class="mt-10 flex list-none flex-wrap items-center gap-3 p-0">
+          <li>
+            <a
+              href={localePath("/about", locale)}
+              class="block rounded-xl bg-accent-bg px-6 py-3 text-sm font-semibold text-white no-underline transition-colors hover:bg-accent-dim"
+            >
+              {tr.nav.about}
+            </a>
+          </li>
+          <li>
+            <a
+              href={localePath("/gallery", locale)}
+              class="block rounded-full bg-surface-alt/55 px-6 py-3 text-sm font-semibold text-fg no-underline transition-colors hover:bg-surface-alt"
+            >
+              {tr.nav.gallery}
+            </a>
+          </li>
+          <li>
+            <a
+              href={localePath("/photos", locale)}
+              class="block rounded-full bg-surface-alt/55 px-6 py-3 text-sm font-semibold text-fg no-underline transition-colors hover:bg-surface-alt"
+            >
+              {tr.nav.photos}
+            </a>
+          </li>
+        </ul>
       </div>
 
-      <ul class="mt-10 flex list-none flex-wrap items-center gap-3 p-0">
-        <li>
-          <a
-            href={localePath("/about", locale)}
-            class="block rounded-xl bg-accent-bg px-6 py-3 text-sm font-semibold text-white no-underline transition-colors hover:bg-accent-dim"
-          >
-            {tr.nav.about}
-          </a>
-        </li>
-        <li>
-          <a
-            href={localePath("/gallery", locale)}
-            class="block rounded-full bg-surface-alt/55 px-6 py-3 text-sm font-semibold text-fg no-underline transition-colors hover:bg-surface-alt"
-          >
-            {tr.nav.gallery}
-          </a>
-        </li>
-        <li>
-          <a
-            href={localePath("/photos", locale)}
-            class="block rounded-full bg-surface-alt/55 px-6 py-3 text-sm font-semibold text-fg no-underline transition-colors hover:bg-surface-alt"
-          >
-            {tr.nav.photos}
-          </a>
-        </li>
-      </ul>
+      <Image
+        src={heroKenichi}
+        alt=""
+        width={480}
+        loading="eager"
+        class="pointer-events-none absolute top-1/2 right-4 w-48 -translate-y-1/2 opacity-15 sm:pointer-events-auto sm:static sm:w-56 sm:translate-y-0 sm:opacity-100 lg:w-72"
+      />
     </div>
   </section>
 
