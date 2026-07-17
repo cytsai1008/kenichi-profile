@@ -36,7 +36,7 @@ const ogPath = `/og/${postHref.replace(/^\/|\/$/g, "").replace(/\//g, "_")}.png`
           alt=""
           width={720}
           height={240}
-          class="h-36 w-full object-cover transition-transform duration-150 group-hover:scale-105"
+          class="h-36 w-full object-cover"
         />
       </a>
     ) : (
@@ -46,7 +46,7 @@ const ogPath = `/og/${postHref.replace(/^\/|\/$/g, "").replace(/\//g, "_")}.png`
           alt=""
           width={720}
           height={240}
-          class="h-36 w-full object-cover object-[50%_-10px] transition-transform duration-150 group-hover:scale-105"
+          class="h-36 w-full object-cover object-[50%_-10px]"
         />
       </a>
     )
@@ -57,7 +57,10 @@ const ogPath = `/og/${postHref.replace(/^\/|\/$/g, "").replace(/\//g, "_")}.png`
       <FormattedDate date={post.data.pubDate} />
     </p>
     <h2 class:list={["leading-snug font-bold text-fg", featured ? "text-xl" : "text-base"]}>
-      <a href={postHref} class="inline-flex items-baseline gap-2 no-underline hover:underline">
+      <a
+        href={postHref}
+        class="inline-flex items-baseline gap-2 no-underline group-hover:underline group-hover:decoration-current"
+      >
         {
           featured && (
             <Pin
