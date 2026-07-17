@@ -24,13 +24,13 @@ const ogPath = `/og/${postHref.replace(/^\/|\/$/g, "").replace(/\//g, "_")}.png`
 <article
   data-animate
   class:list={[
-    "group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface-alt transition-shadow hover:shadow-lg",
+    "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-surface-alt transition-shadow hover:shadow-lg",
     blogFontClass,
   ]}
 >
   {
     post.data.heroImage ? (
-      <a href={postHref} class="block h-36 overflow-hidden" tabindex="-1" aria-hidden="true">
+      <div class="h-36 overflow-hidden">
         <Image
           src={post.data.heroImage}
           alt=""
@@ -38,9 +38,9 @@ const ogPath = `/og/${postHref.replace(/^\/|\/$/g, "").replace(/\//g, "_")}.png`
           height={240}
           class="h-36 w-full object-cover"
         />
-      </a>
+      </div>
     ) : (
-      <a href={postHref} class="block h-36 overflow-hidden" tabindex="-1" aria-hidden="true">
+      <div class="h-36 overflow-hidden">
         <img
           src={ogPath}
           alt=""
@@ -48,7 +48,7 @@ const ogPath = `/og/${postHref.replace(/^\/|\/$/g, "").replace(/\//g, "_")}.png`
           height={240}
           class="h-36 w-full object-cover object-[50%_-10px]"
         />
-      </a>
+      </div>
     )
   }
 
@@ -59,7 +59,7 @@ const ogPath = `/og/${postHref.replace(/^\/|\/$/g, "").replace(/\//g, "_")}.png`
     <h2 class:list={["leading-snug font-bold text-fg", featured ? "text-xl" : "text-base"]}>
       <a
         href={postHref}
-        class="inline-flex items-baseline gap-2 no-underline group-hover:underline group-hover:decoration-current"
+        class="inline-flex items-baseline gap-2 no-underline group-hover:underline group-hover:decoration-current after:absolute after:inset-0"
       >
         {
           featured && (
@@ -77,8 +77,6 @@ const ogPath = `/og/${postHref.replace(/^\/|\/$/g, "").replace(/\//g, "_")}.png`
         <p class="mt-2 line-clamp-3 flex-1 text-sm text-fg-muted">{post.data.description}</p>
       )
     }
-    <a href={postHref} class="mt-3 text-sm font-medium text-accent no-underline">
-      {tr.blog.readMore} →
-    </a>
+    {/* <span class="mt-3 text-sm font-medium text-accent">{tr.blog.readMore} →</span> */}
   </div>
 </article>
