@@ -3,9 +3,10 @@
 ## 1. Visual Theme & Atmosphere
 
 Calm, accessible, softly clinical — well-lit personal journal. Palette: cool blue-grays + single warm amber accent for
-featured emphasis. Content center stage; chrome muted. Surfaces use frosted-glass (`backdrop-blur`) + near-opaque fills
-over heavy shadows — weightless feel. Dark mode true dark (near-black `#17181c`), not mere dimming — switching feels
-like different room.
+featured emphasis. Content center stage; chrome muted. Chrome (nav, mobile menu, modal backdrop) uses frosted-glass
+(`backdrop-blur`) + near-opaque fills; primary content sits flat and unchromed directly on the page surface — the hero
+carries no card, border, or heavy shadow. Weightless feel. Dark mode true dark (near-black `#17181c`), not mere
+dimming — switching feels like different room.
 
 Motions intentional, physics-based (anime.js spring curves), never decorative.
 `prefers-reduced-motion` first-class concern throughout.
@@ -110,10 +111,13 @@ Sizing: `px-6 py-3` hero CTAs; `px-4 py-1.5` filter pills; `p-1.5` icon buttons.
 | ----------------------- | ---------------------------------- | ----------------------- | -------------------- | ----------------------------------------------- |
 | Blog card               | Generously rounded (`rounded-2xl`) | `bg-surface-alt`        | `border-border`      | `hover:shadow-lg`                               |
 | Gallery/photo thumbnail | Generously rounded (`rounded-2xl`) | `bg-surface-alt`        | `border-border`      | none                                            |
-| Hero card               | Very large rounded (`rounded-4xl`) | `bg-surface/88` frosted | `border-border/30`   | `0 24px 80px rgba(61,53,48,0.08)` warm diffused |
 | About image             | Generously rounded (`rounded-2xl`) | —                       | `ring-1 ring-border` | `shadow-md`                                     |
 
 Image hover: `transition-transform duration-300 group-hover:scale-105` inside `overflow-hidden`.
+
+**Hero is flat, not a card.** Content sits directly on the page surface (`mx-auto max-w-5xl p-7 sm:p-10`) with no
+background fill, border, or shadow — deliberately flattened. Max corner radius in use across the site is `rounded-2xl`
+(16px); there is no `rounded-3xl`/`rounded-4xl`.
 
 ### Navigation bar
 
