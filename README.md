@@ -6,7 +6,7 @@ The site ships in three locales: `en`, `zh-tw`, and `zh-cn`. The repo also holds
 
 ## Stack
 
-- Astro 6
+- Astro 7
 - Vue 3 islands for interactive UI
 - Tailwind CSS v4
 - Cloudflare adapter + Wrangler
