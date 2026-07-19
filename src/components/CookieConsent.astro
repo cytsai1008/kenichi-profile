@@ -21,7 +21,7 @@ const allTranslations = {
 </script>
 
 <script>
-  import { run, setLanguage } from "vanilla-cookieconsent";
+  import { run, setLanguage, acceptCategory, hide, hidePreferences } from "vanilla-cookieconsent";
 
   const handlePersonalization = (categories: string[], changed?: string[]) => {
     if (!categories.includes("personalization")) {
@@ -98,6 +98,26 @@ const allTranslations = {
     });
 
     await setLanguage(currentLang);
+
+    // "Necessary only" keeps personalization — theme/language are the user's own
+    // settings, not tracking. Turning the personalization toggle off explicitly
+    // in the preferences modal still revokes and wipes via
+    // handlePersonalization/autoClear.
+    // Capture phase so the library's own handler never runs (it would reject
+    // personalization first, firing autoClear before we could re-accept).
+    document.addEventListener(
+      "click",
+      (e) => {
+        const target = e.target as Element | null;
+        if (!target?.closest?.('[data-role="necessary"]')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        acceptCategory(["personalization"]);
+        hidePreferences();
+        hide();
+      },
+      true
+    );
 
     // Tag the consent modal so AdGuard's generic rule
     // ##.cc-window[aria-label="cookieconsent"] can hide it.
