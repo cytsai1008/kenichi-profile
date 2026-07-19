@@ -1,6 +1,10 @@
 {
   "compatibility_date": "2026-04-08",
   "compatibility_flags": ["nodejs_compat"],
+  // Serve dist/client/404.html for unmatched paths (default is an empty 404).
+  "assets": {
+    "not_found_handling": "404-page",
+  },
   "routes": [
     {
       "pattern": "kenichi.photocat.blue",
