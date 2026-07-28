@@ -34,9 +34,9 @@ const socialLinks = [
     <div class="space-y-10">
       <section data-animate>
         <h2 class="mb-3 text-2xl font-bold">{tr.about.character}</h2>
-        <div class="grid gap-8 sm:grid-cols-3">
+        <div class="grid gap-8 sm:grid-cols-3 lg:grid-cols-2">
           <figure>
-            <div class="overflow-hidden rounded-2xl shadow-md ring-1 ring-border">
+            <div class="overflow-hidden rounded-2xl">
               <Image
                 src={refSheet}
                 alt={`${tr.about.name} ${tr.gallery.refSheet}`}
@@ -49,31 +49,36 @@ const socialLinks = [
             </figcaption>
           </figure>
 
-          <div class="sm:col-span-2">
-            <dl class="space-y-4">
+          <div class="sm:col-span-2 lg:col-span-1">
+            {
+              /* pb-6 = figcaption's mt-2 + text-xs line — ends the list at the image, not the caption */
+            }
+            <dl
+              class="space-y-4 lg:flex lg:h-full lg:flex-col lg:justify-between lg:space-y-0 lg:pb-6"
+            >
               <div>
                 <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
                   {tr.about.nameLabel}
                 </dt>
-                <dd class="mt-1 text-base font-medium text-fg">{tr.about.name}</dd>
+                <dd class="mt-1 text-lg font-medium text-fg">{tr.about.name}</dd>
               </div>
               <div>
                 <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
                   {tr.about.speciesLabel}
                 </dt>
-                <dd class="mt-1 text-base font-medium text-fg">{tr.about.speciesValue}</dd>
+                <dd class="mt-1 text-lg font-medium text-fg">{tr.about.speciesValue}</dd>
               </div>
               <div>
                 <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
                   {tr.about.pronounsLabel}
                 </dt>
-                <dd class="mt-1 text-base font-medium text-fg">{tr.about.pronounsValue}</dd>
+                <dd class="mt-1 text-lg font-medium text-fg">{tr.about.pronounsValue}</dd>
               </div>
               <div>
                 <dt class="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">
                   {tr.about.hobbiesLabel}
                 </dt>
-                <dd class="mt-1 text-base font-medium text-fg">{tr.about.hobbiesValue}</dd>
+                <dd class="mt-1 text-lg font-medium text-fg">{tr.about.hobbiesValue}</dd>
               </div>
             </dl>
           </div>
@@ -109,22 +114,22 @@ const socialLinks = [
                 aria-hidden="true"
               />
               <dt
-                class="font-mono-maple text-[0.7rem] tracking-[0.28em] text-accent-dim uppercase dark:text-accent"
+                class="text-[0.7rem] tracking-[0.28em] text-accent-dim uppercase dark:text-accent"
               >
                 {tr.about.bodyLabel}
               </dt>
               <dd class="mt-1.5 text-xl font-semibold text-fg">{tr.about.bodyValue}</dd>
-              <dd class="mt-1.5 font-mono-maple text-xs text-fg-muted">{tr.about.bodySpec}</dd>
+              <dd class="mt-1.5 text-xs text-fg-muted">{tr.about.bodySpec}</dd>
             </div>
 
             <div>
               <dt
-                class="font-mono-maple text-[0.7rem] tracking-[0.28em] text-accent-dim uppercase dark:text-accent"
+                class="text-[0.7rem] tracking-[0.28em] text-accent-dim uppercase dark:text-accent"
               >
                 {tr.about.lensLabel}
               </dt>
               <dd class="mt-1.5 text-xl font-semibold text-fg">{tr.about.lensValue}</dd>
-              <dd class="mt-1.5 font-mono-maple text-xs text-fg-muted">{tr.about.lensSpec}</dd>
+              <dd class="mt-1.5 text-xs text-fg-muted">{tr.about.lensSpec}</dd>
             </div>
           </dl>
         </div>
