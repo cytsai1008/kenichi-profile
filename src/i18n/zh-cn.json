@@ -100,7 +100,8 @@
   },
   "footer": {},
   "a11y": {
-    "skipToContent": "跳到主要内容"
+    "skipToContent": "跳到主要内容",
+    "mainNavigation": "主导航"
   },
   "cookieConsent": {
     "consentModal": {

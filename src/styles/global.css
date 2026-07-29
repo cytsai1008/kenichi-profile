@@ -1,7 +1,18 @@
 @import "tailwindcss";
 
 /* ─── Enable .dark class strategy ───────────────────────── */
-@variant dark (&:where(.dark, .dark *));
+/* Two triggers: the .dark class (JS path), and the OS preference when no JS
+   ever ran to set that class. Block form so both emit the same utilities. */
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    html:not(.js) & {
+      @slot;
+    }
+  }
+}
 
 /* ─── Step 1: Raw switching values ──────────────────────── *
  *  These plain CSS vars switch under .dark.
@@ -23,6 +34,8 @@
   --explicit-bg: #8a3838;
 }
 
+/* Keep this list and the html:not(.js) copy below in sync — same palette, two
+   different triggers (theme class vs. OS preference with no JS to set it). */
 .dark {
   --surface: #17181c;
   --surface-alt: #1f2028;
@@ -36,6 +49,26 @@
   --border: #30323c;
   --explicit: #c47878;
   --explicit-bg: #7a3232;
+}
+
+/* No JS: nothing ever adds .dark, so honour the OS preference directly.
+   Scoped to html:not(.js) so a JS visitor is unaffected — for them the theme
+   is whatever NavBar/localStorage decided, including "light on a dark OS". */
+@media (prefers-color-scheme: dark) {
+  html:not(.js) {
+    --surface: #17181c;
+    --surface-alt: #1f2028;
+    --fg: #e5e1db;
+    --fg-muted: #948e89;
+    --accent: #7ba4c9;
+    --accent-bg: #4a7aa3;
+    --accent-dim: #3d6b8f;
+    --highlight: #d4a84b;
+    --highlight-dim: #b88c35;
+    --border: #30323c;
+    --explicit: #c47878;
+    --explicit-bg: #7a3232;
+  }
 }
 
 /* ─── Step 2: Tailwind tokens via @theme inline ─────────── *
@@ -99,6 +132,12 @@
 
   html.dark {
     color-scheme: dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not(.js) {
+      color-scheme: dark;
+    }
   }
 
   html:lang(zh-TW) {
@@ -352,6 +391,62 @@ html.js [data-animate][data-animate-done] {
 }
 [data-animate][data-animate-done][data-opacity="0.35"] {
   opacity: 0.35;
+}
+
+/* ─── No-JS fallbacks ───────────────────────────────────── */
+/* Mirror of the html.js gating above: everything here targets html:not(.js),
+   so a JS-enabled visitor never matches a single one of these rules. */
+
+/* Plain-link nav fallback. Hidden rather than shown, so it also covers a JS
+   visitor whose NavBar bundle fails to load — <noscript> would not. `.js` lands
+   before first paint, so there is no flash for anyone. */
+html.js .nojs-nav,
+html.js .nojs-photo-link {
+  display: none;
+}
+
+/* PhotoViewer items ship with an inline opacity:0 (the `!introReady` intro
+   state) that only Vue clears — without hydration the whole grid stays blank.
+   !important is required: it is beating an inline style. */
+html:not(.js) .photo-viewer-root > button {
+  opacity: 1 !important;
+}
+
+/* Gallery masonry is computed by updateMasonryLayout() (absolute positioning per
+   item), so without JS it falls back to a square grid that crops nothing but
+   wastes space. CSS multi-column gets the same ragged look for free — column
+   order is top-to-bottom per column rather than left-to-right, which is the one
+   difference from the JS version and doesn't matter for a gallery. */
+html:not(.js) .photo-viewer-flow {
+  display: block;
+  columns: 2;
+  column-gap: 0.75rem;
+}
+
+html:not(.js) .photo-viewer-flow > * {
+  break-inside: avoid;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  html:not(.js) .photo-viewer-flow {
+    columns: 3;
+  }
+}
+
+@media (min-width: 1024px) {
+  html:not(.js) .photo-viewer-flow {
+    columns: 4;
+  }
+}
+
+/* Controls that do nothing at all without their script — a dead button that
+   still looks pressable is worse than an absent one. */
+html:not(.js) #gallery-filters,
+html:not(.js) #go-back-btn,
+html:not(.js) .nojs-navbar-controls,
+html:not(.js) [data-cc="show-preferencesModal"] {
+  display: none;
 }
 
 /* ─── Text selection ────────────────────────────────────── */

@@ -314,7 +314,7 @@ if (droppedCount > 0) {
 </Layout>
 
 <script>
-  import { animate } from "animejs";
+  import { animate, type Target } from "animejs";
 
   // Read explicit preference first — needed by matchesCategory
   const EXPLICIT_KEY = "gallery-explicit-shown";
@@ -474,7 +474,10 @@ if (droppedCount > 0) {
         duration: 150,
         // Capped stagger — uncapped, 26 items add a ~400ms tail to the exit
         // alone, and the whole grid transition is stuck behind it.
-        delay: (_el: HTMLElement, i: number) => Math.min(i, 5) * 12,
+        // Signature must match anime's FunctionValue exactly: annotating the
+        // target as HTMLElement narrows it, so TS falls through the TweenParamValue
+        // union to EasingFunction and reports an arity mismatch instead.
+        delay: (_el?: Target, i = 0) => Math.min(i, 5) * 12,
         ease: "out(3)",
       }).then();
     }
@@ -499,7 +502,7 @@ if (droppedCount > 0) {
         scale: [0.96, 1],
         translateY: [12, 0],
         duration: 240,
-        delay: (_el: HTMLElement, i: number) => Math.min(i, 8) * 25,
+        delay: (_el?: Target, i = 0) => Math.min(i, 8) * 25,
         ease: "out(3)",
       }).then();
     }

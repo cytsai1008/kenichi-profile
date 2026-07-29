@@ -892,11 +892,14 @@ onUnmounted(() => {
   <div
     ref="galleryEl"
     class="photo-viewer-root"
-    :class="
+    :class="[
       props.alwaysShowText && masonryReady
         ? 'photo-viewer-masonry'
-        : 'grid grid-cols-2 items-start gap-3 sm:grid-cols-3 lg:grid-cols-4'
-    "
+        : 'grid grid-cols-2 items-start gap-3 sm:grid-cols-3 lg:grid-cols-4',
+      // Marker only — styled exclusively under html:not(.js) so the JS masonry is
+      // untouched. Lets CSS columns stand in for updateMasonryLayout().
+      props.alwaysShowText && 'photo-viewer-flow',
+    ]"
   >
     <button
       v-for="photo in photos"
@@ -927,6 +930,18 @@ onUnmounted(() => {
     >
       <!-- image container -->
       <div class="relative overflow-hidden">
+        <!-- No-JS fallback: PhotoSwipe never binds, so the surrounding <button>
+             is inert. This overlay link opens the full-size image directly.
+             Hidden via `html.js` in global.css, so with JS it never intercepts
+             a click and the lightbox behaves exactly as before. -->
+        <a
+          class="nojs-photo-link absolute inset-0 z-10"
+          :href="photo.downloadSrc ?? photo.src"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="sr-only">{{ photo.alt }}</span>
+        </a>
         <img
           :src="photo.thumb"
           :alt="photo.alt"

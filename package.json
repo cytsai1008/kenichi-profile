@@ -29,7 +29,6 @@
     "@fontsource/noto-sans": "^5.2.10",
     "@fontsource/noto-sans-sc": "^5.2.9",
     "@fontsource/noto-sans-tc": "^5.2.9",
-    "@iconify/vue": "^5.0.0",
     "@lucide/astro": "^1.7.0",
     "@lucide/vue": "^1.7.0",
     "@resvg/resvg-js": "^2.6.2",
@@ -49,6 +48,10 @@
     "vue": "^3.5.31"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@iconify-json/lucide": "^1.2.120",
+    "@iconify-json/simple-icons": "^1.2.92",
+    "@iconify/types": "^2.0.0",
     "@typescript-eslint/parser": "^8.57.2",
     "@vue/eslint-config-prettier": "^10.2.0",
     "eslint": "^10.2.0",

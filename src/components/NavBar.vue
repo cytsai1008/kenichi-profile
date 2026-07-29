@@ -247,8 +247,11 @@ watch(menuOpen, async (open) => {
 
     if (reducedMotion.value) return;
 
+    // `void` on every animate() below: JSAnimation is thenable, so inside these
+    // async watchers it reads as a floating promise. Not awaiting is the point —
+    // the panel spring and the row stagger have to run together, not in sequence.
     // Panel springs down with a scale pop
-    animate(el, {
+    void animate(el, {
       opacity: [0, 1],
       translateY: [-24, 0],
       scale: [0.95, 1],
@@ -257,7 +260,7 @@ watch(menuOpen, async (open) => {
 
     // Nav items fly in from the left, staggered
     const rows = el.querySelectorAll<HTMLElement>("li, .mobile-menu-controls");
-    animate(rows, {
+    void animate(rows, {
       opacity: [0, 1],
       translateX: [-22, 0],
       ease: spring({ stiffness: 340, damping: 24 }),
@@ -271,7 +274,7 @@ watch(menuOpen, async (open) => {
       return;
     }
 
-    animate(el, {
+    void animate(el, {
       opacity: 0,
       translateY: -18,
       scale: 0.95,
@@ -400,13 +403,13 @@ watch(langOpen, async (open) => {
     if (open) {
       txt.style.display = "inline";
       if (!reducedMotion.value) {
-        animate(txt, { opacity: 1, x: 0, ease: spring({ bounce: 0.2 }) });
+        void animate(txt, { opacity: 1, x: 0, ease: spring({ bounce: 0.2 }) });
       } else {
         txt.style.opacity = "1";
       }
     } else {
       if (!reducedMotion.value) {
-        animate(txt, {
+        void animate(txt, {
           opacity: 0,
           x: -10,
           duration: 180,
@@ -433,7 +436,7 @@ watch(langOpen, async (open) => {
     if (reducedMotion.value) return;
 
     // Dropdown pops open from the top-right corner
-    animate(el, {
+    void animate(el, {
       opacity: [0, 1],
       scale: [0.95, 1],
       translateY: [-8, 0],
@@ -442,7 +445,7 @@ watch(langOpen, async (open) => {
 
     // Options slide in from the right, staggered
     const items = el.querySelectorAll<HTMLElement>("li");
-    animate(items, {
+    void animate(items, {
       opacity: [0, 1],
       translateX: [10, 0],
       ease: spring({ stiffness: 500, damping: 30 }),
@@ -454,7 +457,7 @@ watch(langOpen, async (open) => {
       return;
     }
 
-    animate(el, {
+    void animate(el, {
       opacity: 0,
       scale: 0.95,
       translateY: -6,
@@ -529,7 +532,10 @@ function isActive(href: string) {
         </ul>
 
         <!-- Col 3: Controls (right-aligned) -->
-        <div class="flex items-center justify-end gap-1">
+        <!-- nojs-navbar-controls: theme toggle, language listbox and hamburger are
+             all pure JS. Hidden without hydration (global.css) — the plain-link
+             fallback nav in Layout.astro covers navigation and locale switching. -->
+        <div class="nojs-navbar-controls flex items-center justify-end gap-1">
           <!-- Theme wrapper: compact icon always visible; full panel absolute on hover -->
           <div
             class="relative -my-3 hidden items-center py-3 md:flex"

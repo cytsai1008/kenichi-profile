@@ -2,7 +2,7 @@
 import { Image } from "astro:assets";
 import { Aperture, Camera } from "@lucide/astro";
 import Layout from "../../layouts/Layout.astro";
-import SocialLinks from "../SocialLinks.vue";
+import SocialLinks from "../SocialLinks.astro";
 import { t, nl, type Locale } from "../../i18n/utils";
 import refSheet from "../../assets/ref-sheet.png";
 
@@ -14,7 +14,7 @@ const { locale } = Astro.props;
 const tr = t(locale);
 const socialLinks = [
   { label: "Facebook", href: "https://r.photocat.blue/facebook", icon: "simple-icons:facebook" },
-  { label: "X", href: "https://r.photocat.blue/x", icon: "simple-icons:twitter" },
+  { label: "Twitter", href: "https://r.photocat.blue/x", icon: "simple-icons:twitter" },
   { label: "GitHub", href: "https://r.photocat.blue/github", icon: "simple-icons:github" },
   {
     label: "VRChat",
@@ -137,7 +137,7 @@ const socialLinks = [
 
       <section>
         <h2 data-animate class="mb-4 text-2xl font-bold">{tr.about.linksTitle}</h2>
-        <SocialLinks client:load links={socialLinks} />
+        <SocialLinks links={socialLinks} />
       </section>
     </div>
   </div>

@@ -100,7 +100,8 @@
   },
   "footer": {},
   "a11y": {
-    "skipToContent": "Skip to main content"
+    "skipToContent": "Skip to main content",
+    "mainNavigation": "Main navigation"
   },
   "cookieConsent": {
     "consentModal": {

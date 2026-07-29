@@ -1,0 +1,72 @@
+---
+// Icons are inlined at build time from the local @iconify-json data rather than
+// fetched by @iconify/vue at runtime: the runtime version SSR'd an empty <svg>,
+// so without JS every link rendered as a blank circle. Build-time also means no
+// island and no icon API round-trip — this component needs no client JS at all.
+import type { IconifyJSON } from "@iconify/types";
+import simpleIcons from "@iconify-json/simple-icons/icons.json";
+import lucideIcons from "@iconify-json/lucide/icons.json";
+
+interface SocialLink {
+  label: string;
+  href: string;
+  /** Iconify name, `prefix:name` — only the two collections below are bundled. */
+  icon: string;
+  iconWidth?: number;
+  iconHeight?: number;
+  iconClass?: string;
+}
+
+interface Props {
+  links: SocialLink[];
+}
+
+// Typed as IconifyJSON rather than letting TS infer the literal shape of the
+// JSON: every icon in these two collections happens to carry only `body`, so an
+// inferred type makes the per-icon width/height below look nonexistent. They are
+// optional in the Iconify format and a collection update could start using them.
+const collections: Record<string, IconifyJSON> = {
+  "simple-icons": simpleIcons as IconifyJSON,
+  lucide: lucideIcons as IconifyJSON,
+};
+
+const resolved = Astro.props.links.map((link) => {
+  const [prefix, name] = link.icon.split(":");
+  const collection = collections[prefix];
+  const icon = collection?.icons[name];
+  if (!icon) throw new Error(`Unknown icon "${link.icon}" — is its collection bundled?`);
+
+  return {
+    ...link,
+    body: icon.body,
+    viewBox: `0 0 ${icon.width ?? collection.width} ${icon.height ?? collection.height}`,
+  };
+});
+---
+
+<div data-animate-stagger class="flex flex-wrap items-center gap-4">
+  {
+    resolved.map((link) => (
+      <a
+        data-animate
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex h-11 w-11 items-center justify-center rounded-full text-fg! no-underline transition-colors hover:bg-surface-alt hover:text-fg/70!"
+        aria-label={link.label}
+        title={link.label}
+      >
+        <span class="sr-only">{link.label}</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={link.iconWidth ?? 20}
+          height={link.iconHeight ?? 20}
+          viewBox={link.viewBox}
+          class:list={["text-current", link.iconClass]}
+          aria-hidden="true"
+          set:html={link.body}
+        />
+      </a>
+    ))
+  }
+</div>
