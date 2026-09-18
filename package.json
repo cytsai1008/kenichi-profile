@@ -39,7 +39,7 @@
     "astro": "^7.1.4",
     "astro-seo-meta": "^7.0.0",
     "astro-seo-schema": "^7.0.0",
-    "exifreader": "^4.39.0",
+    "exifreader": "^4.41.1",
     "gray-matter": "^4.0.3",
     "photoswipe": "^5.4.4",
     "satori": "^0.26.0",
